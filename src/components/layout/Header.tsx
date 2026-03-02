@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
-import { TrendingUp, Search, Menu } from "lucide-react";
+import { TrendingUp, Menu } from "lucide-react";
 import { useState } from "react";
+import { SearchBar } from "@/components/ui/SearchBar";
 
 const NAV_LINKS = [
   { href: "/",          label: "대시보드" },
@@ -20,9 +21,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-800 bg-gray-950/95 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-white">
+        <Link href="/" className="flex shrink-0 items-center gap-2 font-bold text-white">
           <TrendingUp className="h-5 w-5 text-emerald-400" />
           <span className="text-lg">finly</span>
         </Link>
@@ -34,7 +35,7 @@ export function Header() {
               key={link.href}
               href={link.href}
               className={cn(
-                "rounded-lg px-3 py-1.5 text-sm transition-colors",
+                "rounded-lg px-3 py-1.5 text-sm transition-colors whitespace-nowrap",
                 pathname === link.href
                   ? "bg-gray-800 text-white"
                   : "text-gray-400 hover:text-white"
@@ -45,23 +46,26 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Right Side */}
-        <div className="flex items-center gap-2">
-          <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white">
-            <Search className="h-4 w-4" />
-          </button>
-          <button
-            className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white md:hidden"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            <Menu className="h-4 w-4" />
-          </button>
+        {/* Search */}
+        <div className="flex-1 max-w-xs ml-auto">
+          <SearchBar />
         </div>
+
+        {/* Mobile menu button */}
+        <button
+          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white md:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <Menu className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Mobile Nav */}
       {menuOpen && (
         <div className="border-t border-gray-800 bg-gray-950 px-4 py-2 md:hidden">
+          <div className="mb-2">
+            <SearchBar />
+          </div>
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
