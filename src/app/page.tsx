@@ -1,5 +1,7 @@
 import { MarketOverview } from "@/components/markets/MarketOverview";
 import { CryptoSection } from "@/components/markets/CryptoSection";
+import { FxWidget } from "@/components/markets/FxWidget";
+import { PortfolioMiniCard } from "@/components/portfolio/PortfolioMiniCard";
 
 export default function HomePage() {
   return (
@@ -12,8 +14,14 @@ export default function HomePage() {
         </p>
       </div>
 
+      {/* 포트폴리오 미니 카드 (로그인 시만 표시) */}
+      <PortfolioMiniCard />
+
       {/* 주요 지수 */}
       <MarketOverview />
+
+      {/* 환율 */}
+      <FxWidget />
 
       {/* 암호화폐 */}
       <CryptoSection />

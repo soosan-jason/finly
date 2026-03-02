@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: "/markets",   label: "시장" },
   { href: "/crypto",    label: "암호화폐" },
   { href: "/portfolio", label: "포트폴리오" },
+  { href: "/news",      label: "뉴스" },
 ];
 
 export function Header() {
