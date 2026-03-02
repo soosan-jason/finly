@@ -8,6 +8,8 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { WatchlistToggle } from "@/components/portfolio/WatchlistToggle";
 import { formatPrice, formatMarketCap, formatPercent } from "@/lib/utils/format";
 
+import type { Metadata } from "next";
+
 async function getCoinDetail(id: string) {
   try {
     const res = await fetch(
@@ -19,6 +21,26 @@ async function getCoinDetail(id: string) {
   } catch {
     return null;
   }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const coin = await getCoinDetail(id);
+  if (!coin) return { title: "코인 정보" };
+  const price = coin.market_data?.current_price?.usd ?? 0;
+  return {
+    title: `${coin.name} (${coin.symbol?.toUpperCase()}) - $${price.toLocaleString()}`,
+    description: `${coin.name} 실시간 가격, 시가총액, 차트 및 상세 정보. 현재가 $${price.toLocaleString()} USD.`,
+    openGraph: {
+      title: `${coin.name} (${coin.symbol?.toUpperCase()})`,
+      description: `현재가 $${price.toLocaleString()} · ${coin.market_data?.price_change_percentage_24h?.toFixed(2)}% (24h)`,
+      images: coin.image?.large ? [{ url: coin.image.large }] : [],
+    },
+  };
 }
 
 export default async function CryptoDetailPage({
@@ -124,9 +146,3 @@ export default async function CryptoDetailPage({
   );
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  return {
-    title: `${id.charAt(0).toUpperCase() + id.slice(1)} 시세 - Finly`,
-  };
-}
