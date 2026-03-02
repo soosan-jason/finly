@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { PriceChart } from "@/components/charts/PriceChart";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { WatchlistToggle } from "@/components/portfolio/WatchlistToggle";
 import { formatPrice, formatMarketCap, formatPercent } from "@/lib/utils/format";
 
 async function getCoinDetail(id: string) {
@@ -70,9 +71,16 @@ export default async function CryptoDetailPage({
           </div>
         </div>
 
-        <div className="ml-auto text-right">
+        <div className="ml-auto flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2">
+            <WatchlistToggle
+              symbol={coin.id}
+              name={coin.name}
+              imageUrl={coin.image.large}
+            />
+          </div>
           <p className="text-3xl font-bold text-white">{formatPrice(price)}</p>
-          <div className="mt-1 flex items-center justify-end gap-2">
+          <div className="flex items-center gap-2">
             <Badge variant={isUp ? "up" : "down"}>{formatPercent(change24h)} 24h</Badge>
             <Badge variant={change7d >= 0 ? "up" : "down"}>{formatPercent(change7d)} 7d</Badge>
             <Badge variant={change30d >= 0 ? "up" : "down"}>{formatPercent(change30d)} 30d</Badge>
