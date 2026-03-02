@@ -3,8 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
-  "regions": ["icn1"],
-  "headers": [
+"headers": [
     {
       "source": "/api/(.*)",
       "headers": [
