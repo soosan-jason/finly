@@ -53,7 +53,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
       asset_type: selected.type,
       symbol: selected.id,
       name: selected.name,
-      image_url: selected.image,
+      image_url: selected.image ?? undefined,
       quantity: parseFloat(quantity),
       avg_buy_price: parseFloat(price),
     };
