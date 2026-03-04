@@ -28,7 +28,7 @@ export function NewsCard({ article }: Props) {
       href={article.url}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
-      className="group flex flex-col rounded-xl border border-gray-800 bg-gray-900 p-4 hover:border-gray-700 transition-colors"
+      className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-4 hover:border-gray-700 transition-colors"
     >
       {/* Image */}
       {article.image && (
