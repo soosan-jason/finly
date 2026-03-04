@@ -18,8 +18,6 @@ export function PortfolioPageClient() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeTab, setActiveTab] = useState<"holdings" | "watchlist">("holdings");
-  const [displayCurrency, setDisplayCurrency] = useState<"USD" | "KRW">("USD");
-  const [usdToKrw, setUsdToKrw] = useState(1325);
 
   async function fetchPortfolio() {
     const res = await fetch("/api/portfolio");
@@ -57,7 +55,7 @@ export function PortfolioPageClient() {
       } catch { /* ignore */ }
     }
 
-    // 주식/ETF 현재가 (Finnhub 개별 조회)
+    // 주식/ETF 현재가 (Finnhub 개별 조회) — native currency (KRW 주식은 KRW, USD 주식은 USD)
     const stockPriceMap: Record<string, number> = {};
     if (stockHoldings.length > 0) {
       await Promise.allSettled(
@@ -71,6 +69,7 @@ export function PortfolioPageClient() {
       );
     }
 
+    // native currency 기준으로 손익 계산
     const enriched = data.map((h: Holding) => {
       const cp =
         h.asset_type === "crypto"
@@ -95,19 +94,11 @@ export function PortfolioPageClient() {
     if (Array.isArray(data)) setWatchlist(data);
   }
 
-  async function fetchFxRate() {
-    try {
-      const res = await fetch("/api/fx?pair=USD/KRW");
-      const data = await res.json();
-      if (Array.isArray(data) && data[0]?.rate) setUsdToKrw(data[0].rate);
-    } catch { /* use default */ }
-  }
-
   async function init() {
     setLoading(true);
     try {
       const p = await fetchPortfolio();
-      await Promise.all([fetchHoldings(p.id), fetchWatchlist(), fetchFxRate()]);
+      await Promise.all([fetchHoldings(p.id), fetchWatchlist()]);
     } finally {
       setLoading(false);
     }
@@ -128,15 +119,20 @@ export function PortfolioPageClient() {
     );
   }
 
-  const totalValue = holdings.reduce((s, h) => s + (h.current_value ?? 0), 0);
-  const totalCost = holdings.reduce((s, h) => s + h.avg_buy_price * h.quantity, 0);
-  const totalPnl = totalValue - totalCost;
-  const totalPnlPct = totalCost > 0 ? (totalPnl / totalCost) * 100 : 0;
-  const isProfit = totalPnl >= 0;
+  // 통화별 그룹 분리
+  const krwHoldings = holdings.filter((h) => h.currency === "KRW");
+  const usdHoldings = holdings.filter((h) => h.currency !== "KRW");
 
-  function fmt(value: number) {
-    return displayCurrency === "KRW" ? formatKRW(value * usdToKrw) : formatPrice(value);
+  function groupStats(group: Holding[]) {
+    const totalValue = group.reduce((s, h) => s + (h.current_value ?? 0), 0);
+    const totalCost = group.reduce((s, h) => s + h.avg_buy_price * h.quantity, 0);
+    const totalPnl = totalValue - totalCost;
+    const totalPnlPct = totalCost > 0 ? (totalPnl / totalCost) * 100 : 0;
+    return { totalValue, totalCost, totalPnl, totalPnlPct };
   }
+
+  const krw = groupStats(krwHoldings);
+  const usd = groupStats(usdHoldings);
 
   return (
     <div className="space-y-6">
@@ -145,56 +141,72 @@ export function PortfolioPageClient() {
           <h1 className="truncate text-2xl font-bold text-white">포트폴리오</h1>
           {portfolio && <p className="mt-0.5 truncate text-sm text-gray-400">{portfolio.name}</p>}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {/* 통화 토글 */}
-          <div className="flex rounded-xl bg-gray-800 p-1 text-xs font-medium">
-            {(["USD", "KRW"] as const).map((cur) => (
-              <button
-                key={cur}
-                onClick={() => setDisplayCurrency(cur)}
-                className={`rounded-lg px-3 py-1.5 transition-colors ${
-                  displayCurrency === cur
-                    ? "bg-emerald-500 text-white"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                {cur}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-400 transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            종목 추가
-          </button>
-        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-400 transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          종목 추가
+        </button>
       </div>
 
-      {/* 요약 카드 */}
+      {/* 요약 카드 — 통화별 분리 */}
       {holdings.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Card>
-            <CardHeader><CardTitle>총 평가액</CardTitle></CardHeader>
-            <p className="text-xl font-bold text-white">{fmt(totalValue)}</p>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle>총 투자금</CardTitle></CardHeader>
-            <p className="text-xl font-bold text-white">{fmt(totalCost)}</p>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle>총 손익</CardTitle></CardHeader>
-            <p className={`text-xl font-bold ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
-              {isProfit ? "+" : ""}{fmt(totalPnl)}
-            </p>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle>수익률</CardTitle></CardHeader>
-            <p className={`text-xl font-bold ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
-              {formatPercent(totalPnlPct)}
-            </p>
-          </Card>
+        <div className="space-y-3">
+          {krwHoldings.length > 0 && (
+            <div>
+              <p className="mb-2 text-xs font-medium text-gray-500">원화 자산 (KRW)</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <Card>
+                  <CardHeader><CardTitle>총 평가액</CardTitle></CardHeader>
+                  <p className="text-xl font-bold text-white">{formatKRW(krw.totalValue)}</p>
+                </Card>
+                <Card>
+                  <CardHeader><CardTitle>총 투자금</CardTitle></CardHeader>
+                  <p className="text-xl font-bold text-white">{formatKRW(krw.totalCost)}</p>
+                </Card>
+                <Card>
+                  <CardHeader><CardTitle>총 손익</CardTitle></CardHeader>
+                  <p className={`text-xl font-bold ${krw.totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {krw.totalPnl >= 0 ? "+" : ""}{formatKRW(krw.totalPnl)}
+                  </p>
+                </Card>
+                <Card>
+                  <CardHeader><CardTitle>수익률</CardTitle></CardHeader>
+                  <p className={`text-xl font-bold ${krw.totalPnlPct >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {formatPercent(krw.totalPnlPct)}
+                  </p>
+                </Card>
+              </div>
+            </div>
+          )}
+          {usdHoldings.length > 0 && (
+            <div>
+              <p className="mb-2 text-xs font-medium text-gray-500">달러 자산 (USD)</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <Card>
+                  <CardHeader><CardTitle>총 평가액</CardTitle></CardHeader>
+                  <p className="text-xl font-bold text-white">{formatPrice(usd.totalValue)}</p>
+                </Card>
+                <Card>
+                  <CardHeader><CardTitle>총 투자금</CardTitle></CardHeader>
+                  <p className="text-xl font-bold text-white">{formatPrice(usd.totalCost)}</p>
+                </Card>
+                <Card>
+                  <CardHeader><CardTitle>총 손익</CardTitle></CardHeader>
+                  <p className={`text-xl font-bold ${usd.totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {usd.totalPnl >= 0 ? "+" : ""}{formatPrice(usd.totalPnl)}
+                  </p>
+                </Card>
+                <Card>
+                  <CardHeader><CardTitle>수익률</CardTitle></CardHeader>
+                  <p className={`text-xl font-bold ${usd.totalPnlPct >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {formatPercent(usd.totalPnlPct)}
+                  </p>
+                </Card>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -230,8 +242,6 @@ export function PortfolioPageClient() {
         ) : (
           <HoldingsTable
             holdings={holdings}
-            displayCurrency={displayCurrency}
-            usdToKrw={usdToKrw}
             onDelete={async (id) => {
               await fetch(`/api/portfolio/holdings?id=${id}`, { method: "DELETE" });
               if (portfolio) fetchHoldings(portfolio.id);

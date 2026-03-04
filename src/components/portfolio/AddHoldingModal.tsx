@@ -19,15 +19,45 @@ interface Props {
   onAdded: () => void;
 }
 
+const STORAGE_KEY = "addHoldingForm";
+
+interface SavedForm {
+  assetTab: "stock" | "crypto";
+  query: string;
+  selected: SearchResult | null;
+  quantity: string;
+  price: string;
+}
+
+function loadSaved(): SavedForm | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as SavedForm) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
-  const [assetTab, setAssetTab] = useState<"crypto" | "stock">("crypto");
-  const [query, setQuery] = useState("");
+  const saved = loadSaved();
+  const [assetTab, setAssetTab] = useState<"stock" | "crypto">(saved?.assetTab ?? "stock");
+  const [query, setQuery] = useState(saved?.query ?? "");
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [selected, setSelected] = useState<SearchResult | null>(null);
-  const [quantity, setQuantity] = useState("");
-  const [price, setPrice] = useState("");
+  const [selected, setSelected] = useState<SearchResult | null>(saved?.selected ?? null);
+  const [quantity, setQuantity] = useState(saved?.quantity ?? "");
+  const [price, setPrice] = useState(saved?.price ?? "");
   const [submitting, setSubmitting] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  // sessionStorage에 폼 상태 저장
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ assetTab, query, selected, quantity, price })
+      );
+    } catch { /* ignore */ }
+  }, [assetTab, query, selected, quantity, price]);
 
   useEffect(() => {
     setSelected(null);
@@ -45,6 +75,14 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
     return () => clearTimeout(t);
   }, [query, selected, assetTab]);
 
+  // 선택된 종목의 통화 감지
+  const holdingCurrency =
+    !selected || selected.type === "crypto"
+      ? "USD"
+      : selected.id.endsWith(".KS") || selected.id.endsWith(".KQ")
+      ? "KRW"
+      : "USD";
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selected) return;
@@ -56,6 +94,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
       image_url: selected.image ?? undefined,
       quantity: parseFloat(quantity),
       avg_buy_price: parseFloat(price),
+      currency: holdingCurrency,
     };
     await fetch("/api/portfolio/holdings", {
       method: "POST",
@@ -63,6 +102,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
       body: JSON.stringify({ ...body, portfolio_id: portfolioId }),
     });
     setSubmitting(false);
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
     onAdded();
   }
 
@@ -80,9 +120,9 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
           </button>
         </div>
 
-        {/* 자산 유형 탭 */}
+        {/* 자산 유형 탭 — 주식/ETF가 왼쪽 */}
         <div className="flex gap-1 rounded-xl bg-gray-800 p-1 mb-4">
-          {(["crypto", "stock"] as const).map((tab) => (
+          {(["stock", "crypto"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
@@ -128,7 +168,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder={assetTab === "crypto" ? "비트코인, 이더리움..." : "AAPL, TSLA, NVDA..."}
+                  placeholder={assetTab === "crypto" ? "비트코인, 이더리움..." : "AAPL, TSLA, 005930.KS..."}
                   className="w-full rounded-xl border border-gray-700 bg-gray-800 py-2.5 pl-9 pr-3 text-sm text-white placeholder-gray-500 outline-none focus:border-emerald-500 transition-colors"
                 />
                 {results.length > 0 && (
@@ -175,7 +215,9 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
 
           {/* 평균 매수가 */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-gray-400">평균 매수가 (USD)</label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-400">
+              평균 매수가 ({holdingCurrency})
+            </label>
             <input
               type="number"
               step="any"

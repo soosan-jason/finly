@@ -6,14 +6,12 @@ import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
 
 interface Props {
   holdings: Holding[];
-  displayCurrency: "USD" | "KRW";
-  usdToKrw: number;
   onDelete: (id: string) => void;
 }
 
-export function HoldingsTable({ holdings, displayCurrency, usdToKrw, onDelete }: Props) {
-  function fmt(value: number) {
-    return displayCurrency === "KRW" ? formatKRW(value * usdToKrw) : formatPrice(value);
+export function HoldingsTable({ holdings, onDelete }: Props) {
+  function fmt(value: number, currency: string) {
+    return currency === "KRW" ? formatKRW(value) : formatPrice(value);
   }
 
   return (
@@ -66,17 +64,17 @@ export function HoldingsTable({ holdings, displayCurrency, usdToKrw, onDelete }:
                   {Number(h.quantity).toLocaleString(undefined, { maximumFractionDigits: 8 })}
                 </td>
                 <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">
-                  {fmt(h.avg_buy_price)}
+                  {fmt(h.avg_buy_price, h.currency)}
                 </td>
                 <td className="px-4 py-3 text-right hidden sm:table-cell whitespace-nowrap">
-                  {h.current_price ? fmt(h.current_price) : <span className="text-gray-600">-</span>}
+                  {h.current_price ? fmt(h.current_price, h.currency) : <span className="text-gray-600">-</span>}
                 </td>
                 <td className="px-4 py-3 text-right text-white hidden md:table-cell whitespace-nowrap">
-                  {h.current_value ? fmt(h.current_value) : "-"}
+                  {h.current_value ? fmt(h.current_value, h.currency) : "-"}
                 </td>
                 <td className={`px-4 py-3 text-right font-medium whitespace-nowrap ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
                   {h.profit_loss != null
-                    ? `${isProfit ? "+" : ""}${fmt(h.profit_loss)}`
+                    ? `${isProfit ? "+" : ""}${fmt(h.profit_loss, h.currency)}`
                     : "-"}
                 </td>
                 <td className={`px-4 py-3 text-right font-medium whitespace-nowrap ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
