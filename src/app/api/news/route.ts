@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMarketNews, FinnhubNewsItem } from "@/lib/api/finnhub";
 
+async function translateHeadline(text: string): Promise<string> {
+  if (!text) return text;
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ko`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
+    if (!res.ok) return text;
+    const data = await res.json();
+    return data.responseStatus === 200 ? (data.responseData.translatedText as string) : text;
+  } catch {
+    return text;
+  }
+}
+
 export interface NewsArticle {
   id: number;
   headline: string;
@@ -26,7 +39,7 @@ export async function GET(req: NextRequest) {
   try {
     const items: FinnhubNewsItem[] = await getMarketNews(category);
 
-    const articles: NewsArticle[] = items
+    let articles: NewsArticle[] = items
       .filter((i) => i.headline && i.url)
       .slice(0, limit)
       .map((i) => ({
@@ -40,6 +53,9 @@ export async function GET(req: NextRequest) {
         category: i.category,
         related: i.related ?? "",
       }));
+
+    const translatedHeadlines = await Promise.all(articles.map((a) => translateHeadline(a.headline)));
+    articles = articles.map((a, i) => ({ ...a, headline: translatedHeadlines[i] ?? a.headline }));
 
     return NextResponse.json(articles, {
       headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=60" },
