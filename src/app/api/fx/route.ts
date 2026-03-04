@@ -15,23 +15,27 @@ const FX_PAIRS = [
   { from: "USD", to: "CNY" },
 ];
 
-async function fetchAVRate(from: string, to: string, apiKey: string): Promise<number | null> {
-  const url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${from}&to_currency=${to}&apikey=${apiKey}`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
-  if (!res.ok) return null;
-  const data = await res.json();
-  const rate = data?.["Realtime Currency Exchange Rate"]?.["5. Exchange Rate"];
-  return rate ? parseFloat(rate) : null;
+// Yahoo Finance 환율 심볼: USDKRW=X, USDJPY=X 등
+async function fetchYahooFxRate(from: string, to: string): Promise<number | null> {
+  try {
+    const symbol = `${from}${to}=X`;
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    return typeof price === "number" ? price : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const pair = searchParams.get("pair"); // e.g. "USD/KRW"
-  const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
-
-  if (!apiKey || apiKey === "your_alpha_vantage_api_key") {
-    return NextResponse.json(FALLBACK_RATES);
-  }
 
   const targets = pair
     ? [{ from: pair.split("/")[0], to: pair.split("/")[1] }]
@@ -40,8 +44,14 @@ export async function GET(req: NextRequest) {
   try {
     const results = await Promise.allSettled(
       targets.map(async ({ from, to }) => {
-        const rate = await fetchAVRate(from, to, apiKey);
-        return { pair: `${from}/${to}`, from, to, rate: rate ?? FALLBACK_MAP[`${from}/${to}`] ?? 0, lastUpdated: new Date().toISOString() };
+        const rate = await fetchYahooFxRate(from, to);
+        return {
+          pair: `${from}/${to}`,
+          from,
+          to,
+          rate: rate ?? FALLBACK_MAP[`${from}/${to}`] ?? 0,
+          lastUpdated: new Date().toISOString(),
+        };
       })
     );
 
