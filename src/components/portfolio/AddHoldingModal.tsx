@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X, Search } from "lucide-react";
-import { HoldingFormData } from "@/types/portfolio";
+import { HoldingFormData, AssetType } from "@/types/portfolio";
 
 interface SearchResult {
+  type: AssetType;
   id: string;
   symbol: string;
   name: string;
-  image: string;
+  image: string | null;
 }
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
+  const [assetTab, setAssetTab] = useState<"crypto" | "stock">("crypto");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [selected, setSelected] = useState<SearchResult | null>(null);
@@ -28,21 +30,27 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setSelected(null);
+    setQuery("");
+    setResults([]);
+  }, [assetTab]);
+
+  useEffect(() => {
     if (!query.trim() || selected) { setResults([]); return; }
     const t = setTimeout(async () => {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=${assetTab}`);
       const data = await res.json();
       setResults(data);
     }, 300);
     return () => clearTimeout(t);
-  }, [query, selected]);
+  }, [query, selected, assetTab]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selected) return;
     setSubmitting(true);
     const body: HoldingFormData = {
-      asset_type: "crypto",
+      asset_type: selected.type,
       symbol: selected.id,
       name: selected.name,
       image_url: selected.image,
@@ -72,14 +80,40 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
           </button>
         </div>
 
+        {/* 자산 유형 탭 */}
+        <div className="flex gap-1 rounded-xl bg-gray-800 p-1 mb-4">
+          {(["crypto", "stock"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setAssetTab(tab)}
+              className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors ${
+                assetTab === tab
+                  ? "bg-emerald-500 text-white"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              {tab === "crypto" ? "코인" : "주식 / ETF"}
+            </button>
+          ))}
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* 코인 검색 */}
+          {/* 종목 검색 */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-gray-400">코인 선택</label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-400">
+              {assetTab === "crypto" ? "코인 선택" : "주식 / ETF 선택"}
+            </label>
             {selected ? (
               <div className="flex items-center justify-between rounded-xl border border-emerald-500/50 bg-gray-800 px-3 py-2.5">
                 <div className="flex items-center gap-2">
-                  <Image src={selected.image} alt={selected.name} width={24} height={24} className="rounded-full" />
+                  {selected.image ? (
+                    <Image src={selected.image} alt={selected.name} width={24} height={24} className="rounded-full" />
+                  ) : (
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-xs font-bold text-emerald-400">
+                      {selected.symbol.charAt(0)}
+                    </div>
+                  )}
                   <span className="text-sm font-medium text-white">{selected.name}</span>
                   <span className="text-xs text-gray-500 uppercase">{selected.symbol}</span>
                 </div>
@@ -94,7 +128,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="비트코인, 이더리움..."
+                  placeholder={assetTab === "crypto" ? "비트코인, 이더리움..." : "AAPL, TSLA, NVDA..."}
                   className="w-full rounded-xl border border-gray-700 bg-gray-800 py-2.5 pl-9 pr-3 text-sm text-white placeholder-gray-500 outline-none focus:border-emerald-500 transition-colors"
                 />
                 {results.length > 0 && (
@@ -106,7 +140,13 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
                           onClick={() => { setSelected(r); setResults([]); }}
                           className="flex w-full items-center gap-2 px-3 py-2 hover:bg-gray-800 transition-colors"
                         >
-                          <Image src={r.image} alt={r.name} width={20} height={20} className="rounded-full" />
+                          {r.image ? (
+                            <Image src={r.image} alt={r.name} width={20} height={20} className="rounded-full" />
+                          ) : (
+                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-xs font-bold text-emerald-400">
+                              {r.symbol.charAt(0)}
+                            </div>
+                          )}
                           <span className="text-sm text-white">{r.name}</span>
                           <span className="ml-auto text-xs text-gray-500 uppercase">{r.symbol}</span>
                         </button>

@@ -2,14 +2,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { Holding } from "@/types/portfolio";
-import { formatPrice, formatPercent } from "@/lib/utils/format";
+import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
 
 interface Props {
   holdings: Holding[];
+  displayCurrency: "USD" | "KRW";
+  usdToKrw: number;
   onDelete: (id: string) => void;
 }
 
-export function HoldingsTable({ holdings, onDelete }: Props) {
+export function HoldingsTable({ holdings, displayCurrency, usdToKrw, onDelete }: Props) {
+  function fmt(value: number) {
+    return displayCurrency === "KRW" ? formatKRW(value * usdToKrw) : formatPrice(value);
+  }
+
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto">
       <table className="w-full text-sm">
@@ -28,34 +34,49 @@ export function HoldingsTable({ holdings, onDelete }: Props) {
         <tbody>
           {holdings.map((h) => {
             const isProfit = (h.profit_loss ?? 0) >= 0;
+            const isCrypto = h.asset_type === "crypto";
+            const nameContent = (
+              <div className="flex items-center gap-2">
+                {h.image_url ? (
+                  <Image src={h.image_url} alt={h.name} width={28} height={28} className="rounded-full" />
+                ) : (
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/20 text-xs font-bold text-emerald-400">
+                    {h.symbol.charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium text-white">{h.name}</p>
+                  <p className="text-xs text-gray-500 uppercase">{h.symbol}</p>
+                </div>
+              </div>
+            );
+
             return (
               <tr key={h.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
                 <td className="px-4 py-3">
-                  <Link href={`/crypto/${h.symbol}`} className="flex items-center gap-2 hover:opacity-80">
-                    {h.image_url && (
-                      <Image src={h.image_url} alt={h.name} width={28} height={28} className="rounded-full" />
-                    )}
-                    <div>
-                      <p className="font-medium text-white">{h.name}</p>
-                      <p className="text-xs text-gray-500 uppercase">{h.symbol}</p>
-                    </div>
-                  </Link>
+                  {isCrypto ? (
+                    <Link href={`/crypto/${h.symbol}`} className="hover:opacity-80">
+                      {nameContent}
+                    </Link>
+                  ) : (
+                    nameContent
+                  )}
                 </td>
                 <td className="px-4 py-3 text-right text-gray-300">
                   {Number(h.quantity).toLocaleString(undefined, { maximumFractionDigits: 8 })}
                 </td>
                 <td className="px-4 py-3 text-right text-gray-300">
-                  {formatPrice(h.avg_buy_price)}
+                  {fmt(h.avg_buy_price)}
                 </td>
                 <td className="px-4 py-3 text-right hidden sm:table-cell">
-                  {h.current_price ? formatPrice(h.current_price) : <span className="text-gray-600">-</span>}
+                  {h.current_price ? fmt(h.current_price) : <span className="text-gray-600">-</span>}
                 </td>
                 <td className="px-4 py-3 text-right text-white hidden md:table-cell">
-                  {h.current_value ? formatPrice(h.current_value) : "-"}
+                  {h.current_value ? fmt(h.current_value) : "-"}
                 </td>
                 <td className={`px-4 py-3 text-right font-medium ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
                   {h.profit_loss != null
-                    ? `${isProfit ? "+" : ""}${formatPrice(h.profit_loss)}`
+                    ? `${isProfit ? "+" : ""}${fmt(h.profit_loss)}`
                     : "-"}
                 </td>
                 <td className={`px-4 py-3 text-right font-medium ${isProfit ? "text-emerald-400" : "text-red-400"}`}>

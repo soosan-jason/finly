@@ -40,3 +40,14 @@ export async function getCompanyNews(symbol: string, from: string, to: string): 
   if (!res.ok) throw new Error(`Finnhub company news error: ${res.status}`);
   return res.json();
 }
+
+export async function searchSymbol(query: string) {
+  const res = await fetch(`${BASE}/search?q=${encodeURIComponent(query)}&token=${getKey()}`, {
+    next: { revalidate: 30 },
+  });
+  if (!res.ok) throw new Error(`Finnhub search error: ${res.status}`);
+  return res.json() as Promise<{
+    count: number;
+    result: { description: string; displaySymbol: string; symbol: string; type: string }[];
+  }>;
+}
