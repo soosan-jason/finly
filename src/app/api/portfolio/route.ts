@@ -3,34 +3,48 @@ import { createClient } from "@/lib/supabase/server";
 
 // GET /api/portfolio - 포트폴리오 목록 조회
 export async function GET() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError) return NextResponse.json({ error: authError.message }, { status: 500 });
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data, error } = await supabase
-    .from("portfolios")
-    .select("*")
-    .order("created_at", { ascending: true });
+    const { data, error } = await supabase
+      .from("portfolios")
+      .select("*")
+      .order("created_at", { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Internal Server Error";
+    console.error("[GET /api/portfolio]", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 // POST /api/portfolio - 포트폴리오 생성
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError) return NextResponse.json({ error: authError.message }, { status: 500 });
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json();
-  const { name, description } = body;
+    const body = await req.json();
+    const { name, description } = body;
 
-  const { data, error } = await supabase
-    .from("portfolios")
-    .insert({ user_id: user.id, name, description })
-    .select()
-    .single();
+    const { data, error } = await supabase
+      .from("portfolios")
+      .insert({ user_id: user.id, name, description })
+      .select()
+      .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data, { status: 201 });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data, { status: 201 });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Internal Server Error";
+    console.error("[POST /api/portfolio]", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
