@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMarketNews, FinnhubNewsItem } from "@/lib/api/finnhub";
 
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 async function translateHeadline(text: string): Promise<string> {
   if (!text) return text;
   try {
@@ -45,7 +49,7 @@ export async function GET(req: NextRequest) {
       .map((i) => ({
         id: i.id,
         headline: i.headline,
-        summary: i.summary ?? "",
+        summary: stripHtml(i.summary ?? ""),
         source: i.source ?? "",
         url: i.url,
         image: i.image ?? "",
