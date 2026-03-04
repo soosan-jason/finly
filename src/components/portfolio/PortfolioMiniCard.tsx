@@ -4,12 +4,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
 import { Holding } from "@/types/portfolio";
-import { formatPrice, formatPercent } from "@/lib/utils/format";
+import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
 import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
+
+interface CurrencySummary {
+  value: number;
+  pnl: number;
+  pnlPct: number;
+}
 
 export function PortfolioMiniCard() {
   const { user } = useUser();
-  const [summary, setSummary] = useState<{ value: number; pnl: number; pnlPct: number } | null>(null);
+  const [krw, setKrw] = useState<CurrencySummary | null>(null);
+  const [usd, setUsd] = useState<CurrencySummary | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -18,7 +25,6 @@ export function PortfolioMiniCard() {
 
     async function load() {
       try {
-        // 포트폴리오 목록 가져오기
         const pRes = await fetch("/api/portfolio");
         const portfolios = await pRes.json();
         if (!Array.isArray(portfolios) || portfolios.length === 0) return;
@@ -27,25 +33,59 @@ export function PortfolioMiniCard() {
         const holdings: Holding[] = await hRes.json();
         if (!Array.isArray(holdings) || holdings.length === 0) return;
 
-        // 현재가 조회
-        const priceRes = await fetch("/api/crypto?limit=100");
-        const priceData = await priceRes.json();
-        const priceMap: Record<string, number> = {};
-        if (Array.isArray(priceData)) {
-          priceData.forEach((c: { id: string; current_price: number }) => {
-            priceMap[c.id] = c.current_price;
-          });
+        const cryptoHoldings = holdings.filter((h) => h.asset_type === "crypto");
+        const stockHoldings = holdings.filter((h) => h.asset_type === "stock" || h.asset_type === "etf");
+
+        // 암호화폐 현재가 (CoinGecko)
+        const cryptoPriceMap: Record<string, number> = {};
+        if (cryptoHoldings.length > 0) {
+          try {
+            const priceRes = await fetch("/api/crypto?limit=100");
+            const priceData = await priceRes.json();
+            if (Array.isArray(priceData)) {
+              priceData.forEach((c: { id: string; current_price: number }) => {
+                cryptoPriceMap[c.id] = c.current_price;
+              });
+            }
+          } catch { /* ignore */ }
         }
 
-        let value = 0, cost = 0;
-        holdings.forEach((h) => {
-          const cp = priceMap[h.symbol] ?? h.avg_buy_price;
-          value += cp * h.quantity;
-          cost += h.avg_buy_price * h.quantity;
-        });
-        const pnl = value - cost;
-        const pnlPct = cost > 0 ? (pnl / cost) * 100 : 0;
-        setSummary({ value, pnl, pnlPct });
+        // 주식/ETF 현재가 (Finnhub + Yahoo Finance)
+        const stockPriceMap: Record<string, number> = {};
+        if (stockHoldings.length > 0) {
+          await Promise.allSettled(
+            stockHoldings.map(async (h: Holding) => {
+              try {
+                const qRes = await fetch(`/api/stock/quote?symbol=${encodeURIComponent(h.symbol)}`);
+                const q = await qRes.json();
+                stockPriceMap[h.symbol] = q.current_price ?? 0;
+              } catch { /* ignore */ }
+            })
+          );
+        }
+
+        function getPrice(h: Holding): number {
+          if (h.asset_type === "crypto") return cryptoPriceMap[h.symbol] ?? h.avg_buy_price;
+          return stockPriceMap[h.symbol] ?? h.avg_buy_price;
+        }
+
+        function calcSummary(group: Holding[]): CurrencySummary {
+          let value = 0, cost = 0;
+          group.forEach((h) => {
+            const cp = getPrice(h);
+            value += cp * h.quantity;
+            cost += h.avg_buy_price * h.quantity;
+          });
+          const pnl = value - cost;
+          const pnlPct = cost > 0 ? (pnl / cost) * 100 : 0;
+          return { value, pnl, pnlPct };
+        }
+
+        const krwGroup = holdings.filter((h) => h.currency === "KRW");
+        const usdGroup = holdings.filter((h) => h.currency !== "KRW");
+
+        if (krwGroup.length > 0) setKrw(calcSummary(krwGroup));
+        if (usdGroup.length > 0) setUsd(calcSummary(usdGroup));
       } finally {
         setLoading(false);
       }
@@ -56,35 +96,67 @@ export function PortfolioMiniCard() {
 
   if (!user) return null;
   if (loading) return <div className="h-24 animate-pulse rounded-xl bg-gray-800" />;
-  if (!summary) return null;
-
-  const isProfit = summary.pnl >= 0;
+  if (!krw && !usd) return null;
 
   return (
     <Link
       href="/portfolio"
-      className="group flex items-center justify-between rounded-xl border border-gray-800 bg-gray-900 px-5 py-4 hover:border-gray-700 transition-colors"
+      className="group flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-900 px-5 py-4 hover:border-gray-700 transition-colors"
     >
-      <div className="flex items-center gap-3">
-        {isProfit
-          ? <TrendingUp className="h-5 w-5 text-emerald-400" />
-          : <TrendingDown className="h-5 w-5 text-red-400" />}
-        <div>
-          <p className="text-xs text-gray-500">내 포트폴리오</p>
-          <p className="text-lg font-bold text-white">{formatPrice(summary.value)}</p>
+      <p className="text-xs text-gray-500">내 포트폴리오</p>
+
+      {krw && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {krw.pnl >= 0
+              ? <TrendingUp className="h-4 w-4 text-emerald-400" />
+              : <TrendingDown className="h-4 w-4 text-red-400" />}
+            <div>
+              <p className="text-[10px] text-gray-500">원화 (KRW)</p>
+              <p className="text-base font-bold text-white">{formatKRW(krw.value)}</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className={`text-sm font-medium ${krw.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+              {krw.pnl >= 0 ? "+" : ""}{formatKRW(krw.pnl)}
+            </p>
+            <p className={`text-xs ${krw.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+              {formatPercent(krw.pnlPct)}
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="flex items-center gap-4">
-        <div className="text-right">
-          <p className={`text-sm font-medium ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
-            {isProfit ? "+" : ""}{formatPrice(summary.pnl)}
-          </p>
-          <p className={`text-xs ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
-            {formatPercent(summary.pnlPct)}
-          </p>
+      )}
+
+      {usd && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {usd.pnl >= 0
+              ? <TrendingUp className="h-4 w-4 text-emerald-400" />
+              : <TrendingDown className="h-4 w-4 text-red-400" />}
+            <div>
+              <p className="text-[10px] text-gray-500">달러 (USD)</p>
+              <p className="text-base font-bold text-white">{formatPrice(usd.value)}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <p className={`text-sm font-medium ${usd.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                {usd.pnl >= 0 ? "+" : ""}{formatPrice(usd.pnl)}
+              </p>
+              <p className={`text-xs ${usd.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                {formatPercent(usd.pnlPct)}
+              </p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
+          </div>
         </div>
-        <ArrowRight className="h-4 w-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
-      </div>
+      )}
+
+      {krw && !usd && (
+        <div className="flex justify-end">
+          <ArrowRight className="h-4 w-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
+        </div>
+      )}
     </Link>
   );
 }
