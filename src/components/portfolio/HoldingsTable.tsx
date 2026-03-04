@@ -21,13 +21,13 @@ export function HoldingsTable({ holdings, displayCurrency, usdToKrw, onDelete }:
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-800 text-left text-xs text-gray-500">
-            <th className="px-4 py-3">종목</th>
-            <th className="px-4 py-3 text-right">보유 수량</th>
-            <th className="px-4 py-3 text-right">평균 단가</th>
-            <th className="px-4 py-3 text-right hidden sm:table-cell">현재가</th>
-            <th className="px-4 py-3 text-right hidden md:table-cell">평가금액</th>
-            <th className="px-4 py-3 text-right">손익</th>
-            <th className="px-4 py-3 text-right">수익률</th>
+            <th className="px-4 py-3 whitespace-nowrap">종목</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap">보유 수량</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap">평균 단가</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap hidden sm:table-cell">현재가</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap hidden md:table-cell">평가금액</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap">손익</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap">수익률</th>
             <th className="px-4 py-3"></th>
           </tr>
         </thead>
@@ -62,24 +62,24 @@ export function HoldingsTable({ holdings, displayCurrency, usdToKrw, onDelete }:
                     nameContent
                   )}
                 </td>
-                <td className="px-4 py-3 text-right text-gray-300">
+                <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">
                   {Number(h.quantity).toLocaleString(undefined, { maximumFractionDigits: 8 })}
                 </td>
-                <td className="px-4 py-3 text-right text-gray-300">
+                <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">
                   {fmt(h.avg_buy_price)}
                 </td>
-                <td className="px-4 py-3 text-right hidden sm:table-cell">
+                <td className="px-4 py-3 text-right hidden sm:table-cell whitespace-nowrap">
                   {h.current_price ? fmt(h.current_price) : <span className="text-gray-600">-</span>}
                 </td>
-                <td className="px-4 py-3 text-right text-white hidden md:table-cell">
+                <td className="px-4 py-3 text-right text-white hidden md:table-cell whitespace-nowrap">
                   {h.current_value ? fmt(h.current_value) : "-"}
                 </td>
-                <td className={`px-4 py-3 text-right font-medium ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
+                <td className={`px-4 py-3 text-right font-medium whitespace-nowrap ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
                   {h.profit_loss != null
                     ? `${isProfit ? "+" : ""}${fmt(h.profit_loss)}`
                     : "-"}
                 </td>
-                <td className={`px-4 py-3 text-right font-medium ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
+                <td className={`px-4 py-3 text-right font-medium whitespace-nowrap ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
                   {h.profit_loss_pct != null ? formatPercent(h.profit_loss_pct) : "-"}
                 </td>
                 <td className="px-4 py-3 text-right">

@@ -140,12 +140,12 @@ export function PortfolioPageClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">포트폴리오</h1>
-          {portfolio && <p className="mt-0.5 text-sm text-gray-400">{portfolio.name}</p>}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="truncate text-2xl font-bold text-white">포트폴리오</h1>
+          {portfolio && <p className="mt-0.5 truncate text-sm text-gray-400">{portfolio.name}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {/* 통화 토글 */}
           <div className="flex rounded-xl bg-gray-800 p-1 text-xs font-medium">
             {(["USD", "KRW"] as const).map((cur) => (
@@ -164,7 +164,7 @@ export function PortfolioPageClient() {
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-400 transition-colors"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-400 transition-colors"
           >
             <Plus className="h-4 w-4" />
             종목 추가

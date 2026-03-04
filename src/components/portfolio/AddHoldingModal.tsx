@@ -147,8 +147,8 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
                               {r.symbol.charAt(0)}
                             </div>
                           )}
-                          <span className="text-sm text-white">{r.name}</span>
-                          <span className="ml-auto text-xs text-gray-500 uppercase">{r.symbol}</span>
+                          <span className="min-w-0 flex-1 truncate text-sm text-white">{r.name}</span>
+                          <span className="ml-2 shrink-0 text-xs text-gray-500 uppercase">{r.symbol}</span>
                         </button>
                       </li>
                     ))}
