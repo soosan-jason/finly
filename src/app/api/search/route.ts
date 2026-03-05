@@ -1,40 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchCoins } from "@/lib/api/coingecko";
-import { searchSymbol } from "@/lib/api/finnhub";
+
+async function searchStocksYahoo(query: string) {
+  const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=5&newsCount=0&listsCount=0`;
+  const res = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0" },
+    next: { revalidate: 30 },
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return ((data.quotes ?? []) as Record<string, string>[])
+    .filter((q) => q.quoteType === "EQUITY" || q.quoteType === "ETF")
+    .slice(0, 5)
+    .map((q) => ({
+      type: q.quoteType === "ETF" ? "etf" : "stock",
+      id: q.symbol,
+      symbol: q.symbol,
+      name: q.shortname || q.longname || q.symbol,
+      image: null as null,
+      market_cap_rank: null as null,
+    }));
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q")?.trim();
-  const type = searchParams.get("type") ?? "crypto"; // "crypto" | "stock"
   if (!q) return NextResponse.json([]);
 
   try {
-    if (type === "stock") {
-      const data = await searchSymbol(q);
-      const stocks = (data.result ?? [])
-        .filter((r) => r.type === "Common Stock" || r.type === "ETP")
-        .slice(0, 8)
-        .map((r) => ({
-          type: r.type === "ETP" ? "etf" : "stock",
-          id: r.symbol,
-          symbol: r.displaySymbol,
-          name: r.description,
-          image: null,
-        }));
-      return NextResponse.json(stocks);
-    }
+    const [cryptoData, stockData] = await Promise.allSettled([
+      searchCoins(q).then((data) =>
+        (data.coins ?? []).slice(0, 5).map((c: Record<string, unknown>) => ({
+          type: "crypto",
+          id: c.id,
+          symbol: c.symbol,
+          name: c.name,
+          image: c.large ?? c.thumb,
+          market_cap_rank: c.market_cap_rank ?? null,
+        }))
+      ),
+      searchStocksYahoo(q),
+    ]);
 
-    // crypto (default)
-    const data = await searchCoins(q);
-    const coins = (data.coins ?? []).slice(0, 8).map((c: Record<string, unknown>) => ({
-      type: "crypto",
-      id: c.id,
-      symbol: c.symbol,
-      name: c.name,
-      image: c.large ?? c.thumb,
-      market_cap_rank: c.market_cap_rank,
-    }));
-    return NextResponse.json(coins);
+    const coins = cryptoData.status === "fulfilled" ? cryptoData.value : [];
+    const stocks = stockData.status === "fulfilled" ? stockData.value : [];
+
+    return NextResponse.json([...coins, ...stocks]);
   } catch (err) {
     console.error("Search API error:", err);
     return NextResponse.json([], { status: 500 });

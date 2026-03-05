@@ -103,7 +103,10 @@ export function PortfolioMiniCard() {
       href="/portfolio"
       className="group flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-900 px-5 py-4 hover:border-gray-700 transition-colors"
     >
-      <p className="text-xs text-gray-500">내 포트폴리오</p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-500">내 포트폴리오</p>
+        <ArrowRight className="h-4 w-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
+      </div>
 
       {krw && (
         <div className="flex items-center justify-between">
@@ -138,25 +141,17 @@ export function PortfolioMiniCard() {
               <p className="text-base font-bold text-white">{formatPrice(usd.value)}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className={`text-sm font-medium ${usd.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                {usd.pnl >= 0 ? "+" : ""}{formatPrice(usd.pnl)}
-              </p>
-              <p className={`text-xs ${usd.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                {formatPercent(usd.pnlPct)}
-              </p>
-            </div>
-            <ArrowRight className="h-4 w-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
+          <div className="text-right">
+            <p className={`text-sm font-medium ${usd.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+              {usd.pnl >= 0 ? "+" : ""}{formatPrice(usd.pnl)}
+            </p>
+            <p className={`text-xs ${usd.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+              {formatPercent(usd.pnlPct)}
+            </p>
           </div>
         </div>
       )}
 
-      {krw && !usd && (
-        <div className="flex justify-end">
-          <ArrowRight className="h-4 w-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
-        </div>
-      )}
     </Link>
   );
 }

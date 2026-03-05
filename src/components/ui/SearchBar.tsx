@@ -7,11 +7,11 @@ import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 interface SearchResult {
-  type: "crypto";
+  type: "crypto" | "stock" | "etf";
   id: string;
   symbol: string;
   name: string;
-  image: string;
+  image: string | null;
   market_cap_rank: number | null;
 }
 
@@ -53,7 +53,9 @@ export function SearchBar({ className }: { className?: string }) {
   function handleSelect(result: SearchResult) {
     setQuery("");
     setOpen(false);
-    router.push(`/crypto/${result.id}`);
+    if (result.type === "crypto") {
+      router.push(`/crypto/${result.id}`);
+    }
   }
 
   return (
@@ -86,18 +88,27 @@ export function SearchBar({ className }: { className?: string }) {
           ) : (
             <ul>
               {results.map((r) => (
-                <li key={r.id}>
+                <li key={`${r.type}-${r.id}`}>
                   <button
                     onClick={() => handleSelect(r)}
                     className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-800 transition-colors"
                   >
-                    {r.image && (
+                    {r.image ? (
                       <Image src={r.image} alt={r.name} width={24} height={24} className="rounded-full" />
+                    ) : (
+                      <div className="h-6 w-6 rounded-full bg-gray-700 flex items-center justify-center text-[9px] text-gray-400 font-bold flex-shrink-0">
+                        {r.symbol.slice(0, 2).toUpperCase()}
+                      </div>
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">{r.name}</p>
                       <p className="text-xs text-gray-500 uppercase">{r.symbol}</p>
                     </div>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium flex-shrink-0 ${
+                      r.type === "crypto" ? "bg-emerald-900/60 text-emerald-400" : "bg-blue-900/60 text-blue-400"
+                    }`}>
+                      {r.type === "crypto" ? "코인" : r.type === "etf" ? "ETF" : "주식"}
+                    </span>
                     {r.market_cap_rank && (
                       <span className="text-xs text-gray-500">#{r.market_cap_rank}</span>
                     )}
