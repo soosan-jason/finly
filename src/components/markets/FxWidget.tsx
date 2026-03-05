@@ -28,26 +28,26 @@ export function FxWidget() {
   return (
     <section>
       <h2 className="mb-3 text-lg font-semibold text-white">환율</h2>
-      <div className="flex gap-3 overflow-x-auto pb-1">
+      <div className="rounded-xl border border-gray-800 bg-gray-900 divide-y divide-gray-800">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-16 w-32 shrink-0 animate-pulse rounded-xl bg-gray-800" />
+              <div key={i} className="flex items-center justify-between px-4 py-3">
+                <div className="h-4 w-24 animate-pulse rounded bg-gray-800" />
+                <div className="h-4 w-20 animate-pulse rounded bg-gray-800" />
+              </div>
             ))
           : rates.map((r) => (
-              <div
-                key={r.pair}
-                className="flex shrink-0 items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 px-4 py-3"
-              >
-                <span className="text-xl">{FLAG[r.to] ?? "🌍"}</span>
-                <div>
-                  <p className="text-xs text-gray-500">USD/{r.to}</p>
-                  <p className="font-semibold text-white">
-                    {r.rate.toLocaleString(undefined, {
-                      minimumFractionDigits: r.to === "KRW" || r.to === "JPY" ? 0 : 4,
-                      maximumFractionDigits: r.to === "KRW" || r.to === "JPY" ? 2 : 4,
-                    })}
-                  </p>
+              <div key={r.pair} className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{FLAG[r.to] ?? "🌍"}</span>
+                  <span className="text-sm text-gray-400">USD/{r.to}</span>
                 </div>
+                <span className="font-semibold text-white tabular-nums">
+                  {r.rate.toLocaleString(undefined, {
+                    minimumFractionDigits: r.to === "KRW" || r.to === "JPY" ? 0 : 4,
+                    maximumFractionDigits: r.to === "KRW" || r.to === "JPY" ? 2 : 4,
+                  })}
+                </span>
               </div>
             ))}
       </div>
