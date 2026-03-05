@@ -45,8 +45,17 @@ export function CryptoPageClient() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+      <div>
+        <table className="w-full table-fixed text-sm">
+          <colgroup>
+            <col className="w-8" />
+            <col />
+            <col className="w-28" />
+            <col className="w-16" />
+            <col className="w-16 hidden sm:table-column" />
+            <col className="w-28 hidden md:table-column" />
+            <col className="w-28 hidden lg:table-column" />
+          </colgroup>
           <thead>
             <tr className="border-b border-gray-800 text-left text-xs text-gray-500">
               <th className="px-3 py-2">#</th>
@@ -73,10 +82,10 @@ export function CryptoPageClient() {
                     <tr key={coin.id} className="border-b border-gray-800/50 hover:bg-gray-800/40 transition-colors">
                       <td className="px-3 py-2 text-xs text-gray-500">{coin.market_cap_rank}</td>
                       <td className="px-3 py-2">
-                        <Link href={`/crypto/${coin.id}`} className="flex items-center gap-2 hover:opacity-80">
-                          <Image src={coin.image} alt={coin.name} width={24} height={24} className="rounded-full" />
-                          <div>
-                            <p className="text-sm font-medium text-white">{coin.name}</p>
+                        <Link href={`/crypto/${coin.id}`} className="flex items-center gap-2 hover:opacity-80 min-w-0">
+                          <Image src={coin.image} alt={coin.name} width={24} height={24} className="rounded-full shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-white truncate">{coin.name}</p>
                             <p className="text-xs text-gray-500 uppercase">{coin.symbol}</p>
                           </div>
                         </Link>
