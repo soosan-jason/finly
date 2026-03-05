@@ -15,12 +15,17 @@ interface SearchResult {
   market_cap_rank: number | null;
 }
 
-export function SearchBar({ className }: { className?: string }) {
+export function SearchBar({ className, autoFocus }: { className?: string; autoFocus?: boolean }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (autoFocus) inputRef.current?.focus();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 

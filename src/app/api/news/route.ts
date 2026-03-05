@@ -2,7 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getMarketNews, FinnhubNewsItem } from "@/lib/api/finnhub";
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 async function translateHeadline(text: string): Promise<string> {
@@ -28,6 +37,7 @@ export interface NewsArticle {
   datetime: number;       // unix timestamp
   category: string;
   related: string;
+  translated: boolean;
 }
 
 export async function GET(req: NextRequest) {
@@ -56,10 +66,15 @@ export async function GET(req: NextRequest) {
         datetime: i.datetime,
         category: i.category,
         related: i.related ?? "",
+        translated: false,
       }));
 
     const translatedHeadlines = await Promise.all(articles.map((a) => translateHeadline(a.headline)));
-    articles = articles.map((a, i) => ({ ...a, headline: translatedHeadlines[i] ?? a.headline }));
+    articles = articles.map((a, i) => ({
+      ...a,
+      headline: translatedHeadlines[i] ?? a.headline,
+      translated: !!translatedHeadlines[i] && translatedHeadlines[i] !== a.headline,
+    }));
 
     return NextResponse.json(articles, {
       headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=60" },
@@ -81,6 +96,7 @@ const FALLBACK_NEWS: NewsArticle[] = [
     datetime: Math.floor(Date.now() / 1000) - 3600,
     category: "crypto",
     related: "BTCUSD",
+    translated: false,
   },
   {
     id: 2,
@@ -92,6 +108,7 @@ const FALLBACK_NEWS: NewsArticle[] = [
     datetime: Math.floor(Date.now() / 1000) - 7200,
     category: "general",
     related: "SPY",
+    translated: false,
   },
   {
     id: 3,
@@ -103,6 +120,7 @@ const FALLBACK_NEWS: NewsArticle[] = [
     datetime: Math.floor(Date.now() / 1000) - 10800,
     category: "general",
     related: "",
+    translated: false,
   },
   {
     id: 4,
@@ -114,6 +132,7 @@ const FALLBACK_NEWS: NewsArticle[] = [
     datetime: Math.floor(Date.now() / 1000) - 14400,
     category: "general",
     related: "KOSPI",
+    translated: false,
   },
   {
     id: 5,
@@ -125,5 +144,6 @@ const FALLBACK_NEWS: NewsArticle[] = [
     datetime: Math.floor(Date.now() / 1000) - 18000,
     category: "crypto",
     related: "ETHUSD",
+    translated: false,
   },
 ];

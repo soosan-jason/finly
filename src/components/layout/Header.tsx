@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
-import { TrendingUp, LogOut, User } from "lucide-react";
+import { TrendingUp, LogOut, User, Search, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { useUser } from "@/hooks/useUser";
@@ -20,6 +20,7 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { user, loading, signOut } = useUser();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
@@ -70,7 +71,19 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-800 bg-gray-950/95 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
+      <div className="relative mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
+        {/* Mobile search overlay */}
+        {searchOpen && (
+          <div className="absolute inset-0 z-10 flex items-center gap-2 bg-gray-950 px-4 md:hidden">
+            <SearchBar className="flex-1" autoFocus />
+            <button
+              onClick={() => setSearchOpen(false)}
+              className="shrink-0 p-1 text-gray-400 hover:text-white transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        )}
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2 font-bold text-white">
           <TrendingUp className="h-5 w-5 text-emerald-400" />
@@ -95,10 +108,19 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Search */}
-        <div className="ml-auto flex-1 max-w-xs">
+        {/* Search - desktop only */}
+        <div className="ml-auto hidden md:flex flex-1 max-w-xs">
           <SearchBar />
         </div>
+
+        {/* Mobile search icon */}
+        <button
+          className="md:hidden ml-auto p-2 text-gray-400 hover:text-white transition-colors"
+          onClick={() => setSearchOpen(true)}
+          aria-label="검색"
+        >
+          <Search className="h-5 w-5" />
+        </button>
 
         {/* Auth Area */}
         {!loading && (
@@ -185,25 +207,6 @@ export function Header() {
         )}
       </div>
 
-      {/* Mobile Tab Bar */}
-      <div className="md:hidden border-t border-gray-800 bg-gray-950">
-        <div className="flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "flex-1 text-center px-1 py-2 text-xs font-medium transition-colors border-b-2 whitespace-nowrap",
-                pathname === link.href
-                  ? "border-emerald-400 text-white"
-                  : "border-transparent text-gray-500 hover:text-gray-300"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      </div>
     </header>
   );
 }

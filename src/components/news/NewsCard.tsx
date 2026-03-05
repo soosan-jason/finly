@@ -58,8 +58,8 @@ export function NewsCard({ article }: Props) {
         {article.headline}
       </h3>
 
-      {/* Summary */}
-      {article.summary && (
+      {/* Summary - 영어 원문이므로 번역된 경우 숨김 */}
+      {article.summary && !article.translated && (
         <p className="mt-2 text-xs leading-relaxed text-gray-500 line-clamp-2">
           {article.summary}
         </p>
