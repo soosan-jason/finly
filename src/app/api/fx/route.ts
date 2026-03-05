@@ -28,16 +28,32 @@ interface YahooFxResult {
 async function fetchYahooFxRate(from: string, to: string): Promise<YahooFxResult> {
   try {
     const symbol = `${from}${to}=X`;
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`;
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0" },
       next: { revalidate: 300 },
     });
     if (!res.ok) return { rate: null, previousClose: null };
     const data = await res.json();
-    const meta = data?.chart?.result?.[0]?.meta;
+    const result = data?.chart?.result?.[0];
+    const meta = result?.meta;
     const rate = typeof meta?.regularMarketPrice === "number" ? meta.regularMarketPrice : null;
-    const previousClose = typeof meta?.previousClose === "number" ? meta.previousClose : null;
+
+    // Yahoo Finance forex는 필드명이 일정하지 않아 여러 이름을 시도
+    const previousClose: number | null =
+      typeof meta?.previousClose === "number" ? meta.previousClose :
+      typeof meta?.chartPreviousClose === "number" ? meta.chartPreviousClose :
+      typeof meta?.regularMarketPreviousClose === "number" ? meta.regularMarketPreviousClose :
+      (() => {
+        // 차트 closes 배열에서 전일 종가 추출 (마지막-1 인덱스)
+        const closes: number[] | undefined = result?.indicators?.quote?.[0]?.close;
+        if (closes && closes.length >= 2) {
+          const prev = closes[closes.length - 2];
+          return typeof prev === "number" ? prev : null;
+        }
+        return null;
+      })();
+
     return { rate, previousClose };
   } catch {
     return { rate: null, previousClose: null };
