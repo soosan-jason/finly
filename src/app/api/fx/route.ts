@@ -23,7 +23,7 @@ const FX_PAIRS = [
 async function fetchYahooFxRate(
   from: string,
   to: string
-): Promise<{ rate: number | null; previousClose: number | null }> {
+): Promise<{ rate: number | null; previousClose: number | null; lastUpdated: string | null }> {
   try {
     const symbol = `${from}${to}=X`;
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
@@ -34,19 +34,23 @@ async function fetchYahooFxRate(
       },
       next: { revalidate: 300 },
     });
-    if (!res.ok) return { rate: null, previousClose: null };
+    if (!res.ok) return { rate: null, previousClose: null, lastUpdated: null };
 
     const data = await res.json();
     const meta = data?.chart?.result?.[0]?.meta;
-    if (!meta?.regularMarketPrice) return { rate: null, previousClose: null };
+    if (!meta?.regularMarketPrice) return { rate: null, previousClose: null, lastUpdated: null };
 
     const rate = meta.regularMarketPrice as number;
     // chartPreviousClose: 직전 거래일 종가 (Yahoo Finance 제공)
     const previousClose = (meta.chartPreviousClose ?? meta.previousClose ?? null) as number | null;
+    // regularMarketTime: Yahoo Finance 시세 기준 Unix timestamp (초)
+    const lastUpdated = meta.regularMarketTime
+      ? new Date((meta.regularMarketTime as number) * 1000).toISOString()
+      : null;
 
-    return { rate, previousClose };
+    return { rate, previousClose, lastUpdated };
   } catch {
-    return { rate: null, previousClose: null };
+    return { rate: null, previousClose: null, lastUpdated: null };
   }
 }
 
@@ -86,6 +90,7 @@ export async function GET(req: NextRequest) {
     const result: FxRate[] = targets.map(({ from, to }, i) => {
       let rate = yahooResults[i].rate;
       const previousClose = yahooResults[i].previousClose;
+      const yahooLastUpdated = yahooResults[i].lastUpdated;
 
       // Yahoo Finance 실패 → 백업 API 사용 (전일비는 null)
       if (rate === null && fallbackRates) {
@@ -113,7 +118,7 @@ export async function GET(req: NextRequest) {
         previousClose,
         change,
         changePct,
-        lastUpdated: new Date().toISOString(),
+        lastUpdated: yahooLastUpdated ?? new Date().toISOString(),
       };
     });
 
