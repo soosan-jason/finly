@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     const coins = cryptoData.status === "fulfilled" ? cryptoData.value : [];
     const stocks = stockData.status === "fulfilled" ? stockData.value : [];
 
-    return NextResponse.json([...coins, ...stocks]);
+    return NextResponse.json([...stocks, ...coins]);
   } catch (err) {
     console.error("Search API error:", err);
     return NextResponse.json([], { status: 500 });

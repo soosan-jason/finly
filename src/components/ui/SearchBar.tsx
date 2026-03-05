@@ -55,6 +55,8 @@ export function SearchBar({ className }: { className?: string }) {
     setOpen(false);
     if (result.type === "crypto") {
       router.push(`/crypto/${result.id}`);
+    } else {
+      router.push(`/stock/${encodeURIComponent(result.id)}`);
     }
   }
 
@@ -66,7 +68,7 @@ export function SearchBar({ className }: { className?: string }) {
           ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="코인, 주식 검색..."
+          placeholder="주식, 코인 검색..."
           className="w-full rounded-xl border border-gray-700 bg-gray-800 py-2 pl-9 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-emerald-500 transition-colors"
         />
         {query && (
