@@ -118,9 +118,6 @@ export function Header() {
       {/* Mobile Nav */}
       {menuOpen && (
         <div className="border-t border-gray-800 bg-gray-950 px-4 py-2 md:hidden">
-          <div className="mb-2">
-            <SearchBar />
-          </div>
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
