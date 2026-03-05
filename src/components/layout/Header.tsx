@@ -187,13 +187,13 @@ export function Header() {
 
       {/* Mobile Tab Bar */}
       <div className="md:hidden border-t border-gray-800 bg-gray-950">
-        <div className="flex overflow-x-auto scrollbar-none">
+        <div className="flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "shrink-0 px-4 py-2 text-sm font-medium transition-colors border-b-2",
+                "flex-1 text-center px-1 py-2 text-xs font-medium transition-colors border-b-2 whitespace-nowrap",
                 pathname === link.href
                   ? "border-emerald-400 text-white"
                   : "border-transparent text-gray-500 hover:text-gray-300"
