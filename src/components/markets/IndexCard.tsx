@@ -39,6 +39,11 @@ export function IndexCard({ index }: IndexCardProps) {
           {isUp ? "▲" : "▼"}{" "}
           {Math.abs(index.change).toLocaleString(undefined, { maximumFractionDigits: 2 })}
         </p>
+        {index.lastUpdated && (
+          <p className="mt-1.5 text-xs text-gray-600">
+            {new Date(index.lastUpdated).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
+          </p>
+        )}
       </div>
     </Card>
   );
