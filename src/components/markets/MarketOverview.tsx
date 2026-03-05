@@ -17,7 +17,8 @@ export function MarketOverview() {
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
       setIndices(data);
-      setLastUpdated(new Date().toLocaleTimeString("ko-KR"));
+      const apiTime = data.find((i: StockIndex) => i.lastUpdated)?.lastUpdated;
+      setLastUpdated(apiTime ? new Date(apiTime).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }) : new Date().toLocaleTimeString("ko-KR"));
     } catch {
       // fallback 샘플 데이터
       setIndices([

@@ -16,7 +16,7 @@ const INDEX_CONFIG: {
 ];
 
 // Yahoo Finance 비공식 API — ^GSPC, ^KS11 등 ^ 심볼을 그대로 지원
-async function fetchYahooQuote(symbol: string): Promise<{ price: number; change: number; changePercent: number } | null> {
+async function fetchYahooQuote(symbol: string): Promise<{ price: number; change: number; changePercent: number; lastUpdated: string } | null> {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
     const res = await fetch(url, {
@@ -32,8 +32,11 @@ async function fetchYahooQuote(symbol: string): Promise<{ price: number; change:
     const prevClose = (meta.chartPreviousClose ?? meta.previousClose ?? price) as number;
     const change = price - prevClose;
     const changePercent = prevClose !== 0 ? (change / prevClose) * 100 : 0;
+    const lastUpdated = meta.regularMarketTime
+      ? new Date((meta.regularMarketTime as number) * 1000).toISOString()
+      : new Date().toISOString();
 
-    return { price, change, changePercent };
+    return { price, change, changePercent, lastUpdated };
   } catch {
     return null;
   }
@@ -53,6 +56,7 @@ export async function GET() {
           changePercent: quote.changePercent,
           currency: cfg.currency,
           region: cfg.region,
+          lastUpdated: quote.lastUpdated,
         } satisfies StockIndex;
       })
     );

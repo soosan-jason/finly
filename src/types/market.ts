@@ -21,6 +21,7 @@ export interface StockIndex {
   changePercent: number;
   currency: string;
   region: "US" | "KR" | "JP" | "CN" | "EU";
+  lastUpdated?: string;
 }
 
 export interface MarketSummary {

@@ -21,7 +21,8 @@ export function CryptoPageClient() {
       const res = await fetch(`/api/crypto?limit=${p * PER_PAGE}`);
       const data = await res.json();
       setCryptos(data);
-      setLastUpdated(new Date().toLocaleTimeString("ko-KR"));
+      const apiTime = Array.isArray(data) && data[0]?.last_updated;
+      setLastUpdated(apiTime ? new Date(apiTime).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }) : new Date().toLocaleTimeString("ko-KR"));
     } finally {
       setLoading(false);
     }

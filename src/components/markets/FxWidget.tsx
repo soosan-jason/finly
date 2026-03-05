@@ -19,6 +19,7 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("ko-KR", {
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
     hour12: false,
   });
 }
@@ -71,7 +72,7 @@ export function FxWidget() {
                       <span className="text-base">{FLAG[r.from] ?? "🌍"}</span>
                       <span className="text-sm font-medium text-white">{r.pair}</span>
                     </div>
-                    <p className="mt-0.5 text-xs text-gray-500">{formatTime(r.lastUpdated)} 기준</p>
+                    <p className="mt-0.5 text-xs text-gray-500">{formatTime(r.lastUpdated)}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-white tabular-nums">
