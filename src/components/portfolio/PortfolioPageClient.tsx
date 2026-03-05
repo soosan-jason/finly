@@ -6,9 +6,49 @@ import { Portfolio, Holding, WatchlistItem } from "@/types/portfolio";
 import { HoldingsTable } from "./HoldingsTable";
 import { WatchlistSection } from "./WatchlistSection";
 import { AddHoldingModal } from "./AddHoldingModal";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+// Card import removed — using inline SummaryHeroCard below
 import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
 import { Plus, Briefcase } from "lucide-react";
+
+interface HeroCardProps {
+  label: string;
+  totalValue: string;
+  totalCost: string;
+  pnl: string;
+  pnlPositive: boolean;
+  pct: number;
+  pctLabel: string;
+}
+
+function SummaryHeroCard({ label, totalValue, totalCost, pnl, pnlPositive, pct, pctLabel }: HeroCardProps) {
+  const barWidth = Math.min(Math.abs(pct), 100);
+  return (
+    <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
+      <p className="mb-2 text-xs font-medium text-gray-500">{label}</p>
+      <p className="text-3xl font-bold tracking-tight text-white">{totalValue}</p>
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <span className="text-gray-500">투자 {totalCost}</span>
+        <span className={pnlPositive ? "font-medium text-emerald-400" : "font-medium text-red-400"}>
+          {pnl}
+        </span>
+      </div>
+      <div className="mt-3 space-y-1.5">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-500">수익률</span>
+          <span className={`font-semibold ${pnlPositive ? "text-emerald-400" : "text-red-400"}`}>
+            {pctLabel}
+          </span>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${pnlPositive ? "bg-emerald-400" : "bg-red-400"}`}
+            style={{ width: `${barWidth}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function PortfolioPageClient() {
   const { user, loading: authLoading } = useUser();
@@ -136,76 +176,46 @@ export function PortfolioPageClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* 페이지 헤더 */}
+      <div className="flex items-center justify-between">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-bold text-white">포트폴리오</h1>
           {portfolio && <p className="mt-0.5 truncate text-sm text-gray-400">{portfolio.name}</p>}
         </div>
+        {/* 데스크톱 버튼 */}
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-400 transition-colors"
+          className="hidden md:flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-400 transition-colors"
         >
           <Plus className="h-4 w-4" />
           종목 추가
         </button>
       </div>
 
-      {/* 요약 카드 — 통화별 분리 */}
+      {/* 히어로 요약 카드 — 통화별 */}
       {holdings.length > 0 && (
         <div className="space-y-3">
           {krwHoldings.length > 0 && (
-            <div>
-              <p className="mb-2 text-xs font-medium text-gray-500">원화 자산 (KRW)</p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <Card>
-                  <CardHeader><CardTitle>총 평가액</CardTitle></CardHeader>
-                  <p className="text-xl font-bold text-white">{formatKRW(krw.totalValue)}</p>
-                </Card>
-                <Card>
-                  <CardHeader><CardTitle>총 투자금</CardTitle></CardHeader>
-                  <p className="text-xl font-bold text-white">{formatKRW(krw.totalCost)}</p>
-                </Card>
-                <Card>
-                  <CardHeader><CardTitle>총 손익</CardTitle></CardHeader>
-                  <p className={`text-xl font-bold ${krw.totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                    {krw.totalPnl >= 0 ? "+" : ""}{formatKRW(krw.totalPnl)}
-                  </p>
-                </Card>
-                <Card>
-                  <CardHeader><CardTitle>수익률</CardTitle></CardHeader>
-                  <p className={`text-xl font-bold ${krw.totalPnlPct >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                    {formatPercent(krw.totalPnlPct)}
-                  </p>
-                </Card>
-              </div>
-            </div>
+            <SummaryHeroCard
+              label="원화 자산 (KRW)"
+              totalValue={formatKRW(krw.totalValue)}
+              totalCost={formatKRW(krw.totalCost)}
+              pnl={`${krw.totalPnl >= 0 ? "+" : ""}${formatKRW(krw.totalPnl)}`}
+              pnlPositive={krw.totalPnl >= 0}
+              pct={krw.totalPnlPct}
+              pctLabel={formatPercent(krw.totalPnlPct)}
+            />
           )}
           {usdHoldings.length > 0 && (
-            <div>
-              <p className="mb-2 text-xs font-medium text-gray-500">달러 자산 (USD)</p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <Card>
-                  <CardHeader><CardTitle>총 평가액</CardTitle></CardHeader>
-                  <p className="text-xl font-bold text-white">{formatPrice(usd.totalValue)}</p>
-                </Card>
-                <Card>
-                  <CardHeader><CardTitle>총 투자금</CardTitle></CardHeader>
-                  <p className="text-xl font-bold text-white">{formatPrice(usd.totalCost)}</p>
-                </Card>
-                <Card>
-                  <CardHeader><CardTitle>총 손익</CardTitle></CardHeader>
-                  <p className={`text-xl font-bold ${usd.totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                    {usd.totalPnl >= 0 ? "+" : ""}{formatPrice(usd.totalPnl)}
-                  </p>
-                </Card>
-                <Card>
-                  <CardHeader><CardTitle>수익률</CardTitle></CardHeader>
-                  <p className={`text-xl font-bold ${usd.totalPnlPct >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                    {formatPercent(usd.totalPnlPct)}
-                  </p>
-                </Card>
-              </div>
-            </div>
+            <SummaryHeroCard
+              label="달러 자산 (USD)"
+              totalValue={formatPrice(usd.totalValue)}
+              totalCost={formatPrice(usd.totalCost)}
+              pnl={`${usd.totalPnl >= 0 ? "+" : ""}${formatPrice(usd.totalPnl)}`}
+              pnlPositive={usd.totalPnl >= 0}
+              pct={usd.totalPnlPct}
+              pctLabel={formatPercent(usd.totalPnlPct)}
+            />
           )}
         </div>
       )}
@@ -265,6 +275,15 @@ export function PortfolioPageClient() {
           onAdded={() => { fetchHoldings(portfolio.id); setShowAddModal(false); }}
         />
       )}
+
+      {/* 모바일 FAB */}
+      <button
+        onClick={() => setShowAddModal(true)}
+        className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-400 transition-colors md:hidden"
+        aria-label="종목 추가"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
     </div>
   );
 }
