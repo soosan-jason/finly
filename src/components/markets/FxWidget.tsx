@@ -7,6 +7,22 @@ const FLAG: Record<string, string> = {
   KRW: "🇰🇷", JPY: "🇯🇵", EUR: "🇪🇺", CNY: "🇨🇳",
 };
 
+function formatRate(rate: number, to: string) {
+  const isWhole = to === "KRW" || to === "JPY";
+  return rate.toLocaleString(undefined, {
+    minimumFractionDigits: isWhole ? 0 : 4,
+    maximumFractionDigits: isWhole ? 2 : 4,
+  });
+}
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
 export function FxWidget() {
   const [rates, setRates] = useState<FxRate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,24 +48,46 @@ export function FxWidget() {
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between px-4 py-3">
-                <div className="h-4 w-24 animate-pulse rounded bg-gray-800" />
-                <div className="h-4 w-20 animate-pulse rounded bg-gray-800" />
+                <div className="space-y-1.5">
+                  <div className="h-3.5 w-20 animate-pulse rounded bg-gray-800" />
+                  <div className="h-3 w-14 animate-pulse rounded bg-gray-800" />
+                </div>
+                <div className="space-y-1.5 items-end flex flex-col">
+                  <div className="h-3.5 w-20 animate-pulse rounded bg-gray-800" />
+                  <div className="h-3 w-16 animate-pulse rounded bg-gray-800" />
+                </div>
               </div>
             ))
-          : rates.map((r) => (
-              <div key={r.pair} className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{FLAG[r.to] ?? "🌍"}</span>
-                  <span className="text-sm text-gray-400">USD/{r.to}</span>
+          : rates.map((r) => {
+              const up = r.change !== null && r.change > 0;
+              const down = r.change !== null && r.change < 0;
+              const changeColor = up ? "text-red-400" : down ? "text-blue-400" : "text-gray-400";
+              const sign = up ? "+" : "";
+
+              return (
+                <div key={r.pair} className="flex items-center justify-between px-4 py-3">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-base">{FLAG[r.to] ?? "🌍"}</span>
+                      <span className="text-sm font-medium text-white">USD/{r.to}</span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-gray-500">{formatTime(r.lastUpdated)} 기준</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-white tabular-nums">
+                      {formatRate(r.rate, r.to)}
+                    </p>
+                    {r.change !== null && r.changePct !== null ? (
+                      <p className={`text-xs tabular-nums ${changeColor}`}>
+                        {sign}{formatRate(r.change, r.to)} ({sign}{r.changePct.toFixed(2)}%)
+                      </p>
+                    ) : (
+                      <p className="text-xs text-gray-600">전일비 없음</p>
+                    )}
+                  </div>
                 </div>
-                <span className="font-semibold text-white tabular-nums">
-                  {r.rate.toLocaleString(undefined, {
-                    minimumFractionDigits: r.to === "KRW" || r.to === "JPY" ? 0 : 4,
-                    maximumFractionDigits: r.to === "KRW" || r.to === "JPY" ? 2 : 4,
-                  })}
-                </span>
-              </div>
-            ))}
+              );
+            })}
       </div>
     </section>
   );

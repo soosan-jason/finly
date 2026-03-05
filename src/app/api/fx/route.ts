@@ -5,6 +5,9 @@ export interface FxRate {
   from: string;
   to: string;
   rate: number;
+  previousClose: number | null;
+  change: number | null;
+  changePct: number | null;
   lastUpdated: string;
 }
 
@@ -15,8 +18,13 @@ const FX_PAIRS = [
   { from: "USD", to: "CNY" },
 ];
 
+interface YahooFxResult {
+  rate: number | null;
+  previousClose: number | null;
+}
+
 // Yahoo Finance 환율 심볼: USDKRW=X, USDJPY=X 등
-async function fetchYahooFxRate(from: string, to: string): Promise<number | null> {
+async function fetchYahooFxRate(from: string, to: string): Promise<YahooFxResult> {
   try {
     const symbol = `${from}${to}=X`;
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
@@ -24,12 +32,14 @@ async function fetchYahooFxRate(from: string, to: string): Promise<number | null
       headers: { "User-Agent": "Mozilla/5.0" },
       next: { revalidate: 300 },
     });
-    if (!res.ok) return null;
+    if (!res.ok) return { rate: null, previousClose: null };
     const data = await res.json();
-    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    return typeof price === "number" ? price : null;
+    const meta = data?.chart?.result?.[0]?.meta;
+    const rate = typeof meta?.regularMarketPrice === "number" ? meta.regularMarketPrice : null;
+    const previousClose = typeof meta?.previousClose === "number" ? meta.previousClose : null;
+    return { rate, previousClose };
   } catch {
-    return null;
+    return { rate: null, previousClose: null };
   }
 }
 
@@ -44,12 +54,18 @@ export async function GET(req: NextRequest) {
   try {
     const results = await Promise.allSettled(
       targets.map(async ({ from, to }) => {
-        const rate = await fetchYahooFxRate(from, to);
+        const { rate, previousClose } = await fetchYahooFxRate(from, to);
+        const finalRate = rate ?? FALLBACK_MAP[`${from}/${to}`] ?? 0;
+        const change = rate !== null && previousClose !== null ? rate - previousClose : null;
+        const changePct = change !== null && previousClose ? (change / previousClose) * 100 : null;
         return {
           pair: `${from}/${to}`,
           from,
           to,
-          rate: rate ?? FALLBACK_MAP[`${from}/${to}`] ?? 0,
+          rate: finalRate,
+          previousClose,
+          change,
+          changePct,
           lastUpdated: new Date().toISOString(),
         };
       })
@@ -80,5 +96,8 @@ const FALLBACK_RATES: FxRate[] = FX_PAIRS.map(({ from, to }) => ({
   from,
   to,
   rate: FALLBACK_MAP[`${from}/${to}`] ?? 0,
+  previousClose: null,
+  change: null,
+  changePct: null,
   lastUpdated: new Date().toISOString(),
 }));
