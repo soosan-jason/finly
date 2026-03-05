@@ -62,8 +62,8 @@ export async function GET() {
     );
 
     const indices = results
-      .filter((r): r is PromiseFulfilledResult<StockIndex> => r.status === "fulfilled" && r.value !== null)
-      .map((r) => r.value);
+      .filter((r) => r.status === "fulfilled" && r.value !== null)
+      .map((r) => (r as PromiseFulfilledResult<StockIndex>).value);
 
     if (indices.length === 0) return NextResponse.json(FALLBACK_DATA);
 
