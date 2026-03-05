@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { TrendingUp, Menu, LogOut, User } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { useUser } from "@/hooks/useUser";
 
@@ -23,6 +23,45 @@ export function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, loading, signOut } = useUser();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+
+  useEffect(() => {
+    const SWIPE_THRESHOLD = 60;
+    const hrefs = NAV_LINKS.map((l) => l.href);
+
+    function onTouchStart(e: TouchEvent) {
+      touchStartX.current = e.touches[0].clientX;
+    }
+
+    function onTouchEnd(e: TouchEvent) {
+      if (touchStartX.current === null) return;
+      const delta = e.changedTouches[0].clientX - touchStartX.current;
+      touchStartX.current = null;
+      if (Math.abs(delta) < SWIPE_THRESHOLD) return;
+
+      const currentPath = window.location.pathname;
+      const idx = hrefs.indexOf(currentPath);
+      if (idx === -1) return;
+
+      if (delta < 0) {
+        // 왼쪽 스와이프 → 다음 페이지
+        const next = hrefs[(idx + 1) % hrefs.length];
+        router.push(next);
+      } else {
+        // 오른쪽 스와이프 → 이전 페이지
+        const prev = hrefs[(idx - 1 + hrefs.length) % hrefs.length];
+        router.push(prev);
+      }
+    }
+
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchend", onTouchEnd);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
   async function handleSignOut() {
     await signOut();
