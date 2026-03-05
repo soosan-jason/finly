@@ -24,8 +24,7 @@ export function MarketsPageClient() {
       const res = await fetch("/api/markets/indices");
       const data = await res.json();
       setIndices(data);
-      const apiTime = data.find((i: StockIndex) => i.lastUpdated)?.lastUpdated;
-      setLastUpdated(apiTime ? new Date(apiTime).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }) : new Date().toLocaleTimeString("ko-KR"));
+      setLastUpdated(new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
     } catch {
       setIndices([
         { symbol: "^KS11", name: "KOSPI", price: 2523.55, change: 12.34, changePercent: 0.49, currency: "KRW", region: "KR" },
