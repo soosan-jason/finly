@@ -14,6 +14,7 @@ export interface FxRate {
 const FX_PAIRS = [
   { from: "USD", to: "KRW" },
   { from: "USD", to: "JPY" },
+  { from: "JPY", to: "KRW" },
   { from: "USD", to: "EUR" },
   { from: "USD", to: "CNY" },
 ];
@@ -87,6 +88,7 @@ export async function GET(req: NextRequest) {
 const FALLBACK_MAP: Record<string, number> = {
   "USD/KRW": 1325.50,
   "USD/JPY": 149.82,
+  "JPY/KRW": 8.85,
   "USD/EUR": 0.9214,
   "USD/CNY": 7.2341,
 };

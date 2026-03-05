@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { FxRate } from "@/app/api/fx/route";
 
 const FLAG: Record<string, string> = {
-  KRW: "🇰🇷", JPY: "🇯🇵", EUR: "🇪🇺", CNY: "🇨🇳",
+  USD: "🇺🇸", KRW: "🇰🇷", JPY: "🇯🇵", EUR: "🇪🇺", CNY: "🇨🇳",
 };
 
 function formatRate(rate: number, to: string) {
@@ -46,7 +46,7 @@ export function FxWidget() {
       <h2 className="mb-3 text-lg font-semibold text-white">환율</h2>
       <div className="rounded-xl border border-gray-800 bg-gray-900 divide-y divide-gray-800">
         {loading
-          ? Array.from({ length: 4 }).map((_, i) => (
+          ? Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between px-4 py-3">
                 <div className="space-y-1.5">
                   <div className="h-3.5 w-20 animate-pulse rounded bg-gray-800" />
@@ -68,8 +68,8 @@ export function FxWidget() {
                 <div key={r.pair} className="flex items-center justify-between px-4 py-3">
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-base">{FLAG[r.to] ?? "🌍"}</span>
-                      <span className="text-sm font-medium text-white">USD/{r.to}</span>
+                      <span className="text-base">{FLAG[r.from] ?? "🌍"}</span>
+                      <span className="text-sm font-medium text-white">{r.pair}</span>
                     </div>
                     <p className="mt-0.5 text-xs text-gray-500">{formatTime(r.lastUpdated)} 기준</p>
                   </div>
