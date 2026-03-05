@@ -26,38 +26,68 @@ export function Header() {
   const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
-    const SWIPE_THRESHOLD = 60;
+    const SWIPE_THRESHOLD = 120;
     const hrefs = NAV_LINKS.map((l) => l.href);
+
+    function getMain() {
+      return document.querySelector<HTMLElement>("main");
+    }
+
+    function setTransform(x: number, animated: boolean) {
+      const el = getMain();
+      if (!el) return;
+      el.style.transition = animated ? "transform 0.25s ease" : "none";
+      el.style.transform = x === 0 ? "" : `translateX(${x}px)`;
+    }
 
     function onTouchStart(e: TouchEvent) {
       touchStartX.current = e.touches[0].clientX;
+      setTransform(0, false);
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      if (touchStartX.current === null) return;
+      const delta = e.touches[0].clientX - touchStartX.current;
+      setTransform(delta * 0.4, false);
     }
 
     function onTouchEnd(e: TouchEvent) {
       if (touchStartX.current === null) return;
       const delta = e.changedTouches[0].clientX - touchStartX.current;
       touchStartX.current = null;
-      if (Math.abs(delta) < SWIPE_THRESHOLD) return;
+
+      if (Math.abs(delta) < SWIPE_THRESHOLD) {
+        setTransform(0, true);
+        return;
+      }
 
       const currentPath = window.location.pathname;
       const idx = hrefs.indexOf(currentPath);
-      if (idx === -1) return;
-
-      if (delta < 0) {
-        // 왼쪽 스와이프 → 다음 페이지
-        const next = hrefs[(idx + 1) % hrefs.length];
-        router.push(next);
-      } else {
-        // 오른쪽 스와이프 → 이전 페이지
-        const prev = hrefs[(idx - 1 + hrefs.length) % hrefs.length];
-        router.push(prev);
+      if (idx === -1) {
+        setTransform(0, true);
+        return;
       }
+
+      // 슬라이드 아웃 후 페이지 이동
+      const exitX = delta < 0 ? -window.innerWidth : window.innerWidth;
+      setTransform(exitX, true);
+      setTimeout(() => {
+        const el = getMain();
+        if (el) { el.style.transition = "none"; el.style.transform = ""; }
+        if (delta < 0) {
+          router.push(hrefs[(idx + 1) % hrefs.length]);
+        } else {
+          router.push(hrefs[(idx - 1 + hrefs.length) % hrefs.length]);
+        }
+      }, 250);
     }
 
     document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: true });
     document.addEventListener("touchend", onTouchEnd, { passive: true });
     return () => {
       document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchmove", onTouchMove);
       document.removeEventListener("touchend", onTouchEnd);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
