@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
-import { TrendingUp, Menu, LogOut, User } from "lucide-react";
+import { TrendingUp, LogOut, User } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { useUser } from "@/hooks/useUser";
@@ -19,7 +19,6 @@ const NAV_LINKS = [
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, loading, signOut } = useUser();
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -145,53 +144,66 @@ export function Header() {
           )
         )}
 
-        {/* Mobile menu button */}
-        <button
-          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white md:hidden"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <Menu className="h-4 w-4" />
-        </button>
+        {/* Mobile user menu button */}
+        {!loading && (
+          user ? (
+            <div ref={userMenuRef} className="relative md:hidden">
+              <button
+                onClick={() => setUserMenuOpen((v) => !v)}
+                className="flex items-center rounded-lg p-1.5 text-gray-400 hover:text-white transition-colors"
+              >
+                {user.user_metadata?.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={user.user_metadata.avatar_url} alt="" className="h-6 w-6 rounded-full" />
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
+              </button>
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-gray-700 bg-gray-900 shadow-2xl overflow-hidden z-50">
+                  <div className="border-b border-gray-800 px-4 py-2.5">
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    로그아웃
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="md:hidden rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-400 transition-colors"
+            >
+              로그인
+            </Link>
+          )
+        )}
       </div>
 
-      {/* Mobile Nav */}
-      {menuOpen && (
-        <div className="border-t border-gray-800 bg-gray-950 px-4 py-2 md:hidden">
+      {/* Mobile Tab Bar */}
+      <div className="md:hidden border-t border-gray-800 bg-gray-950">
+        <div className="flex overflow-x-auto scrollbar-none">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              onClick={() => setMenuOpen(false)}
               className={cn(
-                "block rounded-lg px-3 py-2 text-sm transition-colors",
+                "shrink-0 px-4 py-2 text-sm font-medium transition-colors border-b-2",
                 pathname === link.href
-                  ? "bg-gray-800 text-white"
-                  : "text-gray-400 hover:text-white"
+                  ? "border-emerald-400 text-white"
+                  : "border-transparent text-gray-500 hover:text-gray-300"
               )}
             >
               {link.label}
             </Link>
           ))}
-          <div className="mt-2 border-t border-gray-800 pt-2">
-            {user ? (
-              <button
-                onClick={handleSignOut}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-400 hover:text-white"
-              >
-                <LogOut className="h-4 w-4" /> 로그아웃
-              </button>
-            ) : (
-              <Link
-                href="/auth/login"
-                onClick={() => setMenuOpen(false)}
-                className="block rounded-lg px-3 py-2 text-sm text-emerald-400"
-              >
-                로그인
-              </Link>
-            )}
-          </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }
