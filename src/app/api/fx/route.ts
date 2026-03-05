@@ -24,36 +24,21 @@ interface YahooFxResult {
   previousClose: number | null;
 }
 
-// Yahoo Finance 환율 심볼: USDKRW=X, USDJPY=X 등
+// Yahoo Finance quote API: regularMarketPreviousClose가 실제 전일 종가
+// (chart API의 chartPreviousClose는 오래된 값을 반환하는 경우 있음)
 async function fetchYahooFxRate(from: string, to: string): Promise<YahooFxResult> {
   try {
     const symbol = `${from}${to}=X`;
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`;
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}&fields=regularMarketPrice,regularMarketPreviousClose`;
     const res = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0" },
+      headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/json" },
       next: { revalidate: 300 },
     });
     if (!res.ok) return { rate: null, previousClose: null };
     const data = await res.json();
-    const result = data?.chart?.result?.[0];
-    const meta = result?.meta;
-    const rate = typeof meta?.regularMarketPrice === "number" ? meta.regularMarketPrice : null;
-
-    // Yahoo Finance forex는 필드명이 일정하지 않아 여러 이름을 시도
-    const previousClose: number | null =
-      typeof meta?.previousClose === "number" ? meta.previousClose :
-      typeof meta?.chartPreviousClose === "number" ? meta.chartPreviousClose :
-      typeof meta?.regularMarketPreviousClose === "number" ? meta.regularMarketPreviousClose :
-      (() => {
-        // 차트 closes 배열에서 전일 종가 추출 (마지막-1 인덱스)
-        const closes: number[] | undefined = result?.indicators?.quote?.[0]?.close;
-        if (closes && closes.length >= 2) {
-          const prev = closes[closes.length - 2];
-          return typeof prev === "number" ? prev : null;
-        }
-        return null;
-      })();
-
+    const quote = data?.quoteResponse?.result?.[0];
+    const rate = typeof quote?.regularMarketPrice === "number" ? quote.regularMarketPrice : null;
+    const previousClose = typeof quote?.regularMarketPreviousClose === "number" ? quote.regularMarketPreviousClose : null;
     return { rate, previousClose };
   } catch {
     return { rate: null, previousClose: null };
