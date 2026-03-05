@@ -26,7 +26,7 @@ export function Header() {
   const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
-    const SWIPE_THRESHOLD = 120;
+    const SWIPE_THRESHOLD = 100;
     const hrefs = NAV_LINKS.map((l) => l.href);
 
     function getMain() {
