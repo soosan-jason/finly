@@ -41,6 +41,11 @@ export function CryptoTable({ cryptos }: CryptoTableProps) {
                     <div>
                       <p className="font-medium text-white">{coin.name}</p>
                       <p className="text-xs text-gray-500 uppercase">{coin.symbol}</p>
+                      {coin.last_updated && (
+                        <p className="text-xs text-gray-600">
+                          {new Date(coin.last_updated).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </td>
