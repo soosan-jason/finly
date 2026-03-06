@@ -11,6 +11,7 @@ export interface CryptoAsset {
   low_24h: number;
   market_cap_rank: number;
   sparkline_in_7d?: { price: number[] };
+  last_updated?: string;
 }
 
 export interface StockIndex {
