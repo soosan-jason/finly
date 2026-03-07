@@ -7,25 +7,27 @@ import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useSwipeTab } from "@/hooks/useSwipeTab";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 
-const CATEGORIES = [
-  { value: "general", label: "전체" },
-  { value: "crypto",  label: "암호화폐" },
-  { value: "forex",   label: "외환" },
-] as const;
-
-type Category = (typeof CATEGORIES)[number]["value"];
+const CATEGORY_VALUES = ["general", "crypto", "forex"] as const;
+type Category = (typeof CATEGORY_VALUES)[number];
 
 const STORAGE_KEY = "news-category";
 
 export function NewsPageClient() {
   const { locale, timezone } = useDateFormat();
+  const t = useT();
+  const CATEGORIES = [
+    { value: "general" as Category, label: t("news.cat.all") },
+    { value: "crypto"  as Category, label: t("news.cat.crypto") },
+    { value: "forex"   as Category, label: t("news.cat.forex") },
+  ];
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category>(() => {
     if (typeof window === "undefined") return "general";
     const saved = localStorage.getItem(STORAGE_KEY) as Category | null;
-    return CATEGORIES.some((c) => c.value === saved) ? saved! : "general";
+    return CATEGORY_VALUES.some((v) => v === saved) ? saved! : "general";
   });
   const [lastUpdated, setLastUpdated] = useState("");
 
@@ -76,7 +78,7 @@ export function NewsPageClient() {
           ))}
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500">
-          {lastUpdated && <span>{lastUpdated} 기준</span>}
+          {lastUpdated && <span>{lastUpdated} {t("news.basedOn")}</span>}
           <button
             onClick={() => fetchNews()}
             className="rounded-lg p-1.5 hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
@@ -96,7 +98,7 @@ export function NewsPageClient() {
         </div>
       ) : articles.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-gray-800 bg-gray-900 py-16">
-          <p className="text-gray-400">뉴스를 불러올 수 없습니다</p>
+          <p className="text-gray-400">{t("news.error")}</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

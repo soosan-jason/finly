@@ -6,6 +6,7 @@ import { Trash2 } from "lucide-react";
 import { Holding } from "@/types/portfolio";
 import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
 import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
+import { useT } from "@/lib/i18n/useT";
 
 interface Props {
   holdings: Holding[];
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function HoldingsTable({ holdings, onDelete }: Props) {
+  const t = useT();
   const scrollRef = usePreventSwipeNav<HTMLDivElement>();
 
   function fmt(value: number, currency: string) {
@@ -24,13 +26,13 @@ export function HoldingsTable({ holdings, onDelete }: Props) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-800 text-left text-xs text-gray-500">
-            <th className="px-4 py-3 whitespace-nowrap">종목</th>
-            <th className="px-4 py-3 text-right whitespace-nowrap">보유 수량</th>
-            <th className="px-4 py-3 text-right whitespace-nowrap">평균 단가</th>
-            <th className="px-4 py-3 text-right whitespace-nowrap hidden sm:table-cell">현재가</th>
-            <th className="px-4 py-3 text-right whitespace-nowrap hidden md:table-cell">평가금액</th>
-            <th className="px-4 py-3 text-right whitespace-nowrap">손익</th>
-            <th className="px-4 py-3 text-right whitespace-nowrap">수익률</th>
+            <th className="px-4 py-3 whitespace-nowrap">{t("holdings.asset")}</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap">{t("holdings.quantity")}</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap">{t("holdings.avgPrice")}</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap hidden sm:table-cell">{t("holdings.currPrice")}</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap hidden md:table-cell">{t("holdings.value")}</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap">{t("holdings.pnl")}</th>
+            <th className="px-4 py-3 text-right whitespace-nowrap">{t("holdings.return")}</th>
             <th className="px-4 py-3"></th>
           </tr>
         </thead>

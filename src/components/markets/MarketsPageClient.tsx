@@ -8,27 +8,17 @@ import { CommoditiesSection } from "./CommoditiesSection";
 import { BondsSection } from "./BondsSection";
 import { TopStocksSection } from "./TopStocksSection";
 import { useSwipeTab } from "@/hooks/useSwipeTab";
+import { useT } from "@/lib/i18n/useT";
 
 const TABS = [
-  { id: "indices",     label: "지수" },
-  { id: "futures",     label: "선물" },
-  { id: "commodities", label: "원자재" },
-  { id: "bonds",       label: "채권" },
-  { id: "stocks",      label: "주식" },
+  { id: "indices",     labelKey: "markets.tab.indices" },
+  { id: "futures",     labelKey: "markets.tab.futures" },
+  { id: "commodities", labelKey: "markets.tab.commodities" },
+  { id: "bonds",       labelKey: "markets.tab.bonds" },
+  { id: "stocks",      labelKey: "markets.tab.stocks" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
-
-// JP/CN/EU 모두 "기타"로 묶기
-const REGION_GROUP: Record<StockIndex["region"], string> = {
-  KR: "한국",
-  US: "미국",
-  JP: "기타",
-  CN: "기타",
-  EU: "기타",
-};
-
-const GROUP_ORDER = ["한국", "미국", "기타"];
 
 const FALLBACK_INDICES: StockIndex[] = [
   { symbol: "^KS11",     name: "KOSPI",      price: 2523.55,  change: 12.34,   changePercent: 0.49,  currency: "KRW", region: "KR" },
@@ -43,6 +33,15 @@ const FALLBACK_INDICES: StockIndex[] = [
 ];
 
 export function MarketsPageClient() {
+  const t = useT();
+  const REGION_GROUP: Record<StockIndex["region"], string> = {
+    KR: t("region.KR"),
+    US: t("region.US"),
+    JP: t("region.other"),
+    CN: t("region.other"),
+    EU: t("region.other"),
+  };
+  const GROUP_ORDER = [t("region.KR"), t("region.US"), t("region.other")];
   const [tab, setTab] = useState<TabId>("indices");
   const [indices, setIndices] = useState<StockIndex[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,17 +94,17 @@ export function MarketsPageClient() {
     <div className="space-y-5">
       {/* 탭 바 */}
       <div className="flex gap-1 rounded-xl bg-gray-800/60 p-1" role="tablist">
-          {TABS.map((t) => (
+          {TABS.map((tabItem) => (
             <button
-              key={t.id}
-              onClick={() => handleTabChange(t.id)}
+              key={tabItem.id}
+              onClick={() => handleTabChange(tabItem.id)}
               className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition-colors ${
-                tab === t.id
+                tab === tabItem.id
                   ? "bg-gray-700 text-white shadow"
                   : "text-gray-400 hover:text-gray-200"
               }`}
             >
-              {t.label}
+              {t(tabItem.labelKey as Parameters<typeof t>[0])}
             </button>
           ))}
       </div>

@@ -3,6 +3,7 @@
 import { StockIndex } from "@/types/market";
 import { formatPercent, formatTime, formatMonthDay } from "@/lib/utils/format";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 
 const REGION_FLAG: Record<StockIndex["region"], string> = {
   US: "🇺🇸",
@@ -12,13 +13,7 @@ const REGION_FLAG: Record<StockIndex["region"], string> = {
   EU: "🇪🇺",
 };
 
-const REGION_LABEL: Record<StockIndex["region"], string> = {
-  US: "미국",
-  KR: "한국",
-  JP: "일본",
-  CN: "중국",
-  EU: "유럽",
-};
+
 
 interface IndexCardProps {
   index: StockIndex;
@@ -26,6 +21,7 @@ interface IndexCardProps {
 
 export function IndexCard({ index }: IndexCardProps) {
   const { showDate, locale, timezone } = useDateFormat();
+  const t = useT();
   const isUp = index.changePercent >= 0;
 
   return (
@@ -44,7 +40,7 @@ export function IndexCard({ index }: IndexCardProps) {
       {/* 헤더: 지역 + 등락률 뱃지 */}
       <div className="flex items-center justify-between">
         <span className="text-xs text-gray-500">
-          {REGION_FLAG[index.region]}&nbsp;{REGION_LABEL[index.region]}
+          {REGION_FLAG[index.region]}&nbsp;{t(`region.${index.region}` as Parameters<typeof t>[0])}
         </span>
         <span
           className={`rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums ${

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CryptoAsset } from "@/types/market";
 import { CryptoTable } from "./CryptoTable";
 import Link from "next/link";
+import { useT } from "@/lib/i18n/useT";
 
 const FALLBACK: CryptoAsset[] = [
   { id: "bitcoin", symbol: "btc", name: "Bitcoin", image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png", current_price: 67234.12, price_change_percentage_24h: 2.34, market_cap: 1324000000000, total_volume: 28900000000, high_24h: 68100, low_24h: 65800, market_cap_rank: 1 },
@@ -16,6 +17,7 @@ const FALLBACK: CryptoAsset[] = [
 interface CryptoSectionProps { limit?: number; }
 
 export function CryptoSection({ limit = 10 }: CryptoSectionProps) {
+  const t = useT();
   const [cryptos, setCryptos] = useState<CryptoAsset[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +42,7 @@ export function CryptoSection({ limit = 10 }: CryptoSectionProps) {
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">암호화폐 시세</h2>
+        <h2 className="text-lg font-semibold text-white">{t("crypto.title")}</h2>
         <Link href="/crypto" className="text-sm text-emerald-400 hover:underline">
           전체보기 →
         </Link>

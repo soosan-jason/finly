@@ -5,19 +5,14 @@ import Link from "next/link";
 import { X, Star } from "lucide-react";
 import { WatchlistItem, AssetType } from "@/types/portfolio";
 import { formatPercent } from "@/lib/utils/format";
+import { useT } from "@/lib/i18n/useT";
 
 interface Props {
   items: WatchlistItem[];
   onRemove: (symbol: string) => void;
 }
 
-const ASSET_LABELS: Record<AssetType, string> = {
-  crypto:    "코인",
-  stock:     "주식",
-  etf:       "ETF",
-  commodity: "원자재",
-  futures:   "선물",
-};
+
 
 function itemHref(item: WatchlistItem): string | null {
   if (item.asset_type === "crypto") return `/crypto/${item.symbol}`;
@@ -48,12 +43,20 @@ function fmtChange(change: number, currency = "USD"): string {
 }
 
 export function WatchlistSection({ items, onRemove }: Props) {
+  const t = useT();
+  const ASSET_LABELS: Record<AssetType, string> = {
+    crypto:    t("type.coin"),
+    stock:     t("type.stock"),
+    etf:       t("type.etf"),
+    commodity: t("type.commodity"),
+    futures:   t("type.futures"),
+  };
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-gray-800 bg-gray-900 py-16">
         <Star className="h-10 w-10 text-gray-600" />
-        <p className="mt-3 text-gray-400">관심 목록이 비어있습니다</p>
-        <p className="mt-1 text-xs text-gray-600">각 종목 상세 페이지의 ★ 버튼으로 추가하세요</p>
+        <p className="mt-3 text-gray-400">{t("watchlist.empty")}</p>
+        <p className="mt-1 text-xs text-gray-600">{t("watchlist.emptyHint")}</p>
       </div>
     );
   }
@@ -62,10 +65,10 @@ export function WatchlistSection({ items, onRemove }: Props) {
     <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-hidden">
       {/* 헤더 */}
       <div className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto_auto] items-center gap-x-4 px-4 py-2.5 border-b border-gray-800 text-xs font-medium text-gray-500">
-        <span>종목</span>
-        <span className="text-right hidden sm:block">현재가</span>
-        <span className="text-right hidden sm:block">등락값</span>
-        <span className="text-right">등락율</span>
+        <span>{t("holdings.asset")}</span>
+        <span className="text-right hidden sm:block">{t("holdings.currPrice")}</span>
+        <span className="text-right hidden sm:block">{t("watchlist.change")}</span>
+        <span className="text-right">{t("watchlist.changePct")}</span>
       </div>
 
       {/* 목록 */}

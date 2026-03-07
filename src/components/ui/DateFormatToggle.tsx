@@ -2,14 +2,16 @@
 
 import { Clock, CalendarDays } from "lucide-react";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 
 export function DateFormatToggle() {
   const { showDate, toggle } = useDateFormat();
+  const t = useT();
 
   return (
     <button
       onClick={toggle}
-      title={showDate ? "시간 형식으로 전환" : "날짜 형식으로 전환"}
+      title={showDate ? t("dateToggle.toTime") : t("dateToggle.toDate")}
       className="flex items-center rounded-full bg-gray-800 p-0.5"
     >
       <span

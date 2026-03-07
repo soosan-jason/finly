@@ -5,9 +5,11 @@ import { StockIndex } from "@/types/market";
 import { IndexCard } from "./IndexCard";
 import { RefreshCw } from "lucide-react";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 
 export function MarketOverview() {
   const { locale, timezone } = useDateFormat();
+  const t = useT();
   const [indices, setIndices] = useState<StockIndex[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>("");
@@ -44,9 +46,9 @@ export function MarketOverview() {
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">주요 지수</h2>
+        <h2 className="text-lg font-semibold text-white">{t("markets.keyIndices")}</h2>
         <div className="flex items-center gap-2 text-xs text-gray-500">
-          {lastUpdated && <span>업데이트: {lastUpdated}</span>}
+          {lastUpdated && <span>{t("markets.updatedAt")} {lastUpdated}</span>}
           <button
             onClick={fetchIndices}
             className="rounded-lg p-1.5 hover:bg-gray-800 transition-colors"

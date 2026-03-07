@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X, Search } from "lucide-react";
 import { HoldingFormData, AssetType } from "@/types/portfolio";
+import { useT } from "@/lib/i18n/useT";
 
 interface SearchResult {
   type: AssetType;
@@ -39,6 +40,7 @@ function loadSaved(): SavedForm | null {
 }
 
 export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
+  const t = useT();
   const saved = loadSaved();
   const [assetTab, setAssetTab] = useState<"stock" | "crypto">(saved?.assetTab ?? "stock");
   const [query, setQuery] = useState(saved?.query ?? "");
@@ -114,7 +116,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
     >
       <div className="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-900 p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold text-white">종목 추가</h2>
+          <h2 className="text-lg font-semibold text-white">{t("modal.addHolding")}</h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-gray-500 hover:text-white hover:bg-gray-800 transition-colors">
             <X className="h-4 w-4" />
           </button>
@@ -133,7 +135,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              {tab === "crypto" ? "코인" : "주식 / ETF"}
+              {tab === "crypto" ? t("modal.tab.coins") : t("modal.tab.stocks")}
             </button>
           ))}
         </div>
@@ -142,7 +144,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
           {/* 종목 검색 */}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-gray-400">
-              {assetTab === "crypto" ? "코인 선택" : "주식 / ETF 선택"}
+              {assetTab === "crypto" ? t("modal.selectCoin") : t("modal.selectStock")}
             </label>
             {selected ? (
               <div className="flex items-center justify-between rounded-xl border border-emerald-500/50 bg-gray-800 px-3 py-2.5">
@@ -168,7 +170,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder={assetTab === "crypto" ? "비트코인, 이더리움..." : "AAPL, TSLA, 005930.KS..."}
+                  placeholder={assetTab === "crypto" ? t("modal.coinPlaceholder") : t("modal.stockPlaceholder")}
                   className="w-full rounded-xl border border-gray-700 bg-gray-800 py-2.5 pl-9 pr-3 text-sm text-white placeholder-gray-500 outline-none focus:border-emerald-500 transition-colors"
                 />
                 {results.length > 0 && (
@@ -200,7 +202,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
 
           {/* 수량 */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-gray-400">보유 수량</label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-400">{t("modal.quantity")}</label>
             <input
               type="number"
               step="any"
@@ -216,7 +218,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
           {/* 평균 매수가 */}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-gray-400">
-              평균 매수가 ({holdingCurrency})
+              {t("modal.avgBuyPrice")} ({holdingCurrency})
             </label>
             <input
               type="number"
@@ -235,7 +237,7 @@ export function AddHoldingModal({ portfolioId, onClose, onAdded }: Props) {
             disabled={!selected || !quantity || !price || submitting}
             className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-medium text-white hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
           >
-            {submitting ? "추가 중..." : "포트폴리오에 추가"}
+            {submitting ? t("modal.adding") : t("modal.addToPortfolio")}
           </button>
         </form>
       </div>

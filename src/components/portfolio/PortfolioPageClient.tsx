@@ -9,6 +9,7 @@ import { AddHoldingModal } from "./AddHoldingModal";
 import { PortfolioChart, type CurrencyView } from "./PortfolioChart";
 import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
 import { Plus, Briefcase } from "lucide-react";
+import { useT } from "@/lib/i18n/useT";
 import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
 
 interface HeroCardProps {
@@ -22,20 +23,21 @@ interface HeroCardProps {
 }
 
 function SummaryHeroCard({ label, totalValue, totalCost, pnl, pnlPositive, pct, pctLabel }: HeroCardProps) {
+  const t = useT();
   const barWidth = Math.min(Math.abs(pct), 100);
   return (
     <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
       <p className="mb-2 text-xs font-medium text-gray-500">{label}</p>
       <p className="text-3xl font-bold tracking-tight text-white">{totalValue}</p>
       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        <span className="text-gray-500">투자 {totalCost}</span>
+        <span className="text-gray-500">{t("portfolio.investment")} {totalCost}</span>
         <span className={pnlPositive ? "font-medium text-emerald-400" : "font-medium text-red-400"}>
           {pnl}
         </span>
       </div>
       <div className="mt-3 space-y-1.5">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-500">수익률</span>
+          <span className="text-gray-500">{t("portfolio.returnRate")}</span>
           <span className={`font-semibold ${pnlPositive ? "text-emerald-400" : "text-red-400"}`}>
             {pctLabel}
           </span>
@@ -52,6 +54,7 @@ function SummaryHeroCard({ label, totalValue, totalCost, pnl, pnlPositive, pct, 
 }
 
 export function PortfolioPageClient() {
+  const t = useT();
   const { user, loading: authLoading } = useUser();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [holdings, setHoldings] = useState<Holding[]>([]);
@@ -330,7 +333,7 @@ export function PortfolioPageClient() {
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between">
         <div className="min-w-0">
-          <h1 className="truncate text-2xl font-bold text-white">포트폴리오</h1>
+          <h1 className="truncate text-2xl font-bold text-white">{t("portfolio.title")}</h1>
           {portfolio && <p className="mt-0.5 truncate text-sm text-gray-400">{portfolio.name}</p>}
         </div>
         <button
@@ -338,7 +341,7 @@ export function PortfolioPageClient() {
           className="hidden md:flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-400 transition-colors"
         >
           <Plus className="h-4 w-4" />
-          종목 추가
+          {t("portfolio.addHolding")}
         </button>
       </div>
 
@@ -347,7 +350,7 @@ export function PortfolioPageClient() {
         <div className="space-y-3">
           {hasKrw && (
             <SummaryHeroCard
-              label="원화 자산 (KRW)"
+              label={t("portfolio.krwAssets")}
               totalValue={formatKRW(krw.totalValue)}
               totalCost={formatKRW(krw.totalCost)}
               pnl={`${krw.totalPnl >= 0 ? "+" : ""}${formatKRW(krw.totalPnl)}`}
@@ -358,7 +361,7 @@ export function PortfolioPageClient() {
           )}
           {hasUsd && (
             <SummaryHeroCard
-              label="달러 자산 (USD)"
+              label={t("portfolio.usdAssets")}
               totalValue={formatPrice(usd.totalValue)}
               totalCost={formatPrice(usd.totalCost)}
               pnl={`${usd.totalPnl >= 0 ? "+" : ""}${formatPrice(usd.totalPnl)}`}
@@ -374,7 +377,7 @@ export function PortfolioPageClient() {
       {holdings.length > 0 && portfolio && (
         <div ref={chartScrollRef} className="rounded-2xl border border-gray-800 bg-gray-900 p-4 overflow-x-auto" style={{ touchAction: "pan-x pan-y", overscrollBehaviorX: "none" }}>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-gray-400">자산 추이</h2>
+            <h2 className="text-sm font-medium text-gray-400">{t("portfolio.assetTrend")}</h2>
             {hasKrw && hasUsd && (
               <div className="flex gap-1 rounded-lg bg-gray-800 p-0.5">
                 {(
@@ -417,7 +420,7 @@ export function PortfolioPageClient() {
                 : "border-transparent text-gray-400 hover:text-white"
             }`}
           >
-            {tab === "holdings" ? `보유 종목 (${holdings.length})` : `관심 목록 (${watchlist.length})`}
+            {tab === "holdings" ? `${t("portfolio.tab.holdings")} (${holdings.length})` : `${t("portfolio.tab.watchlist")} (${watchlist.length})`}
           </button>
         ))}
       </div>
@@ -426,12 +429,12 @@ export function PortfolioPageClient() {
         holdings.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-gray-800 bg-gray-900 py-16">
             <Briefcase className="h-10 w-10 text-gray-600" />
-            <p className="mt-3 text-gray-400">보유 종목이 없습니다</p>
+            <p className="mt-3 text-gray-400">{t("portfolio.noHoldings")}</p>
             <button
               onClick={() => setShowAddModal(true)}
               className="mt-4 rounded-lg bg-emerald-500/10 px-4 py-2 text-sm text-emerald-400 hover:bg-emerald-500/20 transition-colors"
             >
-              첫 종목 추가하기
+              {t("portfolio.addFirst")}
             </button>
           </div>
         ) : (
@@ -474,7 +477,7 @@ export function PortfolioPageClient() {
       <button
         onClick={() => setShowAddModal(true)}
         className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-400 transition-colors md:hidden"
-        aria-label="종목 추가"
+        aria-label={t("portfolio.addHolding")}
       >
         <Plus className="h-6 w-6" />
       </button>

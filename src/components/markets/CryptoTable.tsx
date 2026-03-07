@@ -5,6 +5,7 @@ import { CryptoAsset } from "@/types/market";
 import { formatPrice, formatMarketCap, formatPercent } from "@/lib/utils/format";
 import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 
 interface CryptoTableProps {
   cryptos: CryptoAsset[];
@@ -12,6 +13,7 @@ interface CryptoTableProps {
 
 export function CryptoTable({ cryptos }: CryptoTableProps) {
   const { locale, timezone } = useDateFormat();
+  const t = useT();
   const scrollRef = usePreventSwipeNav<HTMLDivElement>();
 
   return (
@@ -20,11 +22,11 @@ export function CryptoTable({ cryptos }: CryptoTableProps) {
         <thead>
           <tr className="border-b border-gray-800 text-left text-xs text-gray-500">
             <th className="pb-3 pr-4">#</th>
-            <th className="pb-3 pr-4">이름</th>
-            <th className="pb-3 pr-4 text-right">가격</th>
+            <th className="pb-3 pr-4">{t("crypto.name")}</th>
+            <th className="pb-3 pr-4 text-right">{t("crypto.price")}</th>
             <th className="pb-3 pr-4 text-right">24h %</th>
-            <th className="pb-3 pr-4 text-right hidden md:table-cell">시가총액</th>
-            <th className="pb-3 text-right hidden lg:table-cell">거래량 (24h)</th>
+            <th className="pb-3 pr-4 text-right hidden md:table-cell">{t("crypto.mcap")}</th>
+            <th className="pb-3 text-right hidden lg:table-cell">{t("crypto.volume")}</th>
           </tr>
         </thead>
         <tbody>

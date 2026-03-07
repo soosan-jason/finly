@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { FxRate } from "@/app/api/fx/route";
 import { formatTimeWithSec, formatMonthDay } from "@/lib/utils/format";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 
 const FLAG: Record<string, string> = {
   USD: "🇺🇸", KRW: "🇰🇷", JPY: "🇯🇵", EUR: "🇪🇺", CNY: "🇨🇳",
@@ -20,6 +21,7 @@ function formatRate(rate: number, to: string) {
 
 export function FxWidget() {
   const { showDate, locale, timezone } = useDateFormat();
+  const t = useT();
   const [rates, setRates] = useState<FxRate[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +41,7 @@ export function FxWidget() {
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold text-white">환율</h2>
+      <h2 className="mb-3 text-lg font-semibold text-white">{t("fx.title")}</h2>
       <div className="rounded-xl border border-gray-800 bg-gray-900 divide-y divide-gray-800">
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
@@ -78,7 +80,7 @@ export function FxWidget() {
                         {sign}{formatRate(r.change, r.to)} ({sign}{r.changePct.toFixed(2)}%)
                       </p>
                     ) : (
-                      <p className="text-xs text-gray-600">전일비 없음</p>
+                      <p className="text-xs text-gray-600">{t("fx.noChange")}</p>
                     )}
                   </div>
                 </div>

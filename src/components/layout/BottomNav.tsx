@@ -4,17 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, BarChart2, Bitcoin, Briefcase, Newspaper } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-
-const NAV = [
-  { href: "/",          label: "대시보드", Icon: LayoutDashboard },
-  { href: "/markets",   label: "시장",     Icon: BarChart2 },
-  { href: "/crypto",    label: "암호화폐", Icon: Bitcoin },
-  { href: "/portfolio", label: "포트폴리오", Icon: Briefcase },
-  { href: "/news",      label: "뉴스",     Icon: Newspaper },
-];
+import { useT } from "@/lib/i18n/useT";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const t = useT();
+
+  const NAV = [
+    { href: "/",          label: t("nav.dashboard"), Icon: LayoutDashboard },
+    { href: "/markets",   label: t("nav.markets"),   Icon: BarChart2 },
+    { href: "/crypto",    label: t("nav.crypto"),    Icon: Bitcoin },
+    { href: "/portfolio", label: t("nav.portfolio"), Icon: Briefcase },
+    { href: "/news",      label: t("nav.news"),      Icon: Newspaper },
+  ];
 
   return (
     <nav

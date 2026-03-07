@@ -7,17 +7,19 @@ import { TrendingUp, LogOut, User, Search, X, Settings } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { useUser } from "@/hooks/useUser";
-
-const NAV_LINKS = [
-  { href: "/",          label: "대시보드" },
-  { href: "/markets",   label: "시장" },
-  { href: "/crypto",    label: "암호화폐" },
-  { href: "/portfolio", label: "포트폴리오" },
-  { href: "/news",      label: "뉴스" },
-];
+import { useT } from "@/lib/i18n/useT";
 
 export function Header() {
   const pathname = usePathname();
+  const t = useT();
+
+  const NAV_LINKS = [
+    { href: "/",          label: t("nav.dashboard") },
+    { href: "/markets",   label: t("nav.markets") },
+    { href: "/crypto",    label: t("nav.crypto") },
+    { href: "/portfolio", label: t("nav.portfolio") },
+    { href: "/news",      label: t("nav.news") },
+  ];
   const router = useRouter();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -147,7 +149,7 @@ export function Header() {
         <button
           className="md:hidden ml-auto p-2 text-gray-400 hover:text-white transition-colors"
           onClick={() => setSearchOpen(true)}
-          aria-label="검색"
+          aria-label={t("header.search")}
         >
           <Search className="h-5 w-5" />
         </button>
@@ -182,14 +184,14 @@ export function Header() {
                     className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
                   >
                     <Settings className="h-4 w-4" />
-                    설정
+                    {t("header.settings")}
                   </Link>
                   <button
                     onClick={handleSignOut}
                     className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
-                    로그아웃
+                    {t("header.logout")}
                   </button>
                 </div>
               )}
@@ -199,7 +201,7 @@ export function Header() {
               href="/auth/login"
               className="hidden rounded-lg bg-emerald-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-400 transition-colors md:block"
             >
-              로그인
+              {t("header.login")}
             </Link>
           )
         )}
@@ -230,14 +232,14 @@ export function Header() {
                     className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
                   >
                     <Settings className="h-4 w-4" />
-                    설정
+                    {t("header.settings")}
                   </Link>
                   <button
                     onClick={handleSignOut}
                     className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
-                    로그아웃
+                    {t("header.logout")}
                   </button>
                 </div>
               )}
@@ -247,7 +249,7 @@ export function Header() {
               href="/auth/login"
               className="md:hidden rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-400 transition-colors"
             >
-              로그인
+              {t("header.login")}
             </Link>
           )
         )}
