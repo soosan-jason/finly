@@ -42,10 +42,16 @@ function formatMarketCap(cap: number, currency: string): string {
   return `$${(cap / 1e9).toFixed(0)}B`;
 }
 
+const STORAGE_KEY = "stocks-tab";
+
 export function StocksTabs() {
   const [stocks, setStocks] = useState<TopStock[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Country>("US");
+  const [activeTab, setActiveTab] = useState<Country>(() => {
+    if (typeof window === "undefined") return "US";
+    const saved = localStorage.getItem(STORAGE_KEY) as Country | null;
+    return TABS.some((t) => t.key === saved) ? saved! : "US";
+  });
 
   useEffect(() => {
     async function fetch_() {
@@ -63,11 +69,16 @@ export function StocksTabs() {
 
   const group = stocks.filter((s) => s.country === activeTab);
 
+  function changeTab(country: Country) {
+    setActiveTab(country);
+    localStorage.setItem(STORAGE_KEY, country);
+  }
+
   const tabIndex = TABS.findIndex((t) => t.key === activeTab);
   const { containerRef, onTouchStart, onTouchEnd } = useSwipeTab({
     count: TABS.length,
     current: tabIndex,
-    onChange: (i) => setActiveTab(TABS[i].key),
+    onChange: (i) => changeTab(TABS[i].key),
   });
 
   return (
@@ -84,7 +95,7 @@ export function StocksTabs() {
         {TABS.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => changeTab(tab.key)}
             className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition-colors ${
               activeTab === tab.key
                 ? "bg-gray-700 text-white"
