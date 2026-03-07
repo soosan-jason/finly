@@ -5,6 +5,7 @@ import { NewsArticle } from "@/app/api/news/route";
 import { NewsCard } from "./NewsCard";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { useSwipeTab } from "@/hooks/useSwipeTab";
 
 const CATEGORIES = [
   { value: "general", label: "전체" },
@@ -14,10 +15,16 @@ const CATEGORIES = [
 
 type Category = (typeof CATEGORIES)[number]["value"];
 
+const STORAGE_KEY = "news-category";
+
 export function NewsPageClient() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState<Category>("general");
+  const [category, setCategory] = useState<Category>(() => {
+    if (typeof window === "undefined") return "general";
+    const saved = localStorage.getItem(STORAGE_KEY) as Category | null;
+    return CATEGORIES.some((c) => c.value === saved) ? saved! : "general";
+  });
   const [lastUpdated, setLastUpdated] = useState("");
 
   async function fetchNews(cat = category) {
@@ -34,6 +41,18 @@ export function NewsPageClient() {
 
   useEffect(() => { fetchNews(category); }, [category]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  function changeCategory(cat: Category) {
+    setCategory(cat);
+    localStorage.setItem(STORAGE_KEY, cat);
+  }
+
+  const tabIndex = CATEGORIES.findIndex((c) => c.value === category);
+  const { containerRef, onTouchStart, onTouchEnd } = useSwipeTab({
+    count: CATEGORIES.length,
+    current: tabIndex,
+    onChange: (i) => changeCategory(CATEGORIES[i].value),
+  });
+
   return (
     <div className="space-y-4">
       {/* Toolbar */}
@@ -42,7 +61,7 @@ export function NewsPageClient() {
           {CATEGORIES.map((c) => (
             <button
               key={c.value}
-              onClick={() => setCategory(c.value)}
+              onClick={() => changeCategory(c.value)}
               className={cn(
                 "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
                 category === c.value
@@ -65,7 +84,8 @@ export function NewsPageClient() {
         </div>
       </div>
 
-      {/* News Grid */}
+      {/* News Grid — 좌우 스와이프로 카테고리 전환 */}
+      <div ref={containerRef} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -83,6 +103,7 @@ export function NewsPageClient() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
