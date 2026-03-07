@@ -34,8 +34,8 @@ interface PortfolioChartProps {
   className?: string;
 }
 
-const fmtKrw  = (v: number) => `₩${Math.round(v).toLocaleString("ko-KR")}`;
-const fmtUsd  = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
+const fmtKrw  = (v: number) => Math.round(v).toLocaleString("ko-KR");
+const fmtUsd  = (v: number) => Math.round(v).toLocaleString("en-US");
 
 const fmtPct  = (cost: number, pl: number) =>
   cost === 0 ? "—" : `${pl >= 0 ? "+" : ""}${((pl / cost) * 100).toFixed(2)}%`;
