@@ -41,12 +41,9 @@ async function getStockDetail(symbol: string): Promise<StockDetail | null> {
 
 function formatStockPrice(value: number | null, currency: string): string {
   if (value == null) return "-";
-  const isKRW = currency === "KRW";
-  return new Intl.NumberFormat(isKRW ? "ko-KR" : "en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: isKRW ? 0 : value < 1 ? 6 : 2,
-  }).format(value);
+  if (currency === "KRW") return new Intl.NumberFormat("ko-KR", { style: "decimal", maximumFractionDigits: 0 }).format(value);
+  if (currency === "JPY") return new Intl.NumberFormat("ja-JP", { style: "decimal", maximumFractionDigits: 0 }).format(value);
+  return new Intl.NumberFormat("en-US", { style: "decimal", minimumFractionDigits: 2, maximumFractionDigits: value < 1 ? 6 : 2 }).format(value);
 }
 
 function formatVolume(value: number | null): string {
@@ -97,8 +94,8 @@ export default async function StockDetailPage({
       label: "시가총액",
       value: stock.market_cap
         ? stock.currency === "KRW"
-          ? `₩${(stock.market_cap / 1_000_000_000_000).toLocaleString("ko-KR", { maximumFractionDigits: 2 })}조`
-          : `$${(stock.market_cap / 1_000_000_000).toLocaleString("en-US", { maximumFractionDigits: 2 })}B`
+          ? `${(stock.market_cap / 1_000_000_000_000).toLocaleString("ko-KR", { maximumFractionDigits: 2 })}조`
+          : `${(stock.market_cap / 1_000_000_000).toLocaleString("en-US", { maximumFractionDigits: 2 })}B`
         : "-",
     },
   ];
@@ -160,9 +157,12 @@ export default async function StockDetailPage({
             : "border-red-500/20 bg-red-500/5"
         }`}
       >
-        <p className="text-4xl font-bold tracking-tight text-white">
-          {p(stock.price)}
-        </p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-4xl font-bold tracking-tight text-white">
+            {p(stock.price)}
+          </p>
+          <span className="text-sm font-medium text-gray-400">{stock.currency}</span>
+        </div>
         <div className="mt-3 flex items-center gap-2">
           {isUp ? (
             <TrendingUp className="h-4 w-4 text-emerald-400" />

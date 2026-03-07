@@ -127,9 +127,12 @@ export default async function CryptoDetailPage({
             : "border-red-500/20 bg-red-500/5"
         }`}
       >
-        <p className="text-4xl font-bold tracking-tight text-white">
-          {formatPrice(price)}
-        </p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-4xl font-bold tracking-tight text-white">
+            {formatPrice(price)}
+          </p>
+          <span className="text-sm font-medium text-gray-400">USD</span>
+        </div>
         <div className="mt-3 flex items-center gap-2 flex-wrap">
           <Badge variant={isUp ? "up" : "down"} className="rounded-full px-3 py-1">
             {formatPercent(change24h)} 24h

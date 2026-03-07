@@ -17,8 +17,8 @@ const TABS: { key: Country; label: string; flag: string }[] = [
 
 function formatStockPrice(price: number, currency: string): string {
   if (currency === "KRW") return price.toLocaleString("ko-KR") + "원";
-  if (currency === "JPY") return "¥" + price.toLocaleString("ja-JP", { maximumFractionDigits: 0 });
-  return "$" + price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (currency === "JPY") return price.toLocaleString("ja-JP", { maximumFractionDigits: 0 });
+  return price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function formatChange(change: number, currency: string): string {
@@ -35,8 +35,8 @@ function formatMarketCap(cap: number, currency: string): string {
     return jo >= 1 ? `${Math.round(jo).toLocaleString("ko-KR")}조` : `${Math.round(cap / 1e8).toLocaleString("ko-KR")}억`;
   }
   if (currency === "JPY") return `${(cap / 1e12).toLocaleString("ja-JP", { maximumFractionDigits: 1 })}兆`;
-  if (cap >= 1e12) return `$${(cap / 1e12).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}T`;
-  return `$${Math.round(cap / 1e9).toLocaleString("en-US")}B`;
+  if (cap >= 1e12) return `${(cap / 1e12).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}T`;
+  return `${Math.round(cap / 1e9).toLocaleString("en-US")}B`;
 }
 
 const STORAGE_KEY = "stocks-tab";
