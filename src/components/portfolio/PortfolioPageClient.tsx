@@ -58,7 +58,11 @@ export function PortfolioPageClient() {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<"holdings" | "watchlist">("holdings");
+  const [activeTab, setActiveTab] = useState<"holdings" | "watchlist">(() => {
+    if (typeof window === "undefined") return "holdings";
+    const saved = localStorage.getItem("portfolio_active_tab");
+    return saved === "watchlist" ? "watchlist" : "holdings";
+  });
   const [chartView, setChartView] = useState<CurrencyView>(() => {
     if (typeof window === "undefined") return "KRW";
     return (localStorage.getItem("portfolio_chart_view") as CurrencyView) ?? "KRW";
@@ -389,7 +393,7 @@ export function PortfolioPageClient() {
         {(["holdings", "watchlist"] as const).map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => { setActiveTab(tab); localStorage.setItem("portfolio_active_tab", tab); }}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
               activeTab === tab
                 ? "border-emerald-500 text-white"
