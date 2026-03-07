@@ -4,6 +4,7 @@ import { ArrowLeft, TrendingDown, TrendingUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatPercent } from "@/lib/utils/format";
+import { WatchlistToggle } from "@/components/portfolio/WatchlistToggle";
 
 import type { Metadata } from "next";
 
@@ -147,6 +148,11 @@ export default async function StockDetailPage({
               {p(stock.change)} ({formatPercent(stock.change_percent)})
             </Badge>
           </div>
+          <WatchlistToggle
+            symbol={stock.symbol}
+            name={stock.name}
+            assetType="stock"
+          />
         </div>
       </div>
 
