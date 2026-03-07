@@ -71,5 +71,6 @@ export interface TopStock {
   change: number;
   changePct: number;
   currency: string;
+  marketCap?: number;
   lastUpdated?: string;
 }

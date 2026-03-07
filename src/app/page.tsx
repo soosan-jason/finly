@@ -1,7 +1,6 @@
 import { MarketOverview } from "@/components/markets/MarketOverview";
 import { CryptoSection } from "@/components/markets/CryptoSection";
 import { FxWidget } from "@/components/markets/FxWidget";
-import { PortfolioMiniCard } from "@/components/portfolio/PortfolioMiniCard";
 import { FuturesCommoditiesSummary } from "@/components/markets/FuturesCommoditiesSummary";
 import { StocksTabs } from "@/components/markets/StocksTabs";
 
@@ -15,9 +14,6 @@ export default function HomePage() {
           실시간 주식·ETF·암호화폐 시장 현황을 한 눈에 확인하세요.
         </p>
       </div>
-
-      {/* 포트폴리오 미니 카드 (로그인 시만 표시) */}
-      <PortfolioMiniCard />
 
       {/* 주요 지수 */}
       <MarketOverview />

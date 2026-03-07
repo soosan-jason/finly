@@ -28,6 +28,16 @@ function formatStockPrice(price: number, currency: string): string {
   return "$" + price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function formatMarketCap(cap: number, currency: string): string {
+  if (currency === "KRW") {
+    const jo = cap / 1e12;
+    return jo >= 1 ? `${jo.toFixed(0)}조` : `${(cap / 1e8).toFixed(0)}억`;
+  }
+  if (currency === "JPY") return `${(cap / 1e12).toFixed(1)}兆`;
+  if (cap >= 1e12) return `$${(cap / 1e12).toFixed(2)}T`;
+  return `$${(cap / 1e9).toFixed(0)}B`;
+}
+
 export function TopStocksSection() {
   const [stocks, setStocks] = useState<TopStock[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +101,11 @@ export function TopStocksSection() {
                       <p className={`mt-0.5 text-xs font-medium ${up ? "text-emerald-400" : "text-red-400"}`}>
                         {formatPercent(stock.changePct)}
                       </p>
+                      {stock.marketCap != null && (
+                        <p className="mt-0.5 text-xs text-gray-500 tabular-nums">
+                          {formatMarketCap(stock.marketCap, stock.currency)}
+                        </p>
+                      )}
                       {fmtTime(stock.lastUpdated) && (
                         <p className="mt-1 text-xs text-gray-600">{fmtTime(stock.lastUpdated)}</p>
                       )}
