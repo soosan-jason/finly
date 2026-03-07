@@ -87,14 +87,14 @@ export async function GET() {
 }
 
 const FALLBACK_DATA: StockIndex[] = [
-  { symbol: "^KS11",     name: "KOSPI",      price: 2523.55,  change: 12.34,   changePercent: 0.49,  currency: "KRW", region: "KR" },
-  { symbol: "^KQ11",     name: "KOSDAQ",     price: 742.18,   change: -3.21,   changePercent: -0.43, currency: "KRW", region: "KR" },
-  { symbol: "^GSPC",     name: "S&P 500",      price: 5304.72,  change: 28.01,   changePercent: 0.53,  currency: "USD", region: "US" },
-  { symbol: "^IXIC",     name: "NASDAQ",       price: 16742.39, change: -42.77,  changePercent: -0.25, currency: "USD", region: "US" },
-  { symbol: "^DJI",      name: "DOW JONES",    price: 39107.54, change: 134.21,  changePercent: 0.34,  currency: "USD", region: "US" },
-  { symbol: "^RUT",      name: "RUSSELL 2000", price: 2080.50,  change: 5.50,    changePercent: 0.26,  currency: "USD", region: "US" },
-  { symbol: "^N225",     name: "NIKKEI 225", price: 38236.07, change: -201.37, changePercent: -0.52, currency: "JPY", region: "JP" },
-  { symbol: "^HSI",      name: "항셍",       price: 23000.00, change: 120.50,  changePercent: 0.53,  currency: "HKD", region: "CN" },
-  { symbol: "000001.SS", name: "상해종합",   price: 3300.00,  change: -8.40,   changePercent: -0.25, currency: "CNY", region: "CN" },
-  { symbol: "399001.SZ", name: "심천성분",   price: 10500.00, change: 45.20,   changePercent: 0.43,  currency: "CNY", region: "CN" },
+  { symbol: "^KS11",     name: "KOSPI",      price: 5450,     change: -113.10, changePercent: -2.03, currency: "KRW", region: "KR" },
+  { symbol: "^KQ11",     name: "KOSDAQ",     price: 1094,     change: -22.10,  changePercent: -1.98, currency: "KRW", region: "KR" },
+  { symbol: "^GSPC",     name: "S&P 500",    price: 6840.32,  change: -29.18,  changePercent: -0.43, currency: "USD", region: "US" },
+  { symbol: "^IXIC",     name: "NASDAQ",     price: 22515.20, change: -292.28, changePercent: -1.28, currency: "USD", region: "US" },
+  { symbol: "^DJI",      name: "DOW JONES",  price: 48563.23, change: -176.18, changePercent: -0.36, currency: "USD", region: "US" },
+  { symbol: "^RUT",      name: "RUSSELL 2000", price: 2544.35, change: -4.03,  changePercent: -0.16, currency: "USD", region: "US" },
+  { symbol: "^N225",     name: "NIKKEI 225", price: 55620.84, change: 342.78,  changePercent: 0.62,  currency: "JPY", region: "JP" },
+  { symbol: "^HSI",      name: "항셍",       price: 26796.76, change: 449.52,  changePercent: 1.71,  currency: "HKD", region: "CN" },
+  { symbol: "000001.SS", name: "상해종합",   price: 4124.27,  change: 16.40,   changePercent: 0.40,  currency: "CNY", region: "CN" },
+  { symbol: "399001.SZ", name: "심천성분",   price: 14173.44, change: 83.10,   changePercent: 0.59,  currency: "CNY", region: "CN" },
 ];

@@ -70,8 +70,8 @@ export async function GET() {
 }
 
 const FALLBACK_DATA: FuturesItem[] = [
-  { symbol: "ES=F",  name: "S&P 500 선물",  price: 5320.25,  change: 15.50,  changePct: 0.29 },
-  { symbol: "NQ=F",  name: "NASDAQ 선물",  price: 18750.00, change: -25.00, changePct: -0.13 },
-  { symbol: "YM=F",  name: "DOW 선물",     price: 39250.00, change: 80.00,  changePct: 0.20 },
-  { symbol: "^VIX",  name: "VIX 공포지수", price: 14.25,    change: -0.35,  changePct: -2.40 },
+  { symbol: "ES=F",  name: "S&P 500 선물",  price: 6945.75,  change: 2.08,   changePct: 0.03 },
+  { symbol: "NQ=F",  name: "NASDAQ 선물",   price: 25626.25, change: 48.69,  changePct: 0.19 },
+  { symbol: "YM=F",  name: "DOW 선물",      price: 49174.00, change: -54.09, changePct: -0.11 },
+  { symbol: "^VIX",  name: "VIX 공포지수",  price: 15.06,    change: 0.16,   changePct: 1.07 },
 ];

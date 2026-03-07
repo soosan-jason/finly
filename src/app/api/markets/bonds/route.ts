@@ -173,14 +173,14 @@ export async function GET() {
 }
 
 const FALLBACK_DATA: BondYield[] = [
-  { symbol: "^IRX",       label: "3개월",       maturityMonths: 3,   yield: 4.35, change: 0.01,  country: "US" },
-  { symbol: "^FVX",       label: "5년",          maturityMonths: 60,  yield: 4.25, change: -0.02, country: "US" },
-  { symbol: "^TNX",       label: "10년",         maturityMonths: 120, yield: 4.45, change: -0.01, country: "US" },
-  { symbol: "^TYX",       label: "30년",         maturityMonths: 360, yield: 4.60, change: 0.00,  country: "US" },
-  { symbol: "KR5YT=RR",  label: "한국 5년",    maturityMonths: 60,  yield: 3.15, change: -0.01, country: "KR" },
-  { symbol: "KR10YT=RR", label: "한국 10년",   maturityMonths: 120, yield: 3.35, change: -0.02, country: "KR" },
-  { symbol: "JP10YT=RR", label: "일본 10년",   maturityMonths: 120, yield: 1.50, change: 0.02,  country: "JP" },
-  { symbol: "GB10YT=RR", label: "영국 10년",   maturityMonths: 120, yield: 4.55, change: 0.01,  country: "GB" },
-  { symbol: "FR10YT=RR", label: "프랑스 10년", maturityMonths: 120, yield: 3.30, change: -0.01, country: "FR" },
-  { symbol: "DE10YT=RR", label: "독일 10년",   maturityMonths: 120, yield: 2.65, change: 0.00,  country: "DE" },
+  { symbol: "^IRX",       label: "3개월",       maturityMonths: 3,   yield: 4.20, change: -0.02, changePct: -0.47, country: "US" },
+  { symbol: "^FVX",       label: "5년",         maturityMonths: 60,  yield: 3.70, change: -0.01, changePct: -0.27, country: "US" },
+  { symbol: "^TNX",       label: "10년",        maturityMonths: 120, yield: 4.12, change: 0.03,  changePct: 0.73,  country: "US" },
+  { symbol: "^TYX",       label: "30년",        maturityMonths: 360, yield: 4.75, change: 0.02,  changePct: 0.42,  country: "US" },
+  { symbol: "KR5YT=RR",  label: "한국 5년",    maturityMonths: 60,  yield: 3.30, change: 0.02,  changePct: 0.61,  country: "KR" },
+  { symbol: "KR10YT=RR", label: "한국 10년",   maturityMonths: 120, yield: 3.65, change: 0.03,  changePct: 0.83,  country: "KR" },
+  { symbol: "JP10YT=RR", label: "일본 10년",   maturityMonths: 120, yield: 2.15, change: 0.04,  changePct: 1.90,  country: "JP" },
+  { symbol: "GB10YT=RR", label: "영국 10년",   maturityMonths: 120, yield: 4.60, change: 0.05,  changePct: 1.10,  country: "GB" },
+  { symbol: "FR10YT=RR", label: "프랑스 10년", maturityMonths: 120, yield: 3.46, change: 0.03,  changePct: 0.87,  country: "FR" },
+  { symbol: "DE10YT=RR", label: "독일 10년",   maturityMonths: 120, yield: 2.78, change: 0.03,  changePct: 1.09,  country: "DE" },
 ];

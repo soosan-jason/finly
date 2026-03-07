@@ -73,12 +73,12 @@ export async function GET() {
 }
 
 const FALLBACK_DATA: CommodityItem[] = [
-  { symbol: "GC=F",  name: "금",           category: "귀금속", price: 2345.60, change: 12.30,  changePct: 0.53,  unit: "USD/oz" },
-  { symbol: "SI=F",  name: "은",           category: "귀금속", price: 27.85,   change: 0.22,   changePct: 0.80,  unit: "USD/oz" },
-  { symbol: "HG=F",  name: "구리",         category: "귀금속", price: 4.15,    change: -0.03,  changePct: -0.72, unit: "USD/lb" },
-  { symbol: "PL=F",  name: "백금",         category: "귀금속", price: 982.00,  change: 3.50,   changePct: 0.36,  unit: "USD/oz" },
-  { symbol: "CL=F",  name: "WTI 원유",     category: "에너지", price: 78.45,   change: -0.95,  changePct: -1.20, unit: "USD/bbl" },
-  { symbol: "BZ=F",  name: "브렌트 원유",  category: "에너지", price: 82.30,   change: -0.75,  changePct: -0.90, unit: "USD/bbl" },
-  { symbol: "NG=F",  name: "천연가스",     category: "에너지", price: 1.82,    change: 0.04,   changePct: 2.25,  unit: "USD/MMBtu" },
-  { symbol: "HO=F",  name: "난방유",      category: "에너지", price: 2.65,    change: -0.03,  changePct: -1.12, unit: "USD/gal" },
+  { symbol: "GC=F",  name: "금",          category: "귀금속", price: 4471.00, change: 19.68,  changePct: 0.44,  unit: "USD/oz" },
+  { symbol: "SI=F",  name: "은",          category: "귀금속", price: 83.48,   change: 0.70,   changePct: 0.84,  unit: "USD/oz" },
+  { symbol: "HG=F",  name: "구리",        category: "귀금속", price: 5.84,    change: 0.04,   changePct: 0.69,  unit: "USD/lb" },
+  { symbol: "PL=F",  name: "백금",        category: "귀금속", price: 2135.51, change: -17.99, changePct: -0.83, unit: "USD/oz" },
+  { symbol: "CL=F",  name: "WTI 원유",    category: "에너지", price: 81.01,   change: 6.35,   changePct: 8.50,  unit: "USD/bbl" },
+  { symbol: "BZ=F",  name: "브렌트 원유", category: "에너지", price: 84.01,   change: 5.28,   changePct: 6.70,  unit: "USD/bbl" },
+  { symbol: "NG=F",  name: "천연가스",    category: "에너지", price: 2.83,    change: 0.05,   changePct: 1.80,  unit: "USD/MMBtu" },
+  { symbol: "HO=F",  name: "난방유",      category: "에너지", price: 3.52,    change: 0.22,   changePct: 6.67,  unit: "USD/gal" },
 ];
