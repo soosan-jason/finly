@@ -3,6 +3,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
+  "crons": [
+    {
+      "path": "/api/admin/search-index",
+      "schedule": "0 2 * * *"
+    }
+  ],
 "headers": [
     {
       "source": "/api/(.*)",

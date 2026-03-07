@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { searchCoins } from "@/lib/api/coingecko";
 import { searchKoreanDict, isKorean } from "@/lib/search/korean-names";
 
@@ -18,9 +19,41 @@ async function searchStocksYahoo(query: string) {
       id: q.symbol,
       symbol: q.symbol,
       name: q.shortname || q.longname || q.symbol,
+      nameKo: undefined as string | undefined,
       image: null as null,
       market_cap_rank: null as null,
     }));
+}
+
+/** Supabase search_index 테이블 검색 (DB 색인이 구축된 경우 사용) */
+async function searchFromDB(q: string) {
+  try {
+    const supabase = await createClient();
+    const escaped = q.replace(/[%_]/g, "\\$&"); // ILIKE injection 방지
+
+    const { data, error } = await supabase
+      .from("search_index")
+      .select("id, type, symbol, name_en, name_ko, image_url, rank")
+      .or(
+        `name_ko.ilike.%${escaped}%,name_en.ilike.%${escaped}%,symbol.ilike.%${escaped}%`
+      )
+      .order("rank", { ascending: true, nullsFirst: false })
+      .limit(10);
+
+    if (error || !data?.length) return null;
+
+    return data.map((r) => ({
+      type: r.type as "crypto" | "stock" | "etf",
+      id: r.id,
+      symbol: r.symbol,
+      name: r.name_en,
+      nameKo: (r.name_ko as string | null) ?? undefined,
+      image: (r.image_url as string | null) ?? null,
+      market_cap_rank: (r.rank as number | null) ?? null,
+    }));
+  } catch {
+    return null;
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -29,7 +62,13 @@ export async function GET(req: NextRequest) {
   if (!q) return NextResponse.json([]);
 
   try {
-    // ── 한국어 쿼리: 로컬 사전 검색 우선 ──────────────────
+    // ── 1차: Supabase search_index ──────────────────────────
+    const dbResults = await searchFromDB(q);
+    if (dbResults && dbResults.length > 0) {
+      return NextResponse.json(dbResults);
+    }
+
+    // ── 2차 폴백: 한국어 로컬 사전 ─────────────────────────
     if (isKorean(q)) {
       const dictResults = searchKoreanDict(q).map((e) => ({
         type: e.type,
@@ -40,27 +79,18 @@ export async function GET(req: NextRequest) {
         image: null,
         market_cap_rank: e.market_cap_rank,
       }));
-
-      // 사전 결과가 충분하면 바로 반환, 부족하면 Yahoo 병행
-      if (dictResults.length >= 3) {
-        return NextResponse.json(dictResults);
-      }
-
-      // 사전 결과 보완: Yahoo Finance에도 시도 (영문 쿼리가 포함된 경우 대비)
-      const yahooData = await searchStocksYahoo(q).catch(() => []);
-      const seenIds = new Set(dictResults.map((r) => r.id));
-      const extra = yahooData.filter((r) => !seenIds.has(r.id));
-      return NextResponse.json([...dictResults, ...extra].slice(0, 10));
+      if (dictResults.length > 0) return NextResponse.json(dictResults);
     }
 
-    // ── 영어 쿼리: CoinGecko + Yahoo Finance 병렬 ─────────
+    // ── 3차 폴백: CoinGecko + Yahoo Finance ─────────────────
     const [cryptoData, stockData] = await Promise.allSettled([
       searchCoins(q).then((data) =>
         (data.coins ?? []).slice(0, 5).map((c: Record<string, unknown>) => ({
-          type: "crypto",
+          type: "crypto" as const,
           id: c.id,
           symbol: c.symbol,
           name: c.name,
+          nameKo: undefined,
           image: c.large ?? c.thumb,
           market_cap_rank: c.market_cap_rank ?? null,
         }))

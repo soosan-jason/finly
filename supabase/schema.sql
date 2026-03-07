@@ -133,3 +133,31 @@ CREATE POLICY "Users can manage own snapshots"
   ON portfolio_snapshots FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================
+-- 6. 검색 인덱스 테이블 (한국어 포함 전체 종목 검색용)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS search_index (
+  id          TEXT PRIMARY KEY,          -- CoinGecko ID 또는 주식 심볼
+  type        TEXT NOT NULL,             -- 'crypto' | 'stock' | 'etf' | 'commodity' | 'futures'
+  symbol      TEXT NOT NULL,
+  name_en     TEXT NOT NULL,
+  name_ko     TEXT,                      -- 한국어 이름 (없으면 NULL)
+  image_url   TEXT,
+  rank        INTEGER,                   -- 시가총액 순위 (코인 기준)
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 검색 성능을 위한 인덱스
+CREATE INDEX IF NOT EXISTS search_index_name_ko_idx ON search_index (name_ko);
+CREATE INDEX IF NOT EXISTS search_index_name_en_idx ON search_index (name_en);
+CREATE INDEX IF NOT EXISTS search_index_symbol_idx  ON search_index (symbol);
+CREATE INDEX IF NOT EXISTS search_index_rank_idx    ON search_index (rank);
+
+-- RLS: 읽기는 누구나 가능, 쓰기는 service role만 (RLS 비활성화 시 service role이 bypass)
+ALTER TABLE search_index ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "search_index_public_read"
+  ON search_index FOR SELECT
+  USING (true);
