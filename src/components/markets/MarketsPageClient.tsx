@@ -8,7 +8,6 @@ import { CommoditiesSection } from "./CommoditiesSection";
 import { BondsSection } from "./BondsSection";
 import { TopStocksSection } from "./TopStocksSection";
 import { useSwipeTab } from "@/hooks/useSwipeTab";
-import { DateFormatToggle } from "@/components/ui/DateFormatToggle";
 
 const TABS = [
   { id: "indices",     label: "지수" },
@@ -94,9 +93,8 @@ export function MarketsPageClient() {
 
   return (
     <div className="space-y-5">
-      {/* 탭 바 + 우측 날짜/시간 토글 */}
-      <div className="flex items-center gap-2">
-        <div className="flex flex-1 gap-1 rounded-xl bg-gray-800/60 p-1" role="tablist">
+      {/* 탭 바 */}
+      <div className="flex gap-1 rounded-xl bg-gray-800/60 p-1" role="tablist">
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -110,8 +108,6 @@ export function MarketsPageClient() {
               {t.label}
             </button>
           ))}
-        </div>
-        <DateFormatToggle />
       </div>
 
       {/* 탭 콘텐츠 — 좌우 스와이프로 탭 전환 */}

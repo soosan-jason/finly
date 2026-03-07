@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
-import { TrendingUp, LogOut, User, Search, X } from "lucide-react";
+import { TrendingUp, LogOut, User, Search, X, Settings } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { useUser } from "@/hooks/useUser";
@@ -176,6 +176,14 @@ export function Header() {
                   <div className="border-b border-gray-800 px-4 py-2.5">
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
+                  <Link
+                    href="/settings"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    설정
+                  </Link>
                   <button
                     onClick={handleSignOut}
                     className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
@@ -216,6 +224,14 @@ export function Header() {
                   <div className="border-b border-gray-800 px-4 py-2.5">
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
+                  <Link
+                    href="/settings"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    설정
+                  </Link>
                   <button
                     onClick={handleSignOut}
                     className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
