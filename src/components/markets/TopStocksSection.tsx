@@ -104,6 +104,11 @@ export function TopStocksSection() {
                         )}
                       </div>
                       <div className="shrink-0 flex flex-col items-end gap-1">
+                        {stock.marketCap != null && (
+                          <span className="text-xs text-gray-500 tabular-nums">
+                            {formatMarketCap(stock.marketCap, stock.currency)}
+                          </span>
+                        )}
                         <span
                           className={`rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
                             up ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
@@ -114,11 +119,6 @@ export function TopStocksSection() {
                         <span className="text-sm font-bold text-white tabular-nums">
                           {formatStockPrice(stock.price, stock.currency)}
                         </span>
-                        {stock.marketCap != null && (
-                          <span className="text-xs text-gray-500 tabular-nums">
-                            {formatMarketCap(stock.marketCap, stock.currency)}
-                          </span>
-                        )}
                       </div>
                     </div>
                   </Card>
