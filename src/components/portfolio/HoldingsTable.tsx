@@ -20,7 +20,7 @@ export function HoldingsTable({ holdings, onDelete }: Props) {
   }
 
   return (
-    <div ref={scrollRef} className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto overscroll-x-contain" style={{ touchAction: "pan-x pan-y" }}>
+    <div ref={scrollRef} className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto overscroll-x-contain" style={{ touchAction: "pan-x pan-y", overscrollBehaviorX: "none" }}>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-800 text-left text-xs text-gray-500">

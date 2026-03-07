@@ -372,7 +372,7 @@ export function PortfolioPageClient() {
 
       {/* 자산 추이 차트 */}
       {holdings.length > 0 && portfolio && (
-        <div ref={chartScrollRef} className="rounded-2xl border border-gray-800 bg-gray-900 p-4 overflow-x-auto" style={{ touchAction: "pan-x pan-y" }}>
+        <div ref={chartScrollRef} className="rounded-2xl border border-gray-800 bg-gray-900 p-4 overflow-x-auto" style={{ touchAction: "pan-x pan-y", overscrollBehaviorX: "none" }}>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-medium text-gray-400">자산 추이</h2>
             {hasKrw && hasUsd && (
