@@ -139,10 +139,13 @@ export async function GET() {
       BOND_CONFIG.map(async (cfg) => {
         const quote = await fetchYahooQuote(cfg.symbol);
         if (!quote) return null;
+        const prevYield = quote.price - quote.change;
+        const changePct = prevYield !== 0 ? (quote.change / prevYield) * 100 : 0;
         return {
           ...cfg,
           yield: quote.price,
           change: quote.change,
+          changePct,
           lastUpdated: quote.lastUpdated,
         } satisfies BondYield;
       })

@@ -111,9 +111,14 @@ function BondCard({ bond }: { bond: BondYield }) {
       <p className="text-xs text-gray-500">{bond.label}</p>
       <div className="mt-2">
         <p className="text-lg font-bold text-white">{bond.yield.toFixed(2)}%</p>
-        <p className={`mt-0.5 text-xs font-medium ${up ? "text-emerald-400" : "text-red-400"}`}>
-          {up ? "+" : ""}{bond.change.toFixed(2)}bp
-        </p>
+        <div className={`mt-0.5 flex items-center gap-1.5 text-xs font-medium ${up ? "text-emerald-400" : "text-red-400"}`}>
+          <span>{up ? "+" : ""}{bond.change.toFixed(2)}bp</span>
+          {bond.changePct != null && (
+            <span className={`rounded px-1 py-0.5 tabular-nums ${up ? "bg-emerald-500/10" : "bg-red-500/10"}`}>
+              {up ? "+" : ""}{bond.changePct.toFixed(2)}%
+            </span>
+          )}
+        </div>
         {fmtTime(bond.lastUpdated) && (
           <p className="mt-1 text-xs text-gray-500">{fmtTime(bond.lastUpdated)}</p>
         )}
