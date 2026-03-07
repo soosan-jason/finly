@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchCoins } from "@/lib/api/coingecko";
+import { searchKoreanDict, isKorean } from "@/lib/search/korean-names";
 
 async function searchStocksYahoo(query: string) {
   const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=5&newsCount=0&listsCount=0`;
@@ -28,6 +29,31 @@ export async function GET(req: NextRequest) {
   if (!q) return NextResponse.json([]);
 
   try {
+    // ── 한국어 쿼리: 로컬 사전 검색 우선 ──────────────────
+    if (isKorean(q)) {
+      const dictResults = searchKoreanDict(q).map((e) => ({
+        type: e.type,
+        id: e.id,
+        symbol: e.symbol,
+        name: e.name,
+        nameKo: e.nameKo,
+        image: null,
+        market_cap_rank: e.market_cap_rank,
+      }));
+
+      // 사전 결과가 충분하면 바로 반환, 부족하면 Yahoo 병행
+      if (dictResults.length >= 3) {
+        return NextResponse.json(dictResults);
+      }
+
+      // 사전 결과 보완: Yahoo Finance에도 시도 (영문 쿼리가 포함된 경우 대비)
+      const yahooData = await searchStocksYahoo(q).catch(() => []);
+      const seenIds = new Set(dictResults.map((r) => r.id));
+      const extra = yahooData.filter((r) => !seenIds.has(r.id));
+      return NextResponse.json([...dictResults, ...extra].slice(0, 10));
+    }
+
+    // ── 영어 쿼리: CoinGecko + Yahoo Finance 병렬 ─────────
     const [cryptoData, stockData] = await Promise.allSettled([
       searchCoins(q).then((data) =>
         (data.coins ?? []).slice(0, 5).map((c: Record<string, unknown>) => ({
@@ -42,8 +68,8 @@ export async function GET(req: NextRequest) {
       searchStocksYahoo(q),
     ]);
 
-    const coins = cryptoData.status === "fulfilled" ? cryptoData.value : [];
-    const stocks = stockData.status === "fulfilled" ? stockData.value : [];
+    const coins  = cryptoData.status === "fulfilled" ? cryptoData.value : [];
+    const stocks = stockData.status  === "fulfilled" ? stockData.value  : [];
 
     return NextResponse.json([...stocks, ...coins]);
   } catch (err) {

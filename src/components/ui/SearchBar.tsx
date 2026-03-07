@@ -11,6 +11,7 @@ interface SearchResult {
   id: string;
   symbol: string;
   name: string;
+  nameKo?: string;
   image: string | null;
   market_cap_rank: number | null;
 }
@@ -108,8 +109,12 @@ export function SearchBar({ className, autoFocus }: { className?: string; autoFo
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{r.name}</p>
-                      <p className="text-xs text-gray-500 uppercase">{r.symbol}</p>
+                      <p className="text-sm font-medium text-white truncate">
+                        {r.nameKo ?? r.name}
+                      </p>
+                      <p className="text-xs text-gray-500 uppercase truncate">
+                        {r.nameKo ? r.name : r.symbol}
+                      </p>
                     </div>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium flex-shrink-0 ${
                       r.type === "crypto" ? "bg-emerald-900/60 text-emerald-400" : "bg-blue-900/60 text-blue-400"
