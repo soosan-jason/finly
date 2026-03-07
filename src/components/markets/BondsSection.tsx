@@ -27,7 +27,7 @@ export function BondsSection() {
   const usBonds = bonds
     .filter((b) => b.country === "US")
     .sort((a, b) => a.maturityMonths - b.maturityMonths);
-  const krBonds = bonds.filter((b) => b.country === "KR");
+  const otherBonds = bonds.filter((b) => b.country !== "US");
 
   if (loading) {
     return (
@@ -66,14 +66,14 @@ export function BondsSection() {
         </div>
       </section>
 
-      {/* KR 국채 */}
-      {krBonds.length > 0 && (
+      {/* 기타 국채 */}
+      {otherBonds.length > 0 && (
         <section>
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-            한국 국채
+            기타
           </h2>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-            {krBonds.map((bond) => (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {otherBonds.map((bond) => (
               <BondCard key={bond.symbol} bond={bond} />
             ))}
           </div>

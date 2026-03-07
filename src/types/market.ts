@@ -59,7 +59,7 @@ export interface BondYield {
   maturityMonths: number;
   yield: number;
   change: number;
-  country: "US" | "KR";
+  country: "US" | "KR" | "JP" | "GB" | "FR" | "DE";
   lastUpdated?: string;
 }
 
