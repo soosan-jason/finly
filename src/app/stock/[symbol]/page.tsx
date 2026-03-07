@@ -54,7 +54,7 @@ function formatVolume(value: number | null): string {
   if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2)}B`;
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(2)}K`;
-  return value.toString();
+  return value.toLocaleString();
 }
 
 export async function generateMetadata({
@@ -97,8 +97,8 @@ export default async function StockDetailPage({
       label: "시가총액",
       value: stock.market_cap
         ? stock.currency === "KRW"
-          ? `₩${(stock.market_cap / 1_000_000_000_000).toFixed(2)}조`
-          : `$${(stock.market_cap / 1_000_000_000).toFixed(2)}B`
+          ? `₩${(stock.market_cap / 1_000_000_000_000).toLocaleString("ko-KR", { maximumFractionDigits: 2 })}조`
+          : `$${(stock.market_cap / 1_000_000_000).toLocaleString("en-US", { maximumFractionDigits: 2 })}B`
         : "-",
     },
   ];

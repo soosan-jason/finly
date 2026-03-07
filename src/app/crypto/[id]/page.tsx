@@ -63,8 +63,8 @@ export default async function CryptoDetailPage({
   const stats = [
     { label: "시가총액", value: formatMarketCap(md.market_cap.usd) },
     { label: "24h 거래량", value: formatMarketCap(md.total_volume.usd) },
-    { label: "유통 공급량", value: md.circulating_supply ? `${(md.circulating_supply / 1e6).toFixed(2)}M` : "-" },
-    { label: "최대 공급량", value: md.max_supply ? `${(md.max_supply / 1e6).toFixed(2)}M` : "∞" },
+    { label: "유통 공급량", value: md.circulating_supply ? `${(md.circulating_supply / 1e6).toLocaleString("en-US", { maximumFractionDigits: 2 })}M` : "-" },
+    { label: "최대 공급량", value: md.max_supply ? `${(md.max_supply / 1e6).toLocaleString("en-US", { maximumFractionDigits: 2 })}M` : "∞" },
     { label: "역대 최고가", value: formatPrice(md.ath.usd) },
     { label: "역대 최저가", value: formatPrice(md.atl.usd) },
   ];

@@ -41,11 +41,11 @@ function formatChange(change: number, currency: string): string {
 function formatMarketCap(cap: number, currency: string): string {
   if (currency === "KRW") {
     const jo = cap / 1e12;
-    return jo >= 1 ? `${jo.toFixed(0)}조` : `${(cap / 1e8).toFixed(0)}억`;
+    return jo >= 1 ? `${Math.round(jo).toLocaleString("ko-KR")}조` : `${Math.round(cap / 1e8).toLocaleString("ko-KR")}억`;
   }
-  if (currency === "JPY") return `${(cap / 1e12).toFixed(1)}兆`;
-  if (cap >= 1e12) return `$${(cap / 1e12).toFixed(2)}T`;
-  return `$${(cap / 1e9).toFixed(0)}B`;
+  if (currency === "JPY") return `${(cap / 1e12).toLocaleString("ja-JP", { maximumFractionDigits: 1 })}兆`;
+  if (cap >= 1e12) return `$${(cap / 1e12).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}T`;
+  return `$${Math.round(cap / 1e9).toLocaleString("en-US")}B`;
 }
 
 function StarButton({ symbol, name }: { symbol: string; name: string }) {
