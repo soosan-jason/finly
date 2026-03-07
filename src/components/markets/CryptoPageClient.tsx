@@ -8,11 +8,9 @@ import { CryptoAsset } from "@/types/market";
 import { formatPrice, formatMarketCap, formatPercent } from "@/lib/utils/format";
 import { Badge } from "@/components/ui/badge";
 import { useDateFormat } from "@/contexts/DateFormatContext";
-import { useT } from "@/lib/i18n/useT";
 
 export function CryptoPageClient() {
   const { locale, timezone } = useDateFormat();
-  const t = useT();
   const [cryptos, setCryptos] = useState<CryptoAsset[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
