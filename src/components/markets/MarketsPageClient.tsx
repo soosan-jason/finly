@@ -7,7 +7,6 @@ import { FuturesSection } from "./FuturesSection";
 import { CommoditiesSection } from "./CommoditiesSection";
 import { BondsSection } from "./BondsSection";
 import { TopStocksSection } from "./TopStocksSection";
-import { RefreshCw } from "lucide-react";
 
 const TABS = [
   { id: "indices",     label: "지수" },
@@ -46,34 +45,21 @@ export function MarketsPageClient() {
   const [tab, setTab] = useState<TabId>("indices");
   const [indices, setIndices] = useState<StockIndex[]>([]);
   const [loading, setLoading] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState("");
-
-  async function fetchIndices() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/markets/indices");
-      const data = await res.json();
-      setIndices(data);
-      setLastUpdated(
-        new Date().toLocaleTimeString("ko-KR", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        })
-      );
-    } catch {
-      setIndices(FALLBACK_INDICES);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   useEffect(() => {
+    async function fetchIndices() {
+      try {
+        const res = await fetch("/api/markets/indices");
+        setIndices(await res.json());
+      } catch {
+        setIndices(FALLBACK_INDICES);
+      } finally {
+        setLoading(false);
+      }
+    }
     fetchIndices();
     const id = setInterval(fetchIndices, 60_000);
     return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 그룹화 → 정해진 순서로 정렬
@@ -88,37 +74,21 @@ export function MarketsPageClient() {
 
   return (
     <div className="space-y-5">
-      {/* 탭 바: 좁은 화면에서 가로 스크롤, 텍스트 줄바꿈 방지 */}
-      <div className="flex items-center gap-3">
-        <div className="min-w-0 flex-1 overflow-x-auto">
-          <div className="flex w-max gap-1 rounded-xl bg-gray-800/60 p-1">
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
-                  tab === t.id
-                    ? "bg-gray-700 text-white shadow"
-                    : "text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {tab === "indices" && (
-          <div className="flex shrink-0 items-center gap-1.5 text-xs text-gray-500">
-            {lastUpdated && <span className="hidden sm:inline">{lastUpdated}</span>}
-            <button
-              onClick={fetchIndices}
-              className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-            </button>
-          </div>
-        )}
+      {/* 탭 바: 전체 너비를 균등 분할 */}
+      <div className="flex gap-1 rounded-xl bg-gray-800/60 p-1">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition-colors ${
+              tab === t.id
+                ? "bg-gray-700 text-white shadow"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {/* 탭 콘텐츠 */}
