@@ -4,34 +4,33 @@ import STOCK_POOL from "@/config/stockPool";
 
 const TOP_N = 8; // 국가별 표시 종목 수
 
-// Yahoo Finance v10 quoteSummary API (marketCap 안정적 반환)
+// Yahoo Finance v8 chart API
 async function fetchQuote(symbol: string): Promise<{
   price: number;
   change: number;
   changePct: number;
-  marketCap?: number;
   lastUpdated: string;
 } | null> {
   try {
-    const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=price`;
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
       next: { revalidate: 60 },
     });
     if (!res.ok) return null;
     const data = await res.json();
-    const p = data?.quoteSummary?.result?.[0]?.price;
-    if (!p?.regularMarketPrice?.raw) return null;
+    const meta = data?.chart?.result?.[0]?.meta;
+    if (!meta?.regularMarketPrice) return null;
 
-    const price     = p.regularMarketPrice.raw as number;
-    const change    = (p.regularMarketChange?.raw ?? 0) as number;
-    const changePct = (p.regularMarketChangePercent?.raw ?? 0) as number * 100;
-    const marketCap = (p.marketCap?.raw as number | undefined) ?? undefined;
-    const lastUpdated = p.regularMarketTime
-      ? new Date((p.regularMarketTime as number) * 1000).toISOString()
+    const price = meta.regularMarketPrice as number;
+    const prevClose = (meta.chartPreviousClose ?? meta.previousClose ?? price) as number;
+    const change = price - prevClose;
+    const changePct = prevClose !== 0 ? (change / prevClose) * 100 : 0;
+    const lastUpdated = meta.regularMarketTime
+      ? new Date((meta.regularMarketTime as number) * 1000).toISOString()
       : new Date().toISOString();
 
-    return { price, change, changePct, marketCap, lastUpdated };
+    return { price, change, changePct, lastUpdated };
   } catch {
     return null;
   }
@@ -52,7 +51,7 @@ export async function GET() {
           price:       quote.price,
           change:      quote.change,
           changePct:   quote.changePct,
-          marketCap:   quote.marketCap ?? cfg.marketCap,
+          marketCap:   cfg.marketCap,
           lastUpdated: quote.lastUpdated,
         } satisfies TopStock;
       })
