@@ -107,3 +107,29 @@ CREATE TRIGGER portfolios_updated_at
 CREATE TRIGGER holdings_updated_at
   BEFORE UPDATE ON holdings
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- 5. 포트폴리오 스냅샷 테이블 (자산 추이 차트용)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS portfolio_snapshots (
+  id                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  portfolio_id      UUID REFERENCES portfolios(id) ON DELETE CASCADE NOT NULL,
+  user_id           UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  snapshotted_on    DATE NOT NULL,               -- 날짜 기준 (하루 1회 upsert)
+  total_value_krw   NUMERIC(24, 4) NOT NULL DEFAULT 0,
+  total_cost_krw    NUMERIC(24, 4) NOT NULL DEFAULT 0,
+  profit_loss_krw   NUMERIC(24, 4) NOT NULL DEFAULT 0,
+  total_value_usd   NUMERIC(24, 4) NOT NULL DEFAULT 0,
+  total_cost_usd    NUMERIC(24, 4) NOT NULL DEFAULT 0,
+  profit_loss_usd   NUMERIC(24, 4) NOT NULL DEFAULT 0,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(portfolio_id, snapshotted_on)
+);
+
+ALTER TABLE portfolio_snapshots ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own snapshots"
+  ON portfolio_snapshots FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);

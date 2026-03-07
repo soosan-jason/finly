@@ -55,6 +55,16 @@ export interface WatchlistItem {
   change_24h?: number;
 }
 
+export interface PortfolioSnapshot {
+  snapshotted_on: string;
+  total_value_krw: number;
+  total_cost_krw: number;
+  profit_loss_krw: number;
+  total_value_usd: number;
+  total_cost_usd: number;
+  profit_loss_usd: number;
+}
+
 export interface HoldingFormData {
   asset_type: AssetType;
   symbol: string;

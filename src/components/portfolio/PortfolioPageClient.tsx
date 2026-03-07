@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/hooks/useUser";
 import { Portfolio, Holding, WatchlistItem } from "@/types/portfolio";
 import { HoldingsTable } from "./HoldingsTable";
 import { WatchlistSection } from "./WatchlistSection";
 import { AddHoldingModal } from "./AddHoldingModal";
-// Card import removed — using inline SummaryHeroCard below
+import { PortfolioChart } from "./PortfolioChart";
 import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
 import { Plus, Briefcase } from "lucide-react";
 
@@ -58,6 +58,8 @@ export function PortfolioPageClient() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeTab, setActiveTab] = useState<"holdings" | "watchlist">("holdings");
+  const [chartCurrency, setChartCurrency] = useState<"KRW" | "USD">("KRW");
+  const snapshotSavedRef = useRef<string | null>(null); // 오늘 이미 저장했는지 체크
 
   async function fetchPortfolio() {
     const res = await fetch("/api/portfolio");
@@ -95,7 +97,7 @@ export function PortfolioPageClient() {
       } catch { /* ignore */ }
     }
 
-    // 주식/ETF 현재가 (Finnhub 개별 조회) — native currency (KRW 주식은 KRW, USD 주식은 USD)
+    // 주식/ETF 현재가 (Finnhub 개별 조회)
     const stockPriceMap: Record<string, number> = {};
     if (stockHoldings.length > 0) {
       await Promise.allSettled(
@@ -109,7 +111,6 @@ export function PortfolioPageClient() {
       );
     }
 
-    // native currency 기준으로 손익 계산
     const enriched = data.map((h: Holding) => {
       const cp =
         h.asset_type === "crypto"
@@ -126,6 +127,7 @@ export function PortfolioPageClient() {
       };
     });
     setHoldings(enriched);
+    return enriched;
   }
 
   async function fetchWatchlist() {
@@ -134,11 +136,48 @@ export function PortfolioPageClient() {
     if (Array.isArray(data)) setWatchlist(data);
   }
 
+  async function saveSnapshot(portfolioId: string, enriched: Holding[]) {
+    const today = new Date().toISOString().slice(0, 10);
+    if (snapshotSavedRef.current === today) return; // 오늘 이미 저장
+
+    const krw = enriched.filter((h) => h.currency === "KRW");
+    const usd = enriched.filter((h) => h.currency !== "KRW");
+
+    function stats(group: Holding[]) {
+      const value = group.reduce((s, h) => s + (h.current_value ?? 0), 0);
+      const cost  = group.reduce((s, h) => s + h.avg_buy_price * h.quantity, 0);
+      return { value, cost, pl: value - cost };
+    }
+
+    const krwStats = stats(krw);
+    const usdStats = stats(usd);
+
+    try {
+      await fetch("/api/portfolio/snapshot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          portfolio_id:    portfolioId,
+          total_value_krw: krwStats.value,
+          total_cost_krw:  krwStats.cost,
+          profit_loss_krw: krwStats.pl,
+          total_value_usd: usdStats.value,
+          total_cost_usd:  usdStats.cost,
+          profit_loss_usd: usdStats.pl,
+        }),
+      });
+      snapshotSavedRef.current = today;
+    } catch { /* ignore — 스냅샷 실패는 조용히 */ }
+  }
+
   async function init() {
     setLoading(true);
     try {
       const p = await fetchPortfolio();
-      await Promise.all([fetchHoldings(p.id), fetchWatchlist()]);
+      const [enriched] = await Promise.all([fetchHoldings(p.id), fetchWatchlist()]);
+      if (enriched && enriched.length > 0) {
+        saveSnapshot(p.id, enriched);
+      }
     } finally {
       setLoading(false);
     }
@@ -174,6 +213,9 @@ export function PortfolioPageClient() {
   const krw = groupStats(krwHoldings);
   const usd = groupStats(usdHoldings);
 
+  const hasKrw = krwHoldings.length > 0;
+  const hasUsd = usdHoldings.length > 0;
+
   return (
     <div className="space-y-6">
       {/* 페이지 헤더 */}
@@ -182,7 +224,6 @@ export function PortfolioPageClient() {
           <h1 className="truncate text-2xl font-bold text-white">포트폴리오</h1>
           {portfolio && <p className="mt-0.5 truncate text-sm text-gray-400">{portfolio.name}</p>}
         </div>
-        {/* 데스크톱 버튼 */}
         <button
           onClick={() => setShowAddModal(true)}
           className="hidden md:flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-400 transition-colors"
@@ -195,7 +236,7 @@ export function PortfolioPageClient() {
       {/* 히어로 요약 카드 — 통화별 */}
       {holdings.length > 0 && (
         <div className="space-y-3">
-          {krwHoldings.length > 0 && (
+          {hasKrw && (
             <SummaryHeroCard
               label="원화 자산 (KRW)"
               totalValue={formatKRW(krw.totalValue)}
@@ -206,7 +247,7 @@ export function PortfolioPageClient() {
               pctLabel={formatPercent(krw.totalPnlPct)}
             />
           )}
-          {usdHoldings.length > 0 && (
+          {hasUsd && (
             <SummaryHeroCard
               label="달러 자산 (USD)"
               totalValue={formatPrice(usd.totalValue)}
@@ -217,6 +258,34 @@ export function PortfolioPageClient() {
               pctLabel={formatPercent(usd.totalPnlPct)}
             />
           )}
+        </div>
+      )}
+
+      {/* 자산 추이 차트 */}
+      {holdings.length > 0 && portfolio && (
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-medium text-gray-400">자산 추이</h2>
+            {hasKrw && hasUsd && (
+              <div className="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+                {(["KRW", "USD"] as const).map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setChartCurrency(c)}
+                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                      chartCurrency === c ? "bg-gray-700 text-white" : "text-gray-400 hover:text-white"
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <PortfolioChart
+            portfolioId={portfolio.id}
+            currency={hasKrw && !hasUsd ? "KRW" : hasUsd && !hasKrw ? "USD" : chartCurrency}
+          />
         </div>
       )}
 
