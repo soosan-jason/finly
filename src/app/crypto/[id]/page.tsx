@@ -6,6 +6,7 @@ import { PriceChart } from "@/components/charts/PriceChart";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { WatchlistToggle } from "@/components/portfolio/WatchlistToggle";
+import { AddToPortfolioButton } from "@/components/portfolio/AddToPortfolioButton";
 import { formatPrice, formatMarketCap, formatPercent } from "@/lib/utils/format";
 
 import type { Metadata } from "next";
@@ -101,11 +102,21 @@ export default async function CryptoDetailPage({
             </div>
           </div>
         </div>
-        <WatchlistToggle
-          symbol={coin.id}
-          name={coin.name}
-          imageUrl={coin.image.large}
-        />
+        <div className="flex items-center gap-2">
+          <AddToPortfolioButton
+            assetType="crypto"
+            symbol={coin.id}
+            name={coin.name}
+            imageUrl={coin.image.large}
+            currentPrice={price}
+            currency="USD"
+          />
+          <WatchlistToggle
+            symbol={coin.id}
+            name={coin.name}
+            imageUrl={coin.image.large}
+          />
+        </div>
       </div>
 
       {/* Price Hero */}

@@ -4,6 +4,7 @@ import { ArrowLeft, TrendingDown, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatPercent } from "@/lib/utils/format";
 import { WatchlistToggle } from "@/components/portfolio/WatchlistToggle";
+import { AddToPortfolioButton } from "@/components/portfolio/AddToPortfolioButton";
 
 import type { Metadata } from "next";
 
@@ -135,11 +136,20 @@ export default async function StockDetailPage({
             </div>
           </div>
         </div>
-        <WatchlistToggle
-          symbol={stock.symbol}
-          name={stock.name}
-          assetType="stock"
-        />
+        <div className="flex items-center gap-2">
+          <AddToPortfolioButton
+            assetType="stock"
+            symbol={stock.symbol}
+            name={stock.name}
+            currentPrice={stock.price}
+            currency={stock.currency}
+          />
+          <WatchlistToggle
+            symbol={stock.symbol}
+            name={stock.name}
+            assetType="stock"
+          />
+        </div>
       </div>
 
       {/* Price Hero */}
