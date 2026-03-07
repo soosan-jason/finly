@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, TrendingDown, TrendingUp } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatPercent } from "@/lib/utils/format";
 import { WatchlistToggle } from "@/components/portfolio/WatchlistToggle";
@@ -85,6 +84,8 @@ export default async function StockDetailPage({
 
   const isKorean = stock.symbol.endsWith(".KS") || stock.symbol.endsWith(".KQ");
 
+  const ticker = stock.symbol.replace(/\.(KS|KQ|US)$/, "").slice(0, 4);
+
   const stats = [
     { label: "시가", value: p(stock.open) },
     { label: "전일종가", value: p(stock.prev_close) },
@@ -102,7 +103,7 @@ export default async function StockDetailPage({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <Link
         href="/markets"
         className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
@@ -112,57 +113,68 @@ export default async function StockDetailPage({
       </Link>
 
       {/* Header */}
-      <div className="flex flex-wrap items-start gap-4">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-xs font-bold text-gray-300">
-            {stock.symbol.replace(/\.(KS|KQ)$/, "").slice(0, 4)}
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-800 border border-gray-700 flex items-center justify-center shrink-0">
+            <span className="text-sm font-bold text-white">{ticker}</span>
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">{stock.name}</h1>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-sm text-gray-400 uppercase">{stock.symbol}</span>
+            <div className="mt-1 flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-gray-400">{stock.symbol}</span>
               {stock.exchange && (
-                <span className="rounded-md bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
+                <span className="rounded-full bg-gray-800 px-2.5 py-0.5 text-xs font-medium text-gray-400">
                   {stock.exchange}
                 </span>
               )}
               {isKorean && (
-                <span className="rounded-md bg-blue-900/50 px-2 py-0.5 text-xs text-blue-400">
+                <span className="rounded-full bg-blue-900/50 px-2.5 py-0.5 text-xs font-medium text-blue-400 border border-blue-800/50">
                   한국주식
                 </span>
               )}
             </div>
           </div>
         </div>
+        <WatchlistToggle
+          symbol={stock.symbol}
+          name={stock.name}
+          assetType="stock"
+        />
+      </div>
 
-        <div className="ml-auto flex flex-col items-end gap-2">
-          <p className="text-3xl font-bold text-white">{p(stock.price)}</p>
-          <div className="flex items-center gap-1.5">
-            {isUp ? (
-              <TrendingUp className="h-4 w-4 text-emerald-400" />
-            ) : (
-              <TrendingDown className="h-4 w-4 text-red-400" />
-            )}
-            <Badge variant={isUp ? "up" : "down"}>
-              {stock.change >= 0 ? "+" : ""}
-              {p(stock.change)} ({formatPercent(stock.change_percent)})
-            </Badge>
-          </div>
-          <WatchlistToggle
-            symbol={stock.symbol}
-            name={stock.name}
-            assetType="stock"
-          />
+      {/* Price Hero */}
+      <div
+        className={`rounded-2xl border p-5 ${
+          isUp
+            ? "border-emerald-500/20 bg-emerald-500/5"
+            : "border-red-500/20 bg-red-500/5"
+        }`}
+      >
+        <p className="text-4xl font-bold tracking-tight text-white">
+          {p(stock.price)}
+        </p>
+        <div className="mt-3 flex items-center gap-2">
+          {isUp ? (
+            <TrendingUp className="h-4 w-4 text-emerald-400" />
+          ) : (
+            <TrendingDown className="h-4 w-4 text-red-400" />
+          )}
+          <Badge variant={isUp ? "up" : "down"} className="rounded-full px-3 py-1">
+            {stock.change >= 0 ? "+" : ""}
+            {p(stock.change)} ({formatPercent(stock.change_percent)})
+          </Badge>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {stats.map((s) => (
-          <Card key={s.label}>
-            <p className="text-xs text-gray-500">{s.label}</p>
-            <p className="mt-1 font-semibold text-white">{s.value}</p>
-          </Card>
+          <div key={s.label} className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-gray-500">
+              {s.label}
+            </p>
+            <p className="mt-2 text-base font-bold text-white">{s.value}</p>
+          </div>
         ))}
       </div>
     </div>

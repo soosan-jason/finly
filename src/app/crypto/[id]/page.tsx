@@ -69,44 +69,66 @@ export default async function CryptoDetailPage({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Breadcrumb */}
-      <Link href="/crypto" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
+      <Link
+        href="/crypto"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
+      >
         <ArrowLeft className="h-4 w-4" />
         암호화폐
       </Link>
 
       {/* Header */}
-      <div className="flex flex-wrap items-start gap-4">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Image src={coin.image.large} alt={coin.name} width={48} height={48} className="rounded-full" />
+          <Image
+            src={coin.image.large}
+            alt={coin.name}
+            width={56}
+            height={56}
+            className="rounded-full ring-2 ring-gray-700"
+          />
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl font-bold text-white">{coin.name}</h1>
-              <span className="text-sm text-gray-400 uppercase">{coin.symbol}</span>
+              <span className="text-sm font-medium text-gray-400 uppercase">{coin.symbol}</span>
               {md.market_cap_rank && (
-                <span className="rounded-md bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
+                <span className="rounded-full bg-gray-800 px-2.5 py-0.5 text-xs font-medium text-gray-400">
                   #{md.market_cap_rank}
                 </span>
               )}
             </div>
           </div>
         </div>
+        <WatchlistToggle
+          symbol={coin.id}
+          name={coin.name}
+          imageUrl={coin.image.large}
+        />
+      </div>
 
-        <div className="ml-auto flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2">
-            <WatchlistToggle
-              symbol={coin.id}
-              name={coin.name}
-              imageUrl={coin.image.large}
-            />
-          </div>
-          <p className="text-3xl font-bold text-white">{formatPrice(price)}</p>
-          <div className="flex items-center gap-2">
-            <Badge variant={isUp ? "up" : "down"}>{formatPercent(change24h)} 24h</Badge>
-            <Badge variant={change7d >= 0 ? "up" : "down"}>{formatPercent(change7d)} 7d</Badge>
-            <Badge variant={change30d >= 0 ? "up" : "down"}>{formatPercent(change30d)} 30d</Badge>
-          </div>
+      {/* Price Hero */}
+      <div
+        className={`rounded-2xl border p-5 ${
+          isUp
+            ? "border-emerald-500/20 bg-emerald-500/5"
+            : "border-red-500/20 bg-red-500/5"
+        }`}
+      >
+        <p className="text-4xl font-bold tracking-tight text-white">
+          {formatPrice(price)}
+        </p>
+        <div className="mt-3 flex items-center gap-2 flex-wrap">
+          <Badge variant={isUp ? "up" : "down"} className="rounded-full px-3 py-1">
+            {formatPercent(change24h)} 24h
+          </Badge>
+          <Badge variant={change7d >= 0 ? "up" : "down"} className="rounded-full px-3 py-1">
+            {formatPercent(change7d)} 7d
+          </Badge>
+          <Badge variant={change30d >= 0 ? "up" : "down"} className="rounded-full px-3 py-1">
+            {formatPercent(change30d)} 30d
+          </Badge>
         </div>
       </div>
 
@@ -119,12 +141,14 @@ export default async function CryptoDetailPage({
       </Card>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {stats.map((s) => (
-          <Card key={s.label}>
-            <p className="text-xs text-gray-500">{s.label}</p>
-            <p className="mt-1 font-semibold text-white">{s.value}</p>
-          </Card>
+          <div key={s.label} className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-gray-500">
+              {s.label}
+            </p>
+            <p className="mt-2 text-base font-bold text-white">{s.value}</p>
+          </div>
         ))}
       </div>
 
@@ -145,4 +169,3 @@ export default async function CryptoDetailPage({
     </div>
   );
 }
-
