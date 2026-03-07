@@ -8,6 +8,8 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  /* 수평 스와이프로 브라우저 뒤로가기/앞으로가기 방지 (Chrome/Android) */
+  overscroll-behavior-x: none;
 }
 
 * {

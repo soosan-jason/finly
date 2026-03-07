@@ -20,24 +20,29 @@ export function SwipeNavigationGuard() {
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
 
-      const dx = Math.abs(e.touches[0].clientX - startX);
-      const dy = Math.abs(e.touches[0].clientY - startY);
-      if (dx <= dy) return; // 세로 스와이프는 통과
+      const dx    = e.touches[0].clientX - startX;
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(e.touches[0].clientY - startY);
 
-      // 수평 스와이프: 스크롤 가능한 조상이 아직 스크롤 여지가 있으면 허용
+      // 노이즈 제거: 3px 미만 무시
+      if (absDx < 3) return;
+      // 세로 이동이 수평의 1.2배 이상이면 세로 스와이프로 판단 → 통과
+      if (absDy > absDx * 1.2) return;
+
+      // 수평 스와이프 감지: 스크롤 가능한 조상이 해당 방향으로 여유가 있으면 허용
       let el = e.target as HTMLElement | null;
       while (el && el !== document.body) {
-        const style = window.getComputedStyle(el);
-        const ox = style.overflowX;
+        const ox = window.getComputedStyle(el).overflowX;
         if (ox === "auto" || ox === "scroll") {
           const atLeft  = el.scrollLeft <= 0;
           const atRight = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
-          if (!atLeft || !atRight) return; // 스크롤 여지 있음 → 허용
+          if (dx < 0 && !atRight) return; // 왼쪽 스와이프, 오른쪽으로 스크롤 여지 있음
+          if (dx > 0 && !atLeft)  return; // 오른쪽 스와이프, 왼쪽으로 스크롤 여지 있음
         }
         el = el.parentElement;
       }
 
-      // 스크롤 가능한 컨텍스트 없음 → 브라우저 제스처 차단
+      // 스크롤 컨텍스트 없음 또는 경계 도달 → 브라우저 네비게이션 제스처 차단
       e.preventDefault();
     };
 
