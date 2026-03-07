@@ -17,6 +17,9 @@ const PERIODS = [
   { label: "전체", days: 0 },
 ];
 
+const MIN_HEIGHT = 140;
+const MAX_HEIGHT = 600;
+
 export type CurrencyView = "KRW" | "USD" | "BOTH";
 
 interface PortfolioChartProps {
@@ -35,8 +38,62 @@ export function PortfolioChart({ portfolioId, view, className }: PortfolioChartP
     if (typeof window === "undefined") return 30;
     return Number(localStorage.getItem("portfolio_chart_days") ?? 30);
   });
+  const [chartHeight, setChartHeight] = useState(() => {
+    if (typeof window === "undefined") return 220;
+    return Number(localStorage.getItem("portfolio_chart_height") ?? 220);
+  });
   const [loading, setLoading] = useState(true);
   const [empty, setEmpty] = useState(false);
+
+  // 드래그 리사이즈
+  const dragStartY = useRef(0);
+  const dragStartHeight = useRef(0);
+
+  function startDrag(clientY: number) {
+    dragStartY.current = clientY;
+    dragStartHeight.current = chartHeight;
+  }
+
+  function onDragMove(clientY: number) {
+    const delta = clientY - dragStartY.current;
+    const next = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, dragStartHeight.current + delta));
+    setChartHeight(next);
+    chartRef.current?.applyOptions({ height: next });
+  }
+
+  function onDragEnd(finalHeight: number) {
+    localStorage.setItem("portfolio_chart_height", String(Math.round(finalHeight)));
+  }
+
+  // 마우스 드래그
+  function handleMouseDown(e: React.MouseEvent) {
+    e.preventDefault();
+    startDrag(e.clientY);
+    const move = (ev: MouseEvent) => onDragMove(ev.clientY);
+    const up = (ev: MouseEvent) => {
+      const final = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, dragStartHeight.current + (ev.clientY - dragStartY.current)));
+      onDragEnd(final);
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  }
+
+  // 터치 드래그
+  function handleTouchStart(e: React.TouchEvent) {
+    startDrag(e.touches[0].clientY);
+    const move = (ev: TouchEvent) => onDragMove(ev.touches[0].clientY);
+    const end = (ev: TouchEvent) => {
+      const lastY = ev.changedTouches[0].clientY;
+      const final = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, dragStartHeight.current + (lastY - dragStartY.current)));
+      onDragEnd(final);
+      window.removeEventListener("touchmove", move);
+      window.removeEventListener("touchend", end);
+    };
+    window.addEventListener("touchmove", move, { passive: true });
+    window.addEventListener("touchend", end);
+  }
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -63,7 +120,7 @@ export function PortfolioChart({ portfolioId, view, className }: PortfolioChartP
       },
       timeScale: { borderColor: "#374151", timeVisible: false },
       width: containerRef.current.clientWidth,
-      height: 220,
+      height: chartHeight,
     });
 
     chartRef.current = chart;
@@ -202,11 +259,24 @@ export function PortfolioChart({ portfolioId, view, className }: PortfolioChartP
           </div>
         )}
         {empty && !loading && (
-          <div className="flex h-[220px] items-center justify-center rounded-xl border border-gray-800 bg-gray-900">
+          <div
+            className="flex items-center justify-center rounded-xl border border-gray-800 bg-gray-900"
+            style={{ height: chartHeight }}
+          >
             <p className="text-sm text-gray-500">데이터가 쌓이는 중입니다 — 매일 방문하면 추이가 기록됩니다.</p>
           </div>
         )}
         <div ref={containerRef} className={cn("rounded-xl overflow-hidden", empty && "hidden")} />
+      </div>
+
+      {/* 드래그 리사이즈 핸들 */}
+      <div
+        className="flex cursor-row-resize items-center justify-center py-0.5 select-none"
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        title="드래그하여 차트 높이 조절"
+      >
+        <div className="h-1 w-10 rounded-full bg-gray-700 hover:bg-gray-500 transition-colors" />
       </div>
     </div>
   );
