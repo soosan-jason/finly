@@ -90,7 +90,7 @@ export function StocksTabs() {
             const up = stock.changePct >= 0;
             return (
               <Card key={stock.symbol} className="flex flex-col justify-between">
-                {/* 상단: 심볼(좌) + 등락률 뱃지(우) */}
+                {/* 상단: 심볼(좌) + 등락률·시총(우) */}
                 <div className="flex items-start justify-between gap-1">
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500 truncate">
@@ -100,24 +100,26 @@ export function StocksTabs() {
                       {stock.name}
                     </p>
                   </div>
-                  <span
-                    className={`shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
-                      up ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
-                    }`}
-                  >
-                    {formatPercent(stock.changePct)}
-                  </span>
+                  <div className="shrink-0 flex flex-col items-end gap-0.5">
+                    <span
+                      className={`rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
+                        up ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+                      }`}
+                    >
+                      {formatPercent(stock.changePct)}
+                    </span>
+                    {stock.marketCap != null && (
+                      <span className="text-xs text-gray-500 tabular-nums">
+                        {formatMarketCap(stock.marketCap, stock.currency)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                {/* 하단: 가격 + 시가총액 */}
+                {/* 하단: 가격 */}
                 <div className="mt-3">
                   <p className="text-base font-bold text-white tabular-nums">
                     {formatStockPrice(stock.price, stock.currency)}
                   </p>
-                  {stock.marketCap != null && (
-                    <p className="mt-0.5 text-xs text-gray-500 tabular-nums">
-                      {formatMarketCap(stock.marketCap, stock.currency)}
-                    </p>
-                  )}
                 </div>
               </Card>
             );
