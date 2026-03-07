@@ -58,7 +58,6 @@ export function PortfolioPageClient() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeTab, setActiveTab] = useState<"holdings" | "watchlist">("holdings");
-  const [chartCurrency, setChartCurrency] = useState<"KRW" | "USD">("KRW");
   const snapshotSavedRef = useRef<string | null>(null); // 오늘 이미 저장했는지 체크
 
   async function fetchPortfolio() {
@@ -264,27 +263,11 @@ export function PortfolioPageClient() {
       {/* 자산 추이 차트 */}
       {holdings.length > 0 && portfolio && (
         <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-gray-400">자산 추이</h2>
-            {hasKrw && hasUsd && (
-              <div className="flex gap-1 rounded-lg bg-gray-800 p-0.5">
-                {(["KRW", "USD"] as const).map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setChartCurrency(c)}
-                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                      chartCurrency === c ? "bg-gray-700 text-white" : "text-gray-400 hover:text-white"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <h2 className="mb-3 text-sm font-medium text-gray-400">자산 추이</h2>
           <PortfolioChart
             portfolioId={portfolio.id}
-            currency={hasKrw && !hasUsd ? "KRW" : hasUsd && !hasKrw ? "USD" : chartCurrency}
+            hasKrw={hasKrw}
+            hasUsd={hasUsd}
           />
         </div>
       )}

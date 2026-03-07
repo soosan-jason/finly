@@ -17,21 +17,39 @@ const PERIODS = [
   { label: "전체", days: 0 },
 ];
 
+type CurrencyView = "KRW" | "USD" | "BOTH";
+
 interface PortfolioChartProps {
   portfolioId: string;
-  currency: "KRW" | "USD";
+  hasKrw: boolean;
+  hasUsd: boolean;
   className?: string;
 }
 
-export function PortfolioChart({ portfolioId, currency, className }: PortfolioChartProps) {
+const fmtKrw = (v: number) => `₩${Math.round(v).toLocaleString("ko-KR")}`;
+const fmtUsd = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
+
+export function PortfolioChart({ portfolioId, hasKrw, hasUsd, className }: PortfolioChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const [days, setDays] = useState(30);
+  const [view, setView] = useState<CurrencyView>(() =>
+    hasKrw ? "KRW" : "USD"
+  );
   const [loading, setLoading] = useState(true);
   const [empty, setEmpty] = useState(false);
 
+  // 가능한 탭 목록
+  const currencyTabs: { label: string; value: CurrencyView }[] = [
+    ...(hasKrw ? [{ label: "KRW", value: "KRW" as CurrencyView }] : []),
+    ...(hasUsd ? [{ label: "USD", value: "USD" as CurrencyView }] : []),
+    ...(hasKrw && hasUsd ? [{ label: "KRW+USD", value: "BOTH" as CurrencyView }] : []),
+  ];
+
   useEffect(() => {
     if (!containerRef.current) return;
+
+    const isBoth = view === "BOTH";
 
     const chart = createChart(containerRef.current, {
       layout: {
@@ -43,7 +61,14 @@ export function PortfolioChart({ portfolioId, currency, className }: PortfolioCh
         horzLines: { color: "#1f2937" },
       },
       crosshair: { mode: 1 },
-      rightPriceScale: { borderColor: "#374151" },
+      rightPriceScale: {
+        borderColor: "#374151",
+        visible: true,
+      },
+      leftPriceScale: {
+        borderColor: "#374151",
+        visible: isBoth,
+      },
       timeScale: { borderColor: "#374151", timeVisible: false },
       width: containerRef.current.clientWidth,
       height: 220,
@@ -71,19 +96,65 @@ export function PortfolioChart({ portfolioId, currency, className }: PortfolioCh
           return;
         }
 
-        const valueKey = currency === "KRW" ? "total_value_krw" : "total_value_usd";
-        const series = chart.addSeries(LineSeries, {
-          color: "#10b981",
-          lineWidth: 2,
-          priceLineVisible: false,
-        });
+        if (isBoth) {
+          // KRW 시리즈 — 오른쪽 축
+          const krwSeries = chart.addSeries(LineSeries, {
+            color: "#10b981",
+            lineWidth: 2,
+            priceLineVisible: false,
+            priceScaleId: "right",
+            priceFormat: {
+              type: "custom",
+              formatter: (v: number) => `₩${Math.round(v).toLocaleString("ko-KR")}`,
+              minMove: 1,
+            },
+          });
+          krwSeries.setData(
+            snapshots.map((s) => ({
+              time: s.snapshotted_on as Parameters<typeof krwSeries.setData>[0][number]["time"],
+              value: s.total_value_krw,
+            }))
+          );
 
-        series.setData(
-          snapshots.map((s) => ({
-            time: s.snapshotted_on as Parameters<typeof series.setData>[0][number]["time"],
-            value: s[valueKey] as number,
-          }))
-        );
+          // USD 시리즈 — 왼쪽 축
+          const usdSeries = chart.addSeries(LineSeries, {
+            color: "#60a5fa",
+            lineWidth: 2,
+            priceLineVisible: false,
+            priceScaleId: "left",
+            priceFormat: {
+              type: "custom",
+              formatter: (v: number) => `$${Math.round(v).toLocaleString("en-US")}`,
+              minMove: 1,
+            },
+          });
+          usdSeries.setData(
+            snapshots.map((s) => ({
+              time: s.snapshotted_on as Parameters<typeof usdSeries.setData>[0][number]["time"],
+              value: s.total_value_usd,
+            }))
+          );
+        } else {
+          const isKrw = view === "KRW";
+          const series = chart.addSeries(LineSeries, {
+            color: isKrw ? "#10b981" : "#60a5fa",
+            lineWidth: 2,
+            priceLineVisible: false,
+            priceScaleId: "right",
+            priceFormat: {
+              type: "custom",
+              formatter: isKrw ? fmtKrw : fmtUsd,
+              minMove: 1,
+            },
+          });
+          series.setData(
+            snapshots.map((s) => ({
+              time: s.snapshotted_on as Parameters<typeof series.setData>[0][number]["time"],
+              value: isKrw ? s.total_value_krw : s.total_value_usd,
+            }))
+          );
+        }
+
         chart.timeScale().fitContent();
       } finally {
         setLoading(false);
@@ -96,26 +167,62 @@ export function PortfolioChart({ portfolioId, currency, className }: PortfolioCh
       window.removeEventListener("resize", handleResize);
       chart.remove();
     };
-  }, [portfolioId, currency, days]);
+  }, [portfolioId, view, days]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={cn("space-y-3", className)}>
-      <div className="flex gap-1">
-        {PERIODS.map((p) => (
-          <button
-            key={p.days}
-            onClick={() => setDays(p.days)}
-            className={cn(
-              "rounded-lg px-3 py-1 text-xs font-medium transition-colors",
-              days === p.days
-                ? "bg-emerald-500 text-white"
-                : "bg-gray-800 text-gray-400 hover:text-white"
-            )}
-          >
-            {p.label}
-          </button>
-        ))}
+      {/* 상단 컨트롤: 통화 탭 + 기간 선택 */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {/* 통화 탭 */}
+        {currencyTabs.length > 1 && (
+          <div className="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+            {currencyTabs.map((t) => (
+              <button
+                key={t.value}
+                onClick={() => setView(t.value)}
+                className={cn(
+                  "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                  view === t.value ? "bg-gray-700 text-white" : "text-gray-400 hover:text-white"
+                )}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 기간 선택 */}
+        <div className="flex gap-1">
+          {PERIODS.map((p) => (
+            <button
+              key={p.days}
+              onClick={() => setDays(p.days)}
+              className={cn(
+                "rounded-lg px-3 py-1 text-xs font-medium transition-colors",
+                days === p.days
+                  ? "bg-emerald-500 text-white"
+                  : "bg-gray-800 text-gray-400 hover:text-white"
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {/* KRW+USD 범례 */}
+      {view === "BOTH" && (
+        <div className="flex gap-3 text-xs">
+          <span className="flex items-center gap-1.5 text-gray-400">
+            <span className="inline-block h-2 w-4 rounded-full bg-emerald-400" />
+            KRW (우측)
+          </span>
+          <span className="flex items-center gap-1.5 text-gray-400">
+            <span className="inline-block h-2 w-4 rounded-full bg-blue-400" />
+            USD (좌측)
+          </span>
+        </div>
+      )}
 
       <div className="relative">
         {loading && (
