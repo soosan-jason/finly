@@ -9,6 +9,7 @@ import {
 } from "lightweight-charts";
 import { cn } from "@/lib/utils/cn";
 import { PortfolioSnapshot } from "@/types/portfolio";
+import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
 
 const PERIODS = [
   { label: "7일",  days: 7 },
@@ -58,6 +59,7 @@ export function PortfolioChart({ portfolioId, view, className }: PortfolioChartP
   const [loading, setLoading]     = useState(true);
   const [empty,   setEmpty]       = useState(false);
   const [snapshots, setSnapshots] = useState<PortfolioSnapshot[]>([]);
+  const tableScrollRef = usePreventSwipeNav<HTMLDivElement>();
   const [displayMode, setDisplayMode] = useState<DisplayMode>(() => {
     if (typeof window === "undefined") return "chart";
     return (localStorage.getItem("portfolio_display_mode") as DisplayMode) ?? "chart";
@@ -327,7 +329,7 @@ export function PortfolioChart({ portfolioId, view, className }: PortfolioChartP
           )}
 
           {!empty && !loading && (
-            <div className="h-full overflow-auto">
+            <div ref={tableScrollRef} className="h-full overflow-auto">
               <table className="w-full text-xs [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
                 <thead className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur-sm">
                   <tr className="border-b border-gray-800 text-gray-500">

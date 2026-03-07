@@ -9,6 +9,7 @@ import { AddHoldingModal } from "./AddHoldingModal";
 import { PortfolioChart, type CurrencyView } from "./PortfolioChart";
 import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
 import { Plus, Briefcase } from "lucide-react";
+import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
 
 interface HeroCardProps {
   label: string;
@@ -219,6 +220,8 @@ export function PortfolioPageClient() {
   const hasKrw = krwHoldings.length > 0;
   const hasUsd = usdHoldings.length > 0;
 
+  const chartScrollRef = usePreventSwipeNav<HTMLDivElement>();
+
   return (
     <div className="space-y-6">
       {/* 페이지 헤더 */}
@@ -266,7 +269,7 @@ export function PortfolioPageClient() {
 
       {/* 자산 추이 차트 */}
       {holdings.length > 0 && portfolio && (
-        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 overflow-x-auto">
+        <div ref={chartScrollRef} className="rounded-2xl border border-gray-800 bg-gray-900 p-4 overflow-x-auto">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-medium text-gray-400">자산 추이</h2>
             {hasKrw && hasUsd && (

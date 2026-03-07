@@ -1,14 +1,19 @@
+"use client";
+
 import Image from "next/image";
 import { CryptoAsset } from "@/types/market";
 import { formatPrice, formatMarketCap, formatPercent } from "@/lib/utils/format";
+import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
 
 interface CryptoTableProps {
   cryptos: CryptoAsset[];
 }
 
 export function CryptoTable({ cryptos }: CryptoTableProps) {
+  const scrollRef = usePreventSwipeNav<HTMLDivElement>();
+
   return (
-    <div className="overflow-x-auto">
+    <div ref={scrollRef} className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-800 text-left text-xs text-gray-500">
