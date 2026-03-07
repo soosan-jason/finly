@@ -25,7 +25,7 @@ interface IndexCardProps {
 }
 
 export function IndexCard({ index }: IndexCardProps) {
-  const { showDate } = useDateFormat();
+  const { showDate, locale, timezone } = useDateFormat();
   const isUp = index.changePercent >= 0;
 
   return (
@@ -79,7 +79,7 @@ export function IndexCard({ index }: IndexCardProps) {
           <>
             <span className="text-gray-700">·</span>
             <span className="text-xs text-gray-600">
-              {showDate ? formatMonthDay(index.lastUpdated) : formatTime(index.lastUpdated)}
+              {showDate ? formatMonthDay(index.lastUpdated, locale, timezone) : formatTime(index.lastUpdated, locale, timezone)}
             </span>
           </>
         )}

@@ -58,7 +58,7 @@ function StarButton({ symbol, name }: { symbol: string; name: string }) {
 }
 
 export function CommoditiesSection() {
-  const { showDate } = useDateFormat();
+  const { showDate, locale, timezone } = useDateFormat();
   const [items, setItems] = useState<CommodityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -128,7 +128,7 @@ export function CommoditiesSection() {
                         {formatPercent(item.changePct)}
                       </p>
                       {(item.lastUpdated) && (
-                        <p className="mt-1 text-xs text-gray-600">{showDate ? formatMonthDay(item.lastUpdated) : formatTime(item.lastUpdated)}</p>
+                        <p className="mt-1 text-xs text-gray-600">{showDate ? formatMonthDay(item.lastUpdated, locale, timezone) : formatTime(item.lastUpdated, locale, timezone)}</p>
                       )}
                     </div>
                   </Card>

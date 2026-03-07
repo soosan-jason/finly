@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { DateFormatToggle } from "@/components/ui/DateFormatToggle";
+import { TimezoneSelect } from "@/components/ui/TimezoneSelect";
+import { LanguageSelect } from "@/components/ui/LanguageSelect";
 
 export const metadata: Metadata = { title: "설정" };
 
@@ -15,6 +17,23 @@ export default function SettingsPage() {
       <section className="space-y-1">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500">표시</h2>
         <div className="rounded-xl border border-gray-800 bg-gray-900 divide-y divide-gray-800">
+
+          <div className="flex items-center justify-between px-4 py-3.5">
+            <div>
+              <p className="text-sm font-medium text-white">언어</p>
+              <p className="mt-0.5 text-xs text-gray-500">날짜·시간 표시에 사용할 언어</p>
+            </div>
+            <LanguageSelect />
+          </div>
+
+          <div className="flex items-center justify-between px-4 py-3.5">
+            <div>
+              <p className="text-sm font-medium text-white">시간대</p>
+              <p className="mt-0.5 text-xs text-gray-500">마켓 연동 시각에 적용되는 시간대</p>
+            </div>
+            <TimezoneSelect />
+          </div>
+
           <div className="flex items-center justify-between px-4 py-3.5">
             <div>
               <p className="text-sm font-medium text-white">연동 시각 표시</p>
@@ -22,6 +41,7 @@ export default function SettingsPage() {
             </div>
             <DateFormatToggle />
           </div>
+
         </div>
       </section>
     </div>

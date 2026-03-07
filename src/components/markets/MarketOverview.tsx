@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { StockIndex } from "@/types/market";
 import { IndexCard } from "./IndexCard";
 import { RefreshCw } from "lucide-react";
+import { useDateFormat } from "@/contexts/DateFormatContext";
 
 export function MarketOverview() {
+  const { locale, timezone } = useDateFormat();
   const [indices, setIndices] = useState<StockIndex[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>("");
@@ -17,7 +19,7 @@ export function MarketOverview() {
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
       setIndices(data);
-      setLastUpdated(new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
+      setLastUpdated(new Date().toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: timezone }));
     } catch {
       // fallback 샘플 데이터
       setIndices([

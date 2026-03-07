@@ -42,7 +42,7 @@ function formatMarketCap(cap: number, currency: string): string {
 const STORAGE_KEY = "stocks-tab";
 
 export function StocksTabs() {
-  const { showDate } = useDateFormat();
+  const { showDate, locale, timezone } = useDateFormat();
   const [stocks, setStocks] = useState<TopStock[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Country>(() => {
@@ -144,7 +144,7 @@ export function StocksTabs() {
                       </span>
                     )}
                     {(stock.lastUpdated) && (
-                      <span className="text-xs text-gray-600">{showDate ? formatMonthDay(stock.lastUpdated) : formatTime(stock.lastUpdated)}</span>
+                      <span className="text-xs text-gray-600">{showDate ? formatMonthDay(stock.lastUpdated, locale, timezone) : formatTime(stock.lastUpdated, locale, timezone)}</span>
                     )}
                   </div>
                 </div>

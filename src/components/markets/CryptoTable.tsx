@@ -4,12 +4,14 @@ import Image from "next/image";
 import { CryptoAsset } from "@/types/market";
 import { formatPrice, formatMarketCap, formatPercent } from "@/lib/utils/format";
 import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
+import { useDateFormat } from "@/contexts/DateFormatContext";
 
 interface CryptoTableProps {
   cryptos: CryptoAsset[];
 }
 
 export function CryptoTable({ cryptos }: CryptoTableProps) {
+  const { locale, timezone } = useDateFormat();
   const scrollRef = usePreventSwipeNav<HTMLDivElement>();
 
   return (
@@ -48,7 +50,7 @@ export function CryptoTable({ cryptos }: CryptoTableProps) {
                       <p className="text-xs text-gray-500 uppercase">{coin.symbol}</p>
                       {coin.last_updated && (
                         <p className="text-xs text-gray-600">
-                          {new Date(coin.last_updated).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
+                          {new Date(coin.last_updated).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: timezone })}
                         </p>
                       )}
                     </div>

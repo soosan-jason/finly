@@ -93,7 +93,7 @@ function StarButton({ symbol, name }: { symbol: string; name: string }) {
 }
 
 export function TopStocksSection() {
-  const { showDate } = useDateFormat();
+  const { showDate, locale, timezone } = useDateFormat();
   const [stocks, setStocks] = useState<TopStock[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -173,7 +173,7 @@ export function TopStocksSection() {
                           </span>
                         )}
                         {(stock.lastUpdated) && (
-                          <span className="text-xs text-gray-600">{showDate ? formatMonthDay(stock.lastUpdated) : formatTime(stock.lastUpdated)}</span>
+                          <span className="text-xs text-gray-600">{showDate ? formatMonthDay(stock.lastUpdated, locale, timezone) : formatTime(stock.lastUpdated, locale, timezone)}</span>
                         )}
                       </div>
                     </div>

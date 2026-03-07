@@ -7,8 +7,10 @@ import { RefreshCw } from "lucide-react";
 import { CryptoAsset } from "@/types/market";
 import { formatPrice, formatMarketCap, formatPercent } from "@/lib/utils/format";
 import { Badge } from "@/components/ui/badge";
+import { useDateFormat } from "@/contexts/DateFormatContext";
 
 export function CryptoPageClient() {
+  const { locale, timezone } = useDateFormat();
   const [cryptos, setCryptos] = useState<CryptoAsset[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -22,7 +24,7 @@ export function CryptoPageClient() {
       const data = await res.json();
       setCryptos(data);
       const apiTime = Array.isArray(data) && data[0]?.last_updated;
-      setLastUpdated(apiTime ? new Date(apiTime).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }) : new Date().toLocaleTimeString("ko-KR"));
+      setLastUpdated(apiTime ? new Date(apiTime).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: timezone }) : new Date().toLocaleTimeString(locale, { timeZone: timezone }));
     } finally {
       setLoading(false);
     }
@@ -90,7 +92,7 @@ export function CryptoPageClient() {
                             <p className="text-xs text-gray-500 uppercase">{coin.symbol}</p>
                             {coin.last_updated && (
                               <p className="text-xs text-gray-600">
-                                {new Date(coin.last_updated).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
+                                {new Date(coin.last_updated).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: timezone })}
                               </p>
                             )}
                           </div>

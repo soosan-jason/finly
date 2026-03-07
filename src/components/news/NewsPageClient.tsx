@@ -6,6 +6,7 @@ import { NewsCard } from "./NewsCard";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useSwipeTab } from "@/hooks/useSwipeTab";
+import { useDateFormat } from "@/contexts/DateFormatContext";
 
 const CATEGORIES = [
   { value: "general", label: "전체" },
@@ -18,6 +19,7 @@ type Category = (typeof CATEGORIES)[number]["value"];
 const STORAGE_KEY = "news-category";
 
 export function NewsPageClient() {
+  const { locale, timezone } = useDateFormat();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category>(() => {
@@ -33,7 +35,7 @@ export function NewsPageClient() {
       const res = await fetch(`/api/news?category=${cat}&limit=30`);
       const data = await res.json();
       setArticles(Array.isArray(data) ? data : []);
-      setLastUpdated(new Date().toLocaleTimeString("ko-KR"));
+      setLastUpdated(new Date().toLocaleTimeString(locale, { timeZone: timezone }));
     } finally {
       setLoading(false);
     }

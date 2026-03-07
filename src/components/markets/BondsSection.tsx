@@ -7,7 +7,7 @@ import { formatTime, formatMonthDay } from "@/lib/utils/format";
 import { useDateFormat } from "@/contexts/DateFormatContext";
 
 export function BondsSection() {
-  const { showDate } = useDateFormat();
+  const { showDate, locale, timezone } = useDateFormat();
   const [bonds, setBonds] = useState<BondYield[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -87,7 +87,7 @@ export function BondsSection() {
                         new Date(b.lastUpdated!).getTime() -
                         new Date(a.lastUpdated!).getTime()
                     )[0].lastUpdated;
-                  return showDate ? formatMonthDay(iso!) : formatTime(iso!);
+                  return showDate ? formatMonthDay(iso!, locale, timezone) : formatTime(iso!, locale, timezone);
                 })()}
               </span>
             )}
@@ -105,6 +105,7 @@ export function BondsSection() {
 
 
 function BondCard({ bond, showDate }: { bond: BondYield; showDate: boolean }) {
+  const { locale, timezone } = useDateFormat();
   const up = bond.change >= 0;
   return (
     <Card className="flex flex-col justify-between">
@@ -121,7 +122,7 @@ function BondCard({ bond, showDate }: { bond: BondYield; showDate: boolean }) {
         </div>
         {bond.lastUpdated && (
           <p className="mt-1 text-xs text-gray-500">
-            {showDate ? formatMonthDay(bond.lastUpdated) : formatTime(bond.lastUpdated)}
+            {showDate ? formatMonthDay(bond.lastUpdated, locale, timezone) : formatTime(bond.lastUpdated, locale, timezone)}
           </p>
         )}
       </div>

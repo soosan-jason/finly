@@ -41,41 +41,45 @@ export function unixToISO(unixSec: number): string {
   return new Date(unixSec * 1000).toISOString();
 }
 
-/** ISO 문자열 → "HH:mm" (ko-KR, 24시) */
-export function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString("ko-KR", {
+/** ISO 문자열 → "HH:mm" (24시) */
+export function formatTime(iso: string, locale = "ko-KR", timeZone?: string): string {
+  return new Date(iso).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+    ...(timeZone ? { timeZone } : {}),
   });
 }
 
-/** ISO 문자열 → "HH:mm:ss" (ko-KR, 24시) */
-export function formatTimeWithSec(iso: string): string {
-  return new Date(iso).toLocaleTimeString("ko-KR", {
+/** ISO 문자열 → "HH:mm:ss" (24시) */
+export function formatTimeWithSec(iso: string, locale = "ko-KR", timeZone?: string): string {
+  return new Date(iso).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
+    ...(timeZone ? { timeZone } : {}),
   });
 }
 
-/** ISO / YYYY-MM-DD 문자열 → "M월 D일" */
-export function formatMonthDay(iso: string): string {
-  return new Date(iso).toLocaleDateString("ko-KR", {
+/** ISO / YYYY-MM-DD 문자열 → 지역화된 월/일 */
+export function formatMonthDay(iso: string, locale = "ko-KR", timeZone?: string): string {
+  return new Date(iso).toLocaleDateString(locale, {
     month: "long",
     day: "numeric",
+    ...(timeZone ? { timeZone } : {}),
   });
 }
 
-/** ISO 문자열 → "M월 D일 HH:mm" */
-export function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("ko-KR", {
+/** ISO 문자열 → 지역화된 월/일 HH:mm */
+export function formatDateTime(iso: string, locale = "ko-KR", timeZone?: string): string {
+  return new Date(iso).toLocaleString(locale, {
     month: "long",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+    ...(timeZone ? { timeZone } : {}),
   });
 }
 

@@ -19,7 +19,7 @@ function formatRate(rate: number, to: string) {
 
 
 export function FxWidget() {
-  const { showDate } = useDateFormat();
+  const { showDate, locale, timezone } = useDateFormat();
   const [rates, setRates] = useState<FxRate[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,7 +67,7 @@ export function FxWidget() {
                       <span className="text-base">{FLAG[r.from] ?? "🌍"}</span>
                       <span className="text-sm font-medium text-white">{r.pair}</span>
                     </div>
-                    <p className="mt-0.5 text-xs text-gray-500">{showDate ? formatMonthDay(r.lastUpdated) : formatTimeWithSec(r.lastUpdated)}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">{showDate ? formatMonthDay(r.lastUpdated, locale, timezone) : formatTimeWithSec(r.lastUpdated, locale, timezone)}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-white tabular-nums">
