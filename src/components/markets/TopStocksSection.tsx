@@ -124,13 +124,13 @@ export function TopStocksSection() {
                       </div>
                     </div>
 
-                    {/* 회사명 */}
-                    <p className="mt-2 text-sm font-semibold text-gray-200 truncate">{stock.name}</p>
-
-                    {/* 현재가 */}
-                    <p className="mt-2 text-2xl font-bold tracking-tight text-white tabular-nums">
-                      {formatStockPrice(stock.price, stock.currency)}
-                    </p>
+                    {/* 회사명 + 현재가 */}
+                    <div className="mt-2 flex items-baseline justify-between gap-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-200 truncate">{stock.name}</p>
+                      <p className="shrink-0 text-lg font-bold tracking-tight text-white tabular-nums">
+                        {formatStockPrice(stock.price, stock.currency)}
+                      </p>
+                    </div>
 
                     {/* 하단: 등락 절대값 + 등락률 */}
                     <div className="mt-1 flex items-center gap-1 min-w-0">
