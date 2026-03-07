@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     profit_loss_usd: number;
   };
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
 
   const { data, error } = await supabase
     .from("portfolio_snapshots")

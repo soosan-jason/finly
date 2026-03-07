@@ -228,7 +228,7 @@ export function PortfolioPageClient() {
   }
 
   async function saveSnapshot(portfolioId: string, enriched: Holding[]) {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
     if (snapshotSavedRef.current === today) return; // 오늘 이미 저장
 
     const krw = enriched.filter((h) => h.currency === "KRW");
