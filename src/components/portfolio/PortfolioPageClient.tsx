@@ -6,7 +6,7 @@ import { Portfolio, Holding, WatchlistItem } from "@/types/portfolio";
 import { HoldingsTable } from "./HoldingsTable";
 import { WatchlistSection } from "./WatchlistSection";
 import { AddHoldingModal } from "./AddHoldingModal";
-import { PortfolioChart } from "./PortfolioChart";
+import { PortfolioChart, type CurrencyView } from "./PortfolioChart";
 import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
 import { Plus, Briefcase } from "lucide-react";
 
@@ -58,6 +58,7 @@ export function PortfolioPageClient() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeTab, setActiveTab] = useState<"holdings" | "watchlist">("holdings");
+  const [chartView, setChartView] = useState<CurrencyView>("KRW");
   const snapshotSavedRef = useRef<string | null>(null); // 오늘 이미 저장했는지 체크
 
   async function fetchPortfolio() {
@@ -263,11 +264,33 @@ export function PortfolioPageClient() {
       {/* 자산 추이 차트 */}
       {holdings.length > 0 && portfolio && (
         <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
-          <h2 className="mb-3 text-sm font-medium text-gray-400">자산 추이</h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-medium text-gray-400">자산 추이</h2>
+            {hasKrw && hasUsd && (
+              <div className="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+                {(
+                  [
+                    { label: "KRW",     value: "KRW"  },
+                    { label: "USD",     value: "USD"  },
+                    { label: "KRW+USD", value: "BOTH" },
+                  ] as { label: string; value: CurrencyView }[]
+                ).map((t) => (
+                  <button
+                    key={t.value}
+                    onClick={() => setChartView(t.value)}
+                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                      chartView === t.value ? "bg-gray-700 text-white" : "text-gray-400 hover:text-white"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <PortfolioChart
             portfolioId={portfolio.id}
-            hasKrw={hasKrw}
-            hasUsd={hasUsd}
+            view={hasKrw && !hasUsd ? "KRW" : !hasKrw && hasUsd ? "USD" : chartView}
           />
         </div>
       )}
