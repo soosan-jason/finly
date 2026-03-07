@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { BondYield } from "@/types/market";
 import { Card } from "@/components/ui/card";
-import { formatTime } from "@/lib/utils/format";
+import { formatTime, formatMonthDay } from "@/lib/utils/format";
+import { useDateFormat } from "@/contexts/DateFormatContext";
 
 export function BondsSection() {
+  const { showDate } = useDateFormat();
   const [bonds, setBonds] = useState<BondYield[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,15 +79,16 @@ export function BondsSection() {
             {otherBonds.some((b) => b.lastUpdated) && (
               <span className="text-xs text-gray-500">
                 연동{" "}
-                {formatTime(
-                  otherBonds
+                {(() => {
+                  const iso = otherBonds
                     .filter((b) => b.lastUpdated)
                     .sort(
                       (a, b) =>
                         new Date(b.lastUpdated!).getTime() -
                         new Date(a.lastUpdated!).getTime()
-                    )[0].lastUpdated
-                )}
+                    )[0].lastUpdated;
+                  return showDate ? formatMonthDay(iso!) : formatTime(iso!);
+                })()}
               </span>
             )}
           </div>
@@ -116,8 +119,10 @@ function BondCard({ bond }: { bond: BondYield }) {
             </span>
           )}
         </div>
-        {formatTime(bond.lastUpdated) && (
-          <p className="mt-1 text-xs text-gray-500">{formatTime(bond.lastUpdated)}</p>
+        {bond.lastUpdated && (
+          <p className="mt-1 text-xs text-gray-500">
+            {showDate ? formatMonthDay(bond.lastUpdated) : formatTime(bond.lastUpdated)}
+          </p>
         )}
       </div>
     </Card>

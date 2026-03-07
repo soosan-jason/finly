@@ -1,5 +1,8 @@
+"use client";
+
 import { StockIndex } from "@/types/market";
-import { formatPercent, formatTime } from "@/lib/utils/format";
+import { formatPercent, formatTime, formatMonthDay } from "@/lib/utils/format";
+import { useDateFormat } from "@/contexts/DateFormatContext";
 
 const REGION_FLAG: Record<StockIndex["region"], string> = {
   US: "🇺🇸",
@@ -22,6 +25,7 @@ interface IndexCardProps {
 }
 
 export function IndexCard({ index }: IndexCardProps) {
+  const { showDate } = useDateFormat();
   const isUp = index.changePercent >= 0;
 
   return (
@@ -75,7 +79,7 @@ export function IndexCard({ index }: IndexCardProps) {
           <>
             <span className="text-gray-700">·</span>
             <span className="text-xs text-gray-600">
-              {formatTime(index.lastUpdated)}
+              {showDate ? formatMonthDay(index.lastUpdated) : formatTime(index.lastUpdated)}
             </span>
           </>
         )}

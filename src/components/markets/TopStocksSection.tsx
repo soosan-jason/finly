@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import Link from "next/link";
 import { TopStock } from "@/types/market";
-import { formatPercent, formatTime } from "@/lib/utils/format";
+import { formatPercent, formatTime, formatMonthDay } from "@/lib/utils/format";
+import { useDateFormat } from "@/contexts/DateFormatContext";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 
@@ -92,6 +93,7 @@ function StarButton({ symbol, name }: { symbol: string; name: string }) {
 }
 
 export function TopStocksSection() {
+  const { showDate } = useDateFormat();
   const [stocks, setStocks] = useState<TopStock[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -170,8 +172,8 @@ export function TopStocksSection() {
                             {formatMarketCap(stock.marketCap, stock.currency)}
                           </span>
                         )}
-                        {formatTime(stock.lastUpdated) && (
-                          <span className="text-xs text-gray-600">{formatTime(stock.lastUpdated)}</span>
+                        {(stock.lastUpdated) && (
+                          <span className="text-xs text-gray-600">{showDate ? formatMonthDay(stock.lastUpdated) : formatTime(stock.lastUpdated)}</span>
                         )}
                       </div>
                     </div>

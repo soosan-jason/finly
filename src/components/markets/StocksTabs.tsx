@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { TopStock } from "@/types/market";
-import { formatPercent, formatTime } from "@/lib/utils/format";
+import { formatPercent, formatTime, formatMonthDay } from "@/lib/utils/format";
+import { useDateFormat } from "@/contexts/DateFormatContext";
 import Link from "next/link";
 import { useSwipeTab } from "@/hooks/useSwipeTab";
 
@@ -41,6 +42,7 @@ function formatMarketCap(cap: number, currency: string): string {
 const STORAGE_KEY = "stocks-tab";
 
 export function StocksTabs() {
+  const { showDate } = useDateFormat();
   const [stocks, setStocks] = useState<TopStock[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Country>(() => {
@@ -141,8 +143,8 @@ export function StocksTabs() {
                         {formatMarketCap(stock.marketCap, stock.currency)}
                       </span>
                     )}
-                    {formatTime(stock.lastUpdated) && (
-                      <span className="text-xs text-gray-600">{formatTime(stock.lastUpdated)}</span>
+                    {(stock.lastUpdated) && (
+                      <span className="text-xs text-gray-600">{showDate ? formatMonthDay(stock.lastUpdated) : formatTime(stock.lastUpdated)}</span>
                     )}
                   </div>
                 </div>
