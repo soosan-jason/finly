@@ -61,14 +61,13 @@ export function WatchlistToggle({ symbol, name, assetType = "crypto", imageUrl, 
       onClick={toggle}
       disabled={loading}
       title={watched ? "관심 목록에서 제거" : "관심 목록에 추가"}
-      className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-all disabled:opacity-50 ${
+      className={`flex items-center justify-center rounded-xl border p-2.5 transition-all disabled:opacity-50 ${
         watched
           ? "border-yellow-500/50 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20"
           : "border-gray-700 bg-gray-800 text-gray-400 hover:border-yellow-500/50 hover:text-yellow-400"
       }`}
     >
-      <Star className={`h-4 w-4 ${watched ? "fill-yellow-400" : ""}`} />
-      {watched ? "관심 중" : "관심 추가"}
+      <Star className={`h-5 w-5 ${watched ? "fill-yellow-400" : ""}`} />
     </button>
   );
 }
