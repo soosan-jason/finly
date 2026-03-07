@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { TopStock } from "@/types/market";
 import { formatPercent } from "@/lib/utils/format";
 import Link from "next/link";
+import { useSwipeTab } from "@/hooks/useSwipeTab";
 
 type Country = TopStock["country"];
 
@@ -62,6 +63,13 @@ export function StocksTabs() {
 
   const group = stocks.filter((s) => s.country === activeTab);
 
+  const tabIndex = TABS.findIndex((t) => t.key === activeTab);
+  const { containerRef, onTouchStart, onTouchEnd } = useSwipeTab({
+    count: TABS.length,
+    current: tabIndex,
+    onChange: (i) => setActiveTab(TABS[i].key),
+  });
+
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
@@ -88,7 +96,8 @@ export function StocksTabs() {
         ))}
       </div>
 
-      {/* 카드 그리드 */}
+      {/* 카드 그리드 — 좌우 스와이프로 국가 탭 전환 */}
+      <div ref={containerRef} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {loading ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -159,6 +168,7 @@ export function StocksTabs() {
           })}
         </div>
       )}
+      </div>
     </section>
   );
 }

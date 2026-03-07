@@ -7,6 +7,7 @@ import { FuturesSection } from "./FuturesSection";
 import { CommoditiesSection } from "./CommoditiesSection";
 import { BondsSection } from "./BondsSection";
 import { TopStocksSection } from "./TopStocksSection";
+import { useSwipeTab } from "@/hooks/useSwipeTab";
 
 const TABS = [
   { id: "indices",     label: "지수" },
@@ -57,6 +58,13 @@ export function MarketsPageClient() {
     localStorage.setItem("marketsTab", next);
   }
 
+  const tabIndex = TABS.findIndex((t) => t.id === tab);
+  const { containerRef, onTouchStart, onTouchEnd } = useSwipeTab({
+    count: TABS.length,
+    current: tabIndex,
+    onChange: (i) => handleTabChange(TABS[i].id),
+  });
+
   useEffect(() => {
     async function fetchIndices() {
       try {
@@ -86,7 +94,7 @@ export function MarketsPageClient() {
   return (
     <div className="space-y-5">
       {/* 탭 바: 전체 너비를 균등 분할 */}
-      <div className="flex gap-1 rounded-xl bg-gray-800/60 p-1">
+      <div className="flex gap-1 rounded-xl bg-gray-800/60 p-1" role="tablist">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -102,7 +110,8 @@ export function MarketsPageClient() {
         ))}
       </div>
 
-      {/* 탭 콘텐츠 */}
+      {/* 탭 콘텐츠 — 좌우 스와이프로 탭 전환 */}
+      <div ref={containerRef} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {tab === "indices" && (
         loading && indices.length === 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -132,6 +141,7 @@ export function MarketsPageClient() {
       {tab === "commodities" && <CommoditiesSection />}
       {tab === "bonds"       && <BondsSection />}
       {tab === "stocks"      && <TopStocksSection />}
+      </div>
     </div>
   );
 }
