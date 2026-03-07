@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { encryptField, decryptField } from "@/lib/utils/fieldCrypto";
 
 // GET /api/portfolio/holdings?portfolio_id=xxx
 export async function GET(req: NextRequest) {
@@ -20,7 +21,15 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+
+  // 복호화하여 반환 (기존 평문 숫자도 안전하게 처리)
+  const decrypted = (data ?? []).map((h) => ({
+    ...h,
+    quantity:      decryptField(h.quantity),
+    avg_buy_price: decryptField(h.avg_buy_price),
+  }));
+
+  return NextResponse.json(decrypted);
 }
 
 // POST /api/portfolio/holdings - 보유 종목 추가
@@ -41,21 +50,29 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (existing) {
-    const totalQty = existing.quantity + quantity;
-    const newAvg = (existing.quantity * existing.avg_buy_price + quantity * avg_buy_price) / totalQty;
+    const existingQty = decryptField(existing.quantity);
+    const existingAvg = decryptField(existing.avg_buy_price);
+    const totalQty = existingQty + quantity;
+    const newAvg = (existingQty * existingAvg + quantity * avg_buy_price) / totalQty;
 
     const { data, error } = await supabase
       .from("holdings")
-      .update({ quantity: totalQty, avg_buy_price: newAvg })
+      .update({
+        quantity:      encryptField(totalQty),
+        avg_buy_price: encryptField(newAvg),
+      })
       .eq("id", existing.id)
       .select()
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    return NextResponse.json({
+      ...data,
+      quantity:      totalQty,
+      avg_buy_price: newAvg,
+    });
   }
 
-  // currency가 전달되지 않았으면 심볼 접미사로 감지
   const resolvedCurrency: string =
     currency ||
     (asset_type === "crypto"
@@ -68,12 +85,25 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await supabase
     .from("holdings")
-    .insert({ user_id: user.id, portfolio_id, asset_type, symbol, name, image_url, quantity, avg_buy_price, currency: resolvedCurrency })
+    .insert({
+      user_id:       user.id,
+      portfolio_id,
+      asset_type,
+      symbol,
+      name,
+      image_url,
+      quantity:      encryptField(quantity),
+      avg_buy_price: encryptField(avg_buy_price),
+      currency:      resolvedCurrency,
+    })
     .select()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data, { status: 201 });
+  return NextResponse.json(
+    { ...data, quantity, avg_buy_price },
+    { status: 201 }
+  );
 }
 
 // DELETE /api/portfolio/holdings?id=xxx

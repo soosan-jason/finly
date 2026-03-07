@@ -18,7 +18,17 @@ export async function updateSession(request: NextRequest) {
           );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, {
+              ...options,
+              // 세션 만료: 7일 (Supabase refresh token 주기와 맞춤)
+              maxAge:   60 * 60 * 24 * 7,
+              // JS에서 쿠키 접근 차단 (XSS 방어)
+              httpOnly: true,
+              // HTTPS에서만 전송 (프로덕션)
+              secure:   process.env.NODE_ENV === "production",
+              // CSRF 방어
+              sameSite: "lax",
+            })
           );
         },
       },
