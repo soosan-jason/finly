@@ -64,7 +64,7 @@ export function BondsSection() {
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {usBonds.map((bond) => (
-            <BondCard key={bond.symbol} bond={bond} />
+            <BondCard key={bond.symbol} bond={bond} showDate={showDate} />
           ))}
         </div>
       </section>
@@ -94,7 +94,7 @@ export function BondsSection() {
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {otherBonds.map((bond) => (
-              <BondCard key={bond.symbol} bond={bond} />
+              <BondCard key={bond.symbol} bond={bond} showDate={showDate} />
             ))}
           </div>
         </section>
@@ -104,7 +104,7 @@ export function BondsSection() {
 }
 
 
-function BondCard({ bond }: { bond: BondYield }) {
+function BondCard({ bond, showDate }: { bond: BondYield; showDate: boolean }) {
   const up = bond.change >= 0;
   return (
     <Card className="flex flex-col justify-between">
