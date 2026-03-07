@@ -14,44 +14,63 @@ const BOND_CONFIG: Omit<BondYield, "yield" | "change" | "lastUpdated">[] = [
   { symbol: "DE10YT=RR", label: "독일 10년",   maturityMonths: 120, country: "DE" },
 ];
 
-// ── Yahoo Finance 인증 크럼 캐시 ──────────────────────────────────────────
+const UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+
+// ── Yahoo Finance 크럼 캐시 ──────────────────────────────────────────────────
 let credCache: { crumb: string; cookie: string; expires: number } | null = null;
 
 async function getCredentials(): Promise<{ crumb: string; cookie: string } | null> {
-  if (credCache && Date.now() < credCache.expires) {
-    return { crumb: credCache.crumb, cookie: credCache.cookie };
-  }
+  if (credCache && Date.now() < credCache.expires) return credCache;
   try {
-    const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
-    // 1) Yahoo Finance 세션 쿠키 획득
+    // 1) 세션 쿠키 획득
     const homeRes = await fetch("https://finance.yahoo.com/", {
-      headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9" },
+      headers: {
+        "User-Agent": UA,
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
       redirect: "follow",
     });
-    const setCookie = homeRes.headers.getSetCookie?.() ?? [];
-    const cookie = setCookie.map((c) => c.split(";")[0]).join("; ");
 
-    // 2) 크럼 획득
-    const crumbRes = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {
-      headers: { "User-Agent": UA, Cookie: cookie },
-    });
-    if (!crumbRes.ok) return null;
-    const crumb = (await crumbRes.text()).trim();
-    if (!crumb || crumb.startsWith("<")) return null;
+    // getSetCookie() Node 18+; fallback to get()
+    let cookieParts: string[] = [];
+    if (typeof homeRes.headers.getSetCookie === "function") {
+      cookieParts = homeRes.headers.getSetCookie().map((c) => c.split(";")[0]);
+    } else {
+      const raw = homeRes.headers.get("set-cookie") ?? "";
+      cookieParts = raw.split(/,(?=[^ ])/).map((c) => c.split(";")[0].trim());
+    }
+    const cookie = cookieParts.join("; ");
+    if (!cookie) return null;
 
-    credCache = { crumb, cookie, expires: Date.now() + 30 * 60 * 1000 };
-    return { crumb, cookie };
+    // 2) 크럼 획득 (query1 / query2 둘 다 시도)
+    for (const host of ["query1", "query2"]) {
+      const cr = await fetch(
+        `https://${host}.finance.yahoo.com/v1/test/getcrumb`,
+        { headers: { "User-Agent": UA, Cookie: cookie } }
+      );
+      if (!cr.ok) continue;
+      const crumb = (await cr.text()).trim();
+      if (crumb && !crumb.startsWith("<") && crumb.length <= 20) {
+        credCache = { crumb, cookie, expires: Date.now() + 30 * 60_000 };
+        return credCache;
+      }
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
-// ── v8 chart API — ^ CBOE 심볼 전용 ────────────────────────────────────────
-async function fetchChart(symbol: string): Promise<{ price: number; change: number; lastUpdated: string } | null> {
+// ── v8 chart API (^ CBOE 심볼) ───────────────────────────────────────────────
+async function fetchChart(
+  symbol: string
+): Promise<{ price: number; change: number; lastUpdated: string } | null> {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
     const res = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0" },
+      headers: { "User-Agent": UA },
       next: { revalidate: 60 },
     });
     if (!res.ok) return null;
@@ -72,40 +91,45 @@ async function fetchChart(symbol: string): Promise<{ price: number; change: numb
   }
 }
 
-// ── v7 quote API — =RR Reuters 국제 채권 심볼 전용 (크럼 인증) ─────────────
-async function fetchQuote(symbol: string): Promise<{ price: number; change: number; lastUpdated: string } | null> {
-  try {
-    const creds = await getCredentials();
-    const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
-    const base = "https://query2.finance.yahoo.com/v7/finance/quote";
-    const params = `symbols=${encodeURIComponent(symbol)}${creds ? `&crumb=${encodeURIComponent(creds.crumb)}` : ""}`;
-    const url = `${base}?${params}`;
+// ── v7 quote API (=RR Reuters 심볼, 크럼 인증) ───────────────────────────────
+async function fetchQuote(
+  symbol: string
+): Promise<{ price: number; change: number; lastUpdated: string } | null> {
+  const creds = await getCredentials();
+  const crumbParam = creds ? `&crumb=${encodeURIComponent(creds.crumb)}` : "";
 
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent": UA,
-        ...(creds ? { Cookie: creds.cookie } : {}),
-      },
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const q = data?.quoteResponse?.result?.[0];
-    if (!q?.regularMarketPrice) return null;
+  for (const host of ["query1", "query2"]) {
+    try {
+      const url = `https://${host}.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}${crumbParam}`;
+      const res = await fetch(url, {
+        headers: {
+          "User-Agent": UA,
+          ...(creds ? { Cookie: creds.cookie } : {}),
+        },
+        next: { revalidate: 60 },
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const q = data?.quoteResponse?.result?.[0];
+      if (!q?.regularMarketPrice) continue;
 
-    const price = q.regularMarketPrice as number;
-    const change = (q.regularMarketChange as number) ?? 0;
-    const lastUpdated = q.regularMarketTime
-      ? new Date((q.regularMarketTime as number) * 1000).toISOString()
-      : new Date().toISOString();
+      const price = q.regularMarketPrice as number;
+      const change = (q.regularMarketChange as number) ?? 0;
+      const lastUpdated = q.regularMarketTime
+        ? new Date((q.regularMarketTime as number) * 1000).toISOString()
+        : new Date().toISOString();
 
-    return { price, change, lastUpdated };
-  } catch {
-    return null;
+      return { price, change, lastUpdated };
+    } catch {
+      continue;
+    }
   }
+  return null;
 }
 
-async function fetchYahooQuote(symbol: string): Promise<{ price: number; change: number; lastUpdated: string } | null> {
+async function fetchYahooQuote(
+  symbol: string
+): Promise<{ price: number; change: number; lastUpdated: string } | null> {
   return symbol.includes("=RR") ? fetchQuote(symbol) : fetchChart(symbol);
 }
 
@@ -131,7 +155,10 @@ export async function GET() {
     if (items.length === 0) return NextResponse.json(FALLBACK_DATA);
 
     const symbolSet = new Set(items.map((i) => i.symbol));
-    const merged = [...items, ...FALLBACK_DATA.filter((f) => !symbolSet.has(f.symbol))];
+    const merged = [
+      ...items,
+      ...FALLBACK_DATA.filter((f) => !symbolSet.has(f.symbol)),
+    ];
 
     return NextResponse.json(merged, {
       headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate=30" },

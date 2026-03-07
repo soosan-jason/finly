@@ -69,9 +69,25 @@ export function BondsSection() {
       {/* 기타 국채 */}
       {otherBonds.length > 0 && (
         <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-            기타
-          </h2>
+          <div className="mb-3 flex items-baseline gap-2">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              기타
+            </h2>
+            {otherBonds.some((b) => b.lastUpdated) && (
+              <span className="text-xs text-gray-500">
+                연동{" "}
+                {fmtTime(
+                  otherBonds
+                    .filter((b) => b.lastUpdated)
+                    .sort(
+                      (a, b) =>
+                        new Date(b.lastUpdated!).getTime() -
+                        new Date(a.lastUpdated!).getTime()
+                    )[0].lastUpdated
+                )}
+              </span>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {otherBonds.map((bond) => (
               <BondCard key={bond.symbol} bond={bond} />
@@ -99,7 +115,7 @@ function BondCard({ bond }: { bond: BondYield }) {
           {up ? "+" : ""}{bond.change.toFixed(2)}bp
         </p>
         {fmtTime(bond.lastUpdated) && (
-          <p className="mt-1 text-xs text-gray-600">{fmtTime(bond.lastUpdated)}</p>
+          <p className="mt-1 text-xs text-gray-500">{fmtTime(bond.lastUpdated)}</p>
         )}
       </div>
     </Card>
