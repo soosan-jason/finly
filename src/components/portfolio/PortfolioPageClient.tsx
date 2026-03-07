@@ -275,6 +275,8 @@ export function PortfolioPageClient() {
     else if (!authLoading) setLoading(false);
   }, [user, authLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const chartScrollRef = usePreventSwipeNav<HTMLDivElement>();
+
   if (authLoading || loading) {
     return (
       <div className="space-y-4">
@@ -302,8 +304,6 @@ export function PortfolioPageClient() {
 
   const hasKrw = krwHoldings.length > 0;
   const hasUsd = usdHoldings.length > 0;
-
-  const chartScrollRef = usePreventSwipeNav<HTMLDivElement>();
 
   return (
     <div className="space-y-6">
