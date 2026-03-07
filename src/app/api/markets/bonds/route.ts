@@ -3,10 +3,10 @@ import { BondYield } from "@/types/market";
 
 const BOND_CONFIG: Omit<BondYield, "yield" | "change" | "lastUpdated">[] = [
   { symbol: "^IRX",       label: "3개월",      maturityMonths: 3,   country: "US" },
-  { symbol: "^US1YT=RR", label: "1년",         maturityMonths: 12,  country: "US" },
+  { symbol: "US1YT=RR",  label: "1년",         maturityMonths: 12,  country: "US" },
   { symbol: "^FVX",       label: "5년",         maturityMonths: 60,  country: "US" },
   { symbol: "^TNX",       label: "10년",        maturityMonths: 120, country: "US" },
-  { symbol: "^US20YT=RR", label: "20년",        maturityMonths: 240, country: "US" },
+  { symbol: "US20YT=RR", label: "20년",        maturityMonths: 240, country: "US" },
   { symbol: "^TYX",       label: "30년",        maturityMonths: 360, country: "US" },
   { symbol: "KR5YT=RR",   label: "한국 5년",   maturityMonths: 60,  country: "KR" },
   { symbol: "KR10YT=RR",  label: "한국 10년",  maturityMonths: 120, country: "KR" },
@@ -76,10 +76,10 @@ export async function GET() {
 
 const FALLBACK_DATA: BondYield[] = [
   { symbol: "^IRX",       label: "3개월",      maturityMonths: 3,   yield: 4.35, change: 0.01,  country: "US" },
-  { symbol: "^US1YT=RR",  label: "1년",         maturityMonths: 12,  yield: 4.15, change: -0.02, country: "US" },
+  { symbol: "US1YT=RR",  label: "1년",         maturityMonths: 12,  yield: 4.15, change: -0.02, country: "US" },
   { symbol: "^FVX",       label: "5년",         maturityMonths: 60,  yield: 4.25, change: -0.02, country: "US" },
   { symbol: "^TNX",       label: "10년",        maturityMonths: 120, yield: 4.45, change: -0.01, country: "US" },
-  { symbol: "^US20YT=RR", label: "20년",        maturityMonths: 240, yield: 4.65, change: 0.01,  country: "US" },
+  { symbol: "US20YT=RR", label: "20년",        maturityMonths: 240, yield: 4.65, change: 0.01,  country: "US" },
   { symbol: "^TYX",       label: "30년",        maturityMonths: 360, yield: 4.60, change: 0.00,  country: "US" },
   { symbol: "KR5YT=RR",   label: "한국 5년",   maturityMonths: 60,  yield: 3.15, change: -0.01, country: "KR" },
   { symbol: "KR10YT=RR",  label: "한국 10년",  maturityMonths: 120, yield: 3.35, change: -0.02, country: "KR" },

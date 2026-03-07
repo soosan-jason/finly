@@ -9,7 +9,7 @@ const COMMODITY_CONFIG: Omit<CommodityItem, "price" | "change" | "changePct" | "
   { symbol: "CL=F",  name: "WTI 원유",     category: "에너지", unit: "USD/bbl" },
   { symbol: "BZ=F",  name: "브렌트 원유",  category: "에너지", unit: "USD/bbl" },
   { symbol: "NG=F",  name: "천연가스",     category: "에너지", unit: "USD/MMBtu" },
-  { symbol: "LGO=F", name: "런던가스오일", category: "에너지", unit: "USD/t" },
+  { symbol: "HO=F",  name: "난방유",      category: "에너지", unit: "USD/gal" },
 ];
 
 async function fetchYahooQuote(symbol: string): Promise<{ price: number; change: number; changePct: number; lastUpdated: string } | null> {
@@ -80,5 +80,5 @@ const FALLBACK_DATA: CommodityItem[] = [
   { symbol: "CL=F",  name: "WTI 원유",     category: "에너지", price: 78.45,   change: -0.95,  changePct: -1.20, unit: "USD/bbl" },
   { symbol: "BZ=F",  name: "브렌트 원유",  category: "에너지", price: 82.30,   change: -0.75,  changePct: -0.90, unit: "USD/bbl" },
   { symbol: "NG=F",  name: "천연가스",     category: "에너지", price: 1.82,    change: 0.04,   changePct: 2.25,  unit: "USD/MMBtu" },
-  { symbol: "LGO=F", name: "런던가스오일", category: "에너지", price: 680.00,  change: -4.50,  changePct: -0.66, unit: "USD/t" },
+  { symbol: "HO=F",  name: "난방유",      category: "에너지", price: 2.65,    change: -0.03,  changePct: -1.12, unit: "USD/gal" },
 ];
