@@ -58,7 +58,10 @@ export function PortfolioPageClient() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeTab, setActiveTab] = useState<"holdings" | "watchlist">("holdings");
-  const [chartView, setChartView] = useState<CurrencyView>("KRW");
+  const [chartView, setChartView] = useState<CurrencyView>(() => {
+    if (typeof window === "undefined") return "KRW";
+    return (localStorage.getItem("portfolio_chart_view") as CurrencyView) ?? "KRW";
+  });
   const snapshotSavedRef = useRef<string | null>(null); // 오늘 이미 저장했는지 체크
 
   async function fetchPortfolio() {
@@ -277,7 +280,7 @@ export function PortfolioPageClient() {
                 ).map((t) => (
                   <button
                     key={t.value}
-                    onClick={() => setChartView(t.value)}
+                    onClick={() => { setChartView(t.value); localStorage.setItem("portfolio_chart_view", t.value); }}
                     className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                       chartView === t.value ? "bg-gray-700 text-white" : "text-gray-400 hover:text-white"
                     }`}

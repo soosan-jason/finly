@@ -31,7 +31,10 @@ const fmtUsd = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
 export function PortfolioChart({ portfolioId, view, className }: PortfolioChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const [days, setDays] = useState(30);
+  const [days, setDays] = useState(() => {
+    if (typeof window === "undefined") return 30;
+    return Number(localStorage.getItem("portfolio_chart_days") ?? 30);
+  });
   const [loading, setLoading] = useState(true);
   const [empty, setEmpty] = useState(false);
 
@@ -165,7 +168,7 @@ export function PortfolioChart({ portfolioId, view, className }: PortfolioChartP
         {PERIODS.map((p) => (
           <button
             key={p.days}
-            onClick={() => setDays(p.days)}
+            onClick={() => { setDays(p.days); localStorage.setItem("portfolio_chart_days", String(p.days)); }}
             className={cn(
               "rounded-lg px-3 py-1 text-xs font-medium transition-colors",
               days === p.days
