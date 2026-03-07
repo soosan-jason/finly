@@ -32,3 +32,44 @@ export interface MarketSummary {
 }
 
 export type TrendDirection = "up" | "down" | "neutral";
+
+export interface FuturesItem {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  changePct: number;
+  lastUpdated?: string;
+}
+
+export interface CommodityItem {
+  symbol: string;
+  name: string;
+  category: "귀금속" | "에너지";
+  price: number;
+  change: number;
+  changePct: number;
+  unit: string;
+  lastUpdated?: string;
+}
+
+export interface BondYield {
+  symbol: string;
+  label: string;
+  maturityMonths: number;
+  yield: number;
+  change: number;
+  country: "US" | "KR";
+  lastUpdated?: string;
+}
+
+export interface TopStock {
+  symbol: string;
+  name: string;
+  country: "US" | "KR" | "JP";
+  price: number;
+  change: number;
+  changePct: number;
+  currency: string;
+  lastUpdated?: string;
+}
