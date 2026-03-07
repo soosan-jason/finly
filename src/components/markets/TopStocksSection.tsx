@@ -49,8 +49,8 @@ export function TopStocksSection() {
         {COUNTRY_ORDER.map((c) => (
           <div key={c}>
             <div className="mb-3 h-4 w-12 animate-pulse rounded bg-gray-700" />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {Array.from({ length: 5 }).map((_, i) => (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="h-28 animate-pulse rounded-xl bg-gray-800" />
               ))}
             </div>
@@ -70,7 +70,7 @@ export function TopStocksSection() {
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
               {COUNTRY_LABELS[country]}
             </h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {group.map((stock) => {
                 const up = stock.change >= 0;
                 return (
