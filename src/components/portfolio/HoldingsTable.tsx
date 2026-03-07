@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
@@ -14,33 +14,44 @@ interface Props {
 
 export function HoldingsTable({ holdings, onDelete }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
 
   function fmt(value: number, currency: string) {
     return currency === "KRW" ? formatKRW(value) : formatPrice(value);
   }
 
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-  }
+  // non-passive touchmove 리스너로 수평 스와이프 시 브라우저 뒤로가기 방지
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
 
-  function handleTouchMove(e: React.TouchEvent) {
-    const dx = Math.abs(e.touches[0].clientX - touchStartX.current);
-    const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
-    // 수평 스와이프가 주된 방향이면 이벤트 버블링 차단 (브라우저 뒤로가기 방지)
-    if (dx > dy) {
-      e.stopPropagation();
-    }
-  }
+    let startX = 0;
+    let startY = 0;
+
+    const onTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const dx = Math.abs(e.touches[0].clientX - startX);
+      const dy = Math.abs(e.touches[0].clientY - startY);
+      if (dx > dy) {
+        e.preventDefault(); // 수평 스와이프면 브라우저 제스처 차단
+      }
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+    };
+  }, []);
 
   return (
     <div
       ref={scrollRef}
       className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto overscroll-x-contain"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
     >
       <table className="w-full text-sm">
         <thead>
