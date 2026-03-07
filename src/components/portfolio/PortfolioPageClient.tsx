@@ -121,16 +121,28 @@ export function PortfolioPageClient() {
     }
 
     const enriched = data.map((h: Holding) => {
+      // currency가 DB에 없거나 null인 경우 심볼 접미사로 감지
+      const currency: string =
+        h.currency ||
+        (h.asset_type === "crypto"
+          ? "USD"
+          : h.symbol.endsWith(".KS") || h.symbol.endsWith(".KQ")
+          ? "KRW"
+          : h.symbol.endsWith(".T")
+          ? "JPY"
+          : "USD");
+
       const rawPrice =
         h.asset_type === "crypto"
           ? (cryptoPriceMap[h.symbol] ?? 0)
           : (stockPriceMap[h.symbol] ?? 0);
-      // 가격 API 실패(0) 시 평균매수가로 fallback → 현재가 미반영이지만 자산이 0으로 표시되는 것 방지
+      // 가격 API 실패(0) 시 평균매수가로 fallback
       const cp = rawPrice > 0 ? rawPrice : h.avg_buy_price;
       const cv = cp * h.quantity;
       const cost = h.avg_buy_price * h.quantity;
       return {
         ...h,
+        currency,
         current_price: cp,
         current_value: cv,
         profit_loss: cv - cost,

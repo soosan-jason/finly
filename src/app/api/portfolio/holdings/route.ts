@@ -10,13 +10,13 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const portfolioId = searchParams.get("portfolio_id");
 
-  const query = supabase
+  let query = supabase
     .from("holdings")
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: true });
 
-  if (portfolioId) query.eq("portfolio_id", portfolioId);
+  if (portfolioId) query = query.eq("portfolio_id", portfolioId);
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -55,9 +55,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(data);
   }
 
+  // currency가 전달되지 않았으면 심볼 접미사로 감지
+  const resolvedCurrency: string =
+    currency ||
+    (asset_type === "crypto"
+      ? "USD"
+      : symbol.endsWith(".KS") || symbol.endsWith(".KQ")
+      ? "KRW"
+      : symbol.endsWith(".T")
+      ? "JPY"
+      : "USD");
+
   const { data, error } = await supabase
     .from("holdings")
-    .insert({ user_id: user.id, portfolio_id, asset_type, symbol, name, image_url, quantity, avg_buy_price, currency: currency ?? "USD" })
+    .insert({ user_id: user.id, portfolio_id, asset_type, symbol, name, image_url, quantity, avg_buy_price, currency: resolvedCurrency })
     .select()
     .single();
 
