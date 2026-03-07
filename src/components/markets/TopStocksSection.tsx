@@ -127,7 +127,7 @@ export function TopStocksSection() {
                     {/* 회사명 + 현재가 */}
                     <div className="mt-2 flex items-baseline justify-between gap-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-200 truncate">{stock.name}</p>
-                      <p className="shrink-0 text-lg font-bold tracking-tight text-white tabular-nums">
+                      <p className="shrink-0 text-2xl font-bold tracking-tight text-white tabular-nums">
                         {formatStockPrice(stock.price, stock.currency)}
                       </p>
                     </div>
