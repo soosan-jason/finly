@@ -104,24 +104,24 @@ export function TopStocksSection() {
                     {/* 상단 accent bar */}
                     <div className={`absolute inset-x-0 top-0 h-0.5 ${up ? "bg-emerald-500" : "bg-red-500"}`} />
 
-                    {/* 헤더: 순위+심볼(좌) */}
-                    <div className="flex items-center gap-1 min-w-0">
-                      <span className="text-xs font-bold text-gray-600 tabular-nums w-4 shrink-0">{idx + 1}</span>
-                      <span className="text-xs text-gray-500 truncate">
-                        {stock.symbol.replace(".KS", "").replace(".T", "")}
-                      </span>
-                    </div>
-
-                    {/* 시총 + 연동시간 */}
-                    <div className="mt-0.5 flex items-center gap-1.5">
-                      {stock.marketCap != null && (
-                        <span className="text-xs text-gray-500 tabular-nums">
-                          {formatMarketCap(stock.marketCap, stock.currency)}
+                    {/* 헤더: 순위+심볼(좌) + 시총/연동시간(우) */}
+                    <div className="flex items-start justify-between gap-1">
+                      <div className="flex items-center gap-1 min-w-0">
+                        <span className="text-xs font-bold text-gray-600 tabular-nums w-4 shrink-0">{idx + 1}</span>
+                        <span className="text-xs text-gray-500 truncate">
+                          {stock.symbol.replace(".KS", "").replace(".T", "")}
                         </span>
-                      )}
-                      {fmtTime(stock.lastUpdated) && (
-                        <span className="text-xs text-gray-600">{fmtTime(stock.lastUpdated)}</span>
-                      )}
+                      </div>
+                      <div className="flex flex-col items-end shrink-0">
+                        {stock.marketCap != null && (
+                          <span className="text-xs text-gray-500 tabular-nums">
+                            {formatMarketCap(stock.marketCap, stock.currency)}
+                          </span>
+                        )}
+                        {fmtTime(stock.lastUpdated) && (
+                          <span className="text-xs text-gray-600">{fmtTime(stock.lastUpdated)}</span>
+                        )}
+                      </div>
                     </div>
 
                     {/* 회사명 */}
