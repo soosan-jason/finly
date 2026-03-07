@@ -1,5 +1,5 @@
 import { StockIndex } from "@/types/market";
-import { formatPercent } from "@/lib/utils/format";
+import { formatPercent, formatTime } from "@/lib/utils/format";
 
 const REGION_FLAG: Record<StockIndex["region"], string> = {
   US: "🇺🇸",
@@ -75,11 +75,7 @@ export function IndexCard({ index }: IndexCardProps) {
           <>
             <span className="text-gray-700">·</span>
             <span className="text-xs text-gray-600">
-              {new Date(index.lastUpdated).toLocaleTimeString("ko-KR", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-              })}
+              {formatTime(index.lastUpdated)}
             </span>
           </>
         )}

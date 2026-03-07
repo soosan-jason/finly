@@ -8,6 +8,7 @@ import {
   type IChartApi,
 } from "lightweight-charts";
 import { cn } from "@/lib/utils/cn";
+import { formatMonthDay } from "@/lib/utils/format";
 import { PortfolioSnapshot } from "@/types/portfolio";
 import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
 
@@ -35,7 +36,7 @@ interface PortfolioChartProps {
 
 const fmtKrw  = (v: number) => `₩${Math.round(v).toLocaleString("ko-KR")}`;
 const fmtUsd  = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
-const fmtDate = (iso: string) => iso.slice(5); // "MM-DD"
+
 const fmtPct  = (cost: number, pl: number) =>
   cost === 0 ? "—" : `${pl >= 0 ? "+" : ""}${((pl / cost) * 100).toFixed(2)}%`;
 
@@ -362,7 +363,7 @@ export function PortfolioChart({ portfolioId, view, refreshKey, className }: Por
                         key={s.snapshotted_on}
                         className="border-b border-gray-800/50 transition-colors hover:bg-gray-800/40"
                       >
-                        <td className="px-3 py-2 font-mono text-gray-400">{fmtDate(s.snapshotted_on)}</td>
+                        <td className="px-3 py-2 font-mono text-gray-400">{formatMonthDay(s.snapshotted_on)}</td>
                         {(view === "KRW" || view === "BOTH") && (
                           <>
                             <td className="px-3 py-2 text-right tabular-nums text-gray-200">

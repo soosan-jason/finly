@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { unixToISO } from "@/lib/utils/format";
 
 export interface FxRate {
   pair: string;        // "USD/KRW"
@@ -45,7 +46,7 @@ async function fetchYahooFxRate(
     const previousClose = (meta.chartPreviousClose ?? meta.previousClose ?? null) as number | null;
     // regularMarketTime: Yahoo Finance 시세 기준 Unix timestamp (초)
     const lastUpdated = meta.regularMarketTime
-      ? new Date((meta.regularMarketTime as number) * 1000).toISOString()
+      ? unixToISO(meta.regularMarketTime)
       : null;
 
     return { rate, previousClose, lastUpdated };

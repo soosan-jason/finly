@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { unixToISO } from "@/lib/utils/format";
 import { TopStock } from "@/types/market";
 import STOCK_POOL from "@/config/stockPool";
 
@@ -27,7 +28,7 @@ async function fetchQuote(symbol: string): Promise<{
     const change = price - prevClose;
     const changePct = prevClose !== 0 ? (change / prevClose) * 100 : 0;
     const lastUpdated = meta.regularMarketTime
-      ? new Date((meta.regularMarketTime as number) * 1000).toISOString()
+      ? unixToISO(meta.regularMarketTime)
       : new Date().toISOString();
 
     return { price, change, changePct, lastUpdated };

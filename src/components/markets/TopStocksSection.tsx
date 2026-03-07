@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import Link from "next/link";
 import { TopStock } from "@/types/market";
-import { formatPercent } from "@/lib/utils/format";
+import { formatPercent, formatTime } from "@/lib/utils/format";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 
@@ -16,10 +16,6 @@ const COUNTRY_LABELS: Record<TopStock["country"], string> = {
 
 const COUNTRY_ORDER: TopStock["country"][] = ["US", "KR", "JP"];
 
-function fmtTime(iso?: string) {
-  if (!iso) return null;
-  return new Date(iso).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
-}
 
 function formatStockPrice(price: number, currency: string): string {
   if (currency === "KRW") {
@@ -174,8 +170,8 @@ export function TopStocksSection() {
                             {formatMarketCap(stock.marketCap, stock.currency)}
                           </span>
                         )}
-                        {fmtTime(stock.lastUpdated) && (
-                          <span className="text-xs text-gray-600">{fmtTime(stock.lastUpdated)}</span>
+                        {formatTime(stock.lastUpdated) && (
+                          <span className="text-xs text-gray-600">{formatTime(stock.lastUpdated)}</span>
                         )}
                       </div>
                     </div>

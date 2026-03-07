@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { TopStock } from "@/types/market";
-import { formatPercent } from "@/lib/utils/format";
+import { formatPercent, formatTime } from "@/lib/utils/format";
 import Link from "next/link";
 import { useSwipeTab } from "@/hooks/useSwipeTab";
 
@@ -27,10 +27,6 @@ function formatChange(change: number, currency: string): string {
   return abs.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function fmtTime(iso?: string) {
-  if (!iso) return null;
-  return new Date(iso).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
-}
 
 function formatMarketCap(cap: number, currency: string): string {
   if (currency === "KRW") {
@@ -145,8 +141,8 @@ export function StocksTabs() {
                         {formatMarketCap(stock.marketCap, stock.currency)}
                       </span>
                     )}
-                    {fmtTime(stock.lastUpdated) && (
-                      <span className="text-xs text-gray-600">{fmtTime(stock.lastUpdated)}</span>
+                    {formatTime(stock.lastUpdated) && (
+                      <span className="text-xs text-gray-600">{formatTime(stock.lastUpdated)}</span>
                     )}
                   </div>
                 </div>

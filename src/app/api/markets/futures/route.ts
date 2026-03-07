@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { unixToISO } from "@/lib/utils/format";
 import { FuturesItem } from "@/types/market";
 
 const FUTURES_CONFIG: { symbol: string; name: string }[] = [
@@ -25,7 +26,7 @@ async function fetchYahooQuote(symbol: string): Promise<{ price: number; change:
     const change = price - prevClose;
     const changePct = prevClose !== 0 ? (change / prevClose) * 100 : 0;
     const lastUpdated = meta.regularMarketTime
-      ? new Date((meta.regularMarketTime as number) * 1000).toISOString()
+      ? unixToISO(meta.regularMarketTime)
       : new Date().toISOString();
 
     return { price, change, changePct, lastUpdated };

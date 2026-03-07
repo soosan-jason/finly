@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BondYield } from "@/types/market";
 import { Card } from "@/components/ui/card";
+import { formatTime } from "@/lib/utils/format";
 
 export function BondsSection() {
   const [bonds, setBonds] = useState<BondYield[]>([]);
@@ -76,7 +77,7 @@ export function BondsSection() {
             {otherBonds.some((b) => b.lastUpdated) && (
               <span className="text-xs text-gray-500">
                 연동{" "}
-                {fmtTime(
+                {formatTime(
                   otherBonds
                     .filter((b) => b.lastUpdated)
                     .sort(
@@ -99,10 +100,6 @@ export function BondsSection() {
   );
 }
 
-function fmtTime(iso?: string) {
-  if (!iso) return null;
-  return new Date(iso).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
-}
 
 function BondCard({ bond }: { bond: BondYield }) {
   const up = bond.change >= 0;
@@ -119,8 +116,8 @@ function BondCard({ bond }: { bond: BondYield }) {
             </span>
           )}
         </div>
-        {fmtTime(bond.lastUpdated) && (
-          <p className="mt-1 text-xs text-gray-500">{fmtTime(bond.lastUpdated)}</p>
+        {formatTime(bond.lastUpdated) && (
+          <p className="mt-1 text-xs text-gray-500">{formatTime(bond.lastUpdated)}</p>
         )}
       </div>
     </Card>

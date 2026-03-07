@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { unixToISO } from "@/lib/utils/format";
 import { BondYield } from "@/types/market";
 
 const BOND_CONFIG: Omit<BondYield, "yield" | "change" | "lastUpdated">[] = [
@@ -82,7 +83,7 @@ async function fetchChart(
     const prevClose = (meta.chartPreviousClose ?? meta.previousClose ?? price) as number;
     const change = price - prevClose;
     const lastUpdated = meta.regularMarketTime
-      ? new Date((meta.regularMarketTime as number) * 1000).toISOString()
+      ? unixToISO(meta.regularMarketTime)
       : new Date().toISOString();
 
     return { price, change, lastUpdated };
@@ -116,7 +117,7 @@ async function fetchQuote(
       const price = q.regularMarketPrice as number;
       const change = (q.regularMarketChange as number) ?? 0;
       const lastUpdated = q.regularMarketTime
-        ? new Date((q.regularMarketTime as number) * 1000).toISOString()
+        ? unixToISO(q.regularMarketTime)
         : new Date().toISOString();
 
       return { price, change, lastUpdated };
