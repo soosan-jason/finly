@@ -97,7 +97,7 @@ export function StocksTabs() {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[...group].sort((a, b) => (b.marketCap ?? -Infinity) - (a.marketCap ?? -Infinity)).slice(0, 8).map((stock, idx) => {
+          {group.map((stock, idx) => {
             const up = stock.changePct >= 0;
             return (
               <div
@@ -115,6 +115,7 @@ export function StocksTabs() {
                     <span className="text-xs font-bold text-gray-600 tabular-nums w-4 shrink-0">{idx + 1}</span>
                     <span className="text-xs text-gray-500 truncate">
                       {stock.symbol.replace(".KS", "").replace(".T", "")}
+                      {stock.isFallback && <sup className="ml-0.5 text-red-400">*</sup>}
                     </span>
                   </div>
                   <div className="flex flex-col items-end shrink-0">

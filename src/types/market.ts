@@ -74,4 +74,5 @@ export interface TopStock {
   currency: string;
   marketCap?: number;
   lastUpdated?: string;
+  isFallback?: boolean;
 }
