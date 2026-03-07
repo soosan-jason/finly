@@ -46,6 +46,17 @@ export function MarketsPageClient() {
   const [indices, setIndices] = useState<StockIndex[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 탭 상태 복원
+  useEffect(() => {
+    const saved = localStorage.getItem("marketsTab") as TabId | null;
+    if (saved && TABS.some((t) => t.id === saved)) setTab(saved);
+  }, []);
+
+  function handleTabChange(next: TabId) {
+    setTab(next);
+    localStorage.setItem("marketsTab", next);
+  }
+
   useEffect(() => {
     async function fetchIndices() {
       try {
@@ -79,7 +90,7 @@ export function MarketsPageClient() {
         {TABS.map((t) => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => handleTabChange(t.id)}
             className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition-colors ${
               tab === t.id
                 ? "bg-gray-700 text-white shadow"
