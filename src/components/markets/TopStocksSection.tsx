@@ -104,25 +104,16 @@ export function TopStocksSection() {
                     {/* 상단 accent bar */}
                     <div className={`absolute inset-x-0 top-0 h-0.5 ${up ? "bg-emerald-500" : "bg-red-500"}`} />
 
-                    {/* 헤더: 심볼(좌) + 등락률·시총(우) */}
+                    {/* 헤더: 심볼(좌) + 시총(우) */}
                     <div className="flex items-start justify-between gap-1">
                       <span className="text-xs text-gray-500 truncate">
                         {stock.symbol.replace(".KS", "").replace(".T", "")}
                       </span>
-                      <div className="shrink-0 flex flex-col items-end gap-0.5">
-                        <span
-                          className={`rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
-                            up ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
-                          }`}
-                        >
-                          {formatPercent(stock.changePct)}
+                      {stock.marketCap != null && (
+                        <span className="shrink-0 text-xs text-gray-500 tabular-nums">
+                          {formatMarketCap(stock.marketCap, stock.currency)}
                         </span>
-                        {stock.marketCap != null && (
-                          <span className="text-xs text-gray-500 tabular-nums">
-                            {formatMarketCap(stock.marketCap, stock.currency)}
-                          </span>
-                        )}
-                      </div>
+                      )}
                     </div>
 
                     {/* 회사명 */}
@@ -133,16 +124,22 @@ export function TopStocksSection() {
                       {formatStockPrice(stock.price, stock.currency)}
                     </p>
 
-                    {/* 등락 절대값 + 시간 */}
-                    <div className="mt-1 flex items-center gap-1.5">
-                      <span className={`text-xs font-medium tabular-nums ${up ? "text-emerald-400" : "text-red-400"}`}>
-                        {up ? "▲" : "▼"}&nbsp;{formatChange(stock.change, stock.currency)}
-                      </span>
+                    {/* 하단: 등락 절대값 + 등락률(좌) / 연동시간(우) */}
+                    <div className="mt-1 flex items-center justify-between gap-1">
+                      <div className="flex items-center gap-1 min-w-0">
+                        <span className={`text-xs font-medium tabular-nums ${up ? "text-emerald-400" : "text-red-400"}`}>
+                          {up ? "▲" : "▼"}&nbsp;{formatChange(stock.change, stock.currency)}
+                        </span>
+                        <span
+                          className={`rounded-md px-1 py-0.5 text-xs font-semibold tabular-nums ${
+                            up ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+                          }`}
+                        >
+                          {formatPercent(stock.changePct)}
+                        </span>
+                      </div>
                       {fmtTime(stock.lastUpdated) && (
-                        <>
-                          <span className="text-gray-700">·</span>
-                          <span className="text-xs text-gray-600">{fmtTime(stock.lastUpdated)}</span>
-                        </>
+                        <span className="shrink-0 text-xs text-gray-600">{fmtTime(stock.lastUpdated)}</span>
                       )}
                     </div>
 
