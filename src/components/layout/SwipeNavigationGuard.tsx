@@ -3,56 +3,72 @@
 import { useEffect } from "react";
 
 /**
- * 수평 스와이프로 브라우저 뒤로가기/앞으로가기가 트리거되는 현상을 방지.
- * - 수평 스와이프 시 해당 요소(또는 조상)가 아직 스크롤 가능한 경우 → 스크롤 허용
- * - 스크롤 여지가 없는 영역에서의 수평 스와이프 → preventDefault로 네비게이션 차단
+ * Chrome Android / Samsung Internet의 수평 엣지 스와이프 뒤로가기/앞으로가기 제스처를 차단.
+ *
+ * 전략:
+ * 1. touchstart: 화면 양쪽 30px 이내에서 시작된 터치 → 즉시 preventDefault (엣지 제스처 차단)
+ * 2. touchmove:  수평 스와이프 감지 → 스크롤 여지 있는 조상이 없으면 preventDefault
  */
 export function SwipeNavigationGuard() {
   useEffect(() => {
     let startX = 0;
     let startY = 0;
+    let blockMove = false; // touchstart에서 이미 차단 결정된 경우
+
+    const EDGE_THRESHOLD = 30; // px, 화면 엣지로부터의 거리
 
     const onTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+
+      // 화면 좌우 엣지 근처에서 시작된 터치 → 브라우저 스와이프 제스처 원천 차단
+      if (t.clientX < EDGE_THRESHOLD || t.clientX > window.innerWidth - EDGE_THRESHOLD) {
+        blockMove = true;
+        e.preventDefault();
+      } else {
+        blockMove = false;
+      }
     };
 
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
+      if (blockMove) { e.preventDefault(); return; }
 
       const dx    = e.touches[0].clientX - startX;
       const absDx = Math.abs(dx);
       const absDy = Math.abs(e.touches[0].clientY - startY);
 
-      // 노이즈 제거: 3px 미만 무시
       if (absDx < 3) return;
-      // 세로 이동이 수평의 1.2배 이상이면 세로 스와이프로 판단 → 통과
-      if (absDy > absDx * 1.2) return;
+      if (absDy > absDx * 1.2) return; // 세로 스와이프 → 통과
 
-      // 수평 스와이프 감지: 스크롤 가능한 조상이 해당 방향으로 여유가 있으면 허용
+      // 수평 스와이프: 스크롤 여지 있는 조상이면 허용
       let el = e.target as HTMLElement | null;
       while (el && el !== document.body) {
         const ox = window.getComputedStyle(el).overflowX;
         if (ox === "auto" || ox === "scroll") {
           const atLeft  = el.scrollLeft <= 0;
           const atRight = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
-          if (dx < 0 && !atRight) return; // 왼쪽 스와이프, 오른쪽으로 스크롤 여지 있음
-          if (dx > 0 && !atLeft)  return; // 오른쪽 스와이프, 왼쪽으로 스크롤 여지 있음
+          if (dx < 0 && !atRight) return;
+          if (dx > 0 && !atLeft)  return;
         }
         el = el.parentElement;
       }
 
-      // 스크롤 컨텍스트 없음 또는 경계 도달 → 브라우저 네비게이션 제스처 차단
       e.preventDefault();
     };
 
-    // capture: true → stopPropagation()으로 막힌 이벤트도 확실히 수신
-    document.addEventListener("touchstart", onTouchStart, { passive: true,  capture: true });
+    const onTouchEnd = () => { blockMove = false; };
+
+    // touchstart도 passive:false 로 등록해야 preventDefault() 가 동작함
+    document.addEventListener("touchstart", onTouchStart, { passive: false, capture: true });
     document.addEventListener("touchmove",  onTouchMove,  { passive: false, capture: true });
+    document.addEventListener("touchend",   onTouchEnd,   { passive: true,  capture: true });
 
     return () => {
       document.removeEventListener("touchstart", onTouchStart, { capture: true });
       document.removeEventListener("touchmove",  onTouchMove,  { capture: true });
+      document.removeEventListener("touchend",   onTouchEnd,   { capture: true });
     };
   }, []);
 
