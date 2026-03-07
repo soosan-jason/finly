@@ -328,7 +328,7 @@ export function PortfolioChart({ portfolioId, view, className }: PortfolioChartP
 
           {!empty && !loading && (
             <div className="h-full overflow-auto">
-              <table className="w-full text-xs">
+              <table className="w-full text-xs [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
                 <thead className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur-sm">
                   <tr className="border-b border-gray-800 text-gray-500">
                     <th className="px-3 py-2 text-left font-medium">날짜</th>
