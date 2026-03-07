@@ -41,12 +41,13 @@ export function SwipeNavigationGuard() {
       e.preventDefault();
     };
 
-    document.addEventListener("touchstart", onTouchStart, { passive: true });
-    document.addEventListener("touchmove",  onTouchMove,  { passive: false });
+    // capture: true → stopPropagation()으로 막힌 이벤트도 확실히 수신
+    document.addEventListener("touchstart", onTouchStart, { passive: true,  capture: true });
+    document.addEventListener("touchmove",  onTouchMove,  { passive: false, capture: true });
 
     return () => {
-      document.removeEventListener("touchstart", onTouchStart);
-      document.removeEventListener("touchmove",  onTouchMove);
+      document.removeEventListener("touchstart", onTouchStart, { capture: true });
+      document.removeEventListener("touchmove",  onTouchMove,  { capture: true });
     };
   }, []);
 
