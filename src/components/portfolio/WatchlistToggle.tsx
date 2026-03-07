@@ -4,20 +4,26 @@ import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
+import { AssetType } from "@/types/portfolio";
 
 interface Props {
   symbol: string;
   name: string;
+  assetType?: AssetType;
   imageUrl?: string;
+  /** 부모에서 watchlist를 미리 조회해 전달하면 개별 API 호출 생략 */
+  initialWatched?: boolean;
 }
 
-export function WatchlistToggle({ symbol, name, imageUrl }: Props) {
+export function WatchlistToggle({ symbol, name, assetType = "crypto", imageUrl, initialWatched }: Props) {
   const { user } = useUser();
   const router = useRouter();
-  const [watched, setWatched] = useState(false);
+  const [watched, setWatched] = useState(initialWatched ?? false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // initialWatched가 명시적으로 전달된 경우 API 조회 생략
+    if (initialWatched !== undefined) return;
     if (!user) return;
     fetch("/api/portfolio/watchlist")
       .then((r) => r.json())
@@ -26,7 +32,12 @@ export function WatchlistToggle({ symbol, name, imageUrl }: Props) {
           setWatched(data.some((w: { symbol: string }) => w.symbol === symbol));
         }
       });
-  }, [user, symbol]);
+  }, [user, symbol, initialWatched]);
+
+  // initialWatched prop이 바뀌면 동기화
+  useEffect(() => {
+    if (initialWatched !== undefined) setWatched(initialWatched);
+  }, [initialWatched]);
 
   async function toggle() {
     if (!user) { router.push("/auth/login"); return; }
@@ -38,7 +49,7 @@ export function WatchlistToggle({ symbol, name, imageUrl }: Props) {
       await fetch("/api/portfolio/watchlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ asset_type: "crypto", symbol, name, image_url: imageUrl }),
+        body: JSON.stringify({ asset_type: assetType, symbol, name, image_url: imageUrl }),
       });
       setWatched(true);
     }

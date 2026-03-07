@@ -137,7 +137,90 @@ export function PortfolioPageClient() {
   async function fetchWatchlist() {
     const res = await fetch("/api/portfolio/watchlist");
     const data = await res.json();
-    if (Array.isArray(data)) setWatchlist(data);
+    if (!Array.isArray(data)) return;
+
+    // 자산 유형별 그룹핑
+    const cryptoItems  = data.filter((i: WatchlistItem) => i.asset_type === "crypto");
+    const stockItems   = data.filter((i: WatchlistItem) => i.asset_type === "stock" || i.asset_type === "etf");
+    const commItems    = data.filter((i: WatchlistItem) => i.asset_type === "commodity");
+    const futureItems  = data.filter((i: WatchlistItem) => i.asset_type === "futures");
+
+    // 유형별 가격 맵 구성 (병렬 조회)
+    const [cryptoMap, stockMap, commMap, futuresMap] = await Promise.all([
+      // ─ 암호화폐: CoinGecko 배치 조회
+      cryptoItems.length > 0
+        ? fetch("/api/crypto?limit=250").then((r) => r.json()).then((list: unknown[]) => {
+            const map: Record<string, { price: number; change: number; changePct: number }> = {};
+            if (Array.isArray(list)) {
+              for (const c of list as Array<{id:string;current_price:number;price_change_24h?:number;price_change_percentage_24h:number}>) {
+                map[c.id] = { price: c.current_price, change: c.price_change_24h ?? 0, changePct: c.price_change_percentage_24h };
+              }
+            }
+            return map;
+          }).catch(() => ({}))
+        : Promise.resolve({}),
+
+      // ─ 주식/ETF: 개별 quote 조회
+      stockItems.length > 0
+        ? Promise.allSettled(
+            stockItems.map((item: WatchlistItem) =>
+              fetch(`/api/stock/quote?symbol=${item.symbol}`).then((r) => r.json())
+                .then((q: { current_price?: number; change?: number; change_percent?: number }) => ({ symbol: item.symbol, q }))
+                .catch(() => null)
+            )
+          ).then((results) => {
+            const map: Record<string, { price: number; change: number; changePct: number; currency: string }> = {};
+            for (const r of results) {
+              if (r.status === "fulfilled" && r.value) {
+                const { symbol, q } = r.value as { symbol: string; q: { current_price?: number; change?: number; change_percent?: number } };
+                if (q?.current_price) {
+                  const isKR = symbol.endsWith(".KS") || symbol.endsWith(".KQ");
+                  map[symbol] = { price: q.current_price, change: q.change ?? 0, changePct: q.change_percent ?? 0, currency: isKR ? "KRW" : "USD" };
+                }
+              }
+            }
+            return map;
+          })
+        : Promise.resolve({}),
+
+      // ─ 원자재
+      commItems.length > 0
+        ? fetch("/api/markets/commodities").then((r) => r.json()).then((list: unknown[]) => {
+            const map: Record<string, { price: number; change: number; changePct: number }> = {};
+            if (Array.isArray(list)) {
+              for (const c of list as Array<{symbol:string;price:number;change:number;changePct:number}>) {
+                map[c.symbol] = { price: c.price, change: c.change, changePct: c.changePct };
+              }
+            }
+            return map;
+          }).catch(() => ({}))
+        : Promise.resolve({}),
+
+      // ─ 선물
+      futureItems.length > 0
+        ? fetch("/api/markets/futures").then((r) => r.json()).then((list: unknown[]) => {
+            const map: Record<string, { price: number; change: number; changePct: number }> = {};
+            if (Array.isArray(list)) {
+              for (const f of list as Array<{symbol:string;price:number;change:number;changePct:number}>) {
+                map[f.symbol] = { price: f.price, change: f.change, changePct: f.changePct };
+              }
+            }
+            return map;
+          }).catch(() => ({}))
+        : Promise.resolve({}),
+    ]);
+
+    const enriched: WatchlistItem[] = data.map((item: WatchlistItem) => {
+      let info: { price: number; change: number; changePct: number; currency?: string } | undefined;
+      if (item.asset_type === "crypto")                              info = (cryptoMap as Record<string, typeof info>)[item.symbol];
+      else if (item.asset_type === "stock" || item.asset_type === "etf") info = (stockMap as Record<string, typeof info>)[item.symbol];
+      else if (item.asset_type === "commodity")                     info = (commMap as Record<string, typeof info>)[item.symbol];
+      else if (item.asset_type === "futures")                       info = (futuresMap as Record<string, typeof info>)[item.symbol];
+      if (!info) return item;
+      return { ...item, current_price: info.price, change: info.change, change_pct: info.changePct, currency: info.currency ?? "USD" };
+    });
+
+    setWatchlist(enriched);
   }
 
   async function saveSnapshot(portfolioId: string, enriched: Holding[]) {

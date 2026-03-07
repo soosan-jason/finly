@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Star } from "lucide-react";
 import { TopStock } from "@/types/market";
 import { formatPercent } from "@/lib/utils/format";
+import { useUser } from "@/hooks/useUser";
+import { useRouter } from "next/navigation";
 
 const COUNTRY_LABELS: Record<TopStock["country"], string> = {
   US: "미국",
@@ -42,6 +45,53 @@ function formatMarketCap(cap: number, currency: string): string {
   if (currency === "JPY") return `${(cap / 1e12).toFixed(1)}兆`;
   if (cap >= 1e12) return `$${(cap / 1e12).toFixed(2)}T`;
   return `$${(cap / 1e9).toFixed(0)}B`;
+}
+
+function StarButton({ symbol, name }: { symbol: string; name: string }) {
+  const { user } = useUser();
+  const router = useRouter();
+  const [watched, setWatched] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    fetch("/api/portfolio/watchlist")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setWatched(data.some((w: { symbol: string }) => w.symbol === symbol));
+      });
+  }, [user, symbol]);
+
+  async function toggle(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!user) { router.push("/auth/login"); return; }
+    setLoading(true);
+    if (watched) {
+      await fetch(`/api/portfolio/watchlist?symbol=${symbol}`, { method: "DELETE" });
+      setWatched(false);
+    } else {
+      await fetch("/api/portfolio/watchlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ asset_type: "stock", symbol, name }),
+      });
+      setWatched(true);
+    }
+    setLoading(false);
+  }
+
+  return (
+    <button
+      onClick={toggle}
+      disabled={loading}
+      title={watched ? "관심 목록에서 제거" : "관심 목록에 추가"}
+      className={`absolute top-2 right-2 rounded-md p-1 transition-colors disabled:opacity-50 ${
+        watched ? "text-yellow-400" : "text-gray-600 hover:text-yellow-400"
+      }`}
+    >
+      <Star className={`h-3.5 w-3.5 ${watched ? "fill-yellow-400" : ""}`} />
+    </button>
+  );
 }
 
 export function TopStocksSection() {
@@ -104,6 +154,9 @@ export function TopStocksSection() {
                     {/* 상단 accent bar */}
                     <div className={`absolute inset-x-0 top-0 h-0.5 ${up ? "bg-emerald-500" : "bg-red-500"}`} />
 
+                    {/* 관심 버튼 */}
+                    <StarButton symbol={stock.symbol} name={stock.name} />
+
                     {/* 헤더: 순위+심볼(좌) + 시총/연동시간(우) */}
                     <div className="flex items-start justify-between gap-1">
                       <div className="flex items-center gap-1 min-w-0">
@@ -113,7 +166,7 @@ export function TopStocksSection() {
                           {stock.isFallback && <sup className="ml-0.5 text-red-400">*</sup>}
                         </span>
                       </div>
-                      <div className="flex flex-col items-end shrink-0">
+                      <div className="flex flex-col items-end shrink-0 pr-5">
                         {stock.marketCap != null && (
                           <span className="text-xs text-gray-500 tabular-nums">
                             {formatMarketCap(stock.marketCap, stock.currency)}

@@ -1,4 +1,4 @@
-export type AssetType = "crypto" | "stock" | "etf";
+export type AssetType = "crypto" | "stock" | "etf" | "commodity" | "futures";
 
 export interface Portfolio {
   id: string;
@@ -52,7 +52,9 @@ export interface WatchlistItem {
   added_at: string;
   // 실시간 주입 필드
   current_price?: number;
-  change_24h?: number;
+  change?: number;      // 전일대비 등락값 (절대)
+  change_pct?: number;  // 등락율 (%)
+  currency?: string;    // USD | KRW | JPY
 }
 
 export interface PortfolioSnapshot {
