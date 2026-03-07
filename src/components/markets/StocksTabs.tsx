@@ -120,9 +120,10 @@ export function StocksTabs() {
           {group.map((stock, idx) => {
             const up = stock.changePct >= 0;
             return (
-              <div
+              <Link
                 key={stock.symbol}
-                className={`relative overflow-hidden rounded-xl border bg-gray-900 p-4 transition-all hover:bg-gray-800/80 ${
+                href={`/stock/${stock.symbol}`}
+                className={`relative overflow-hidden rounded-xl border bg-gray-900 p-4 transition-all hover:bg-gray-800/80 block ${
                   up ? "border-emerald-500/20" : "border-red-500/20"
                 }`}
               >
@@ -174,7 +175,7 @@ export function StocksTabs() {
 
                 {/* 배경 glow */}
                 <div className={`pointer-events-none absolute -right-6 -bottom-6 h-20 w-20 rounded-full blur-2xl ${up ? "bg-emerald-500/5" : "bg-red-500/5"}`} />
-              </div>
+              </Link>
             );
           })}
         </div>

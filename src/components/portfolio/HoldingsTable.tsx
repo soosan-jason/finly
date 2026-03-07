@@ -54,16 +54,14 @@ export function HoldingsTable({ holdings, onDelete }: Props) {
               </div>
             );
 
+            const href = isCrypto ? `/crypto/${h.symbol}` : `/stock/${h.symbol}`;
+
             return (
               <tr key={h.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
                 <td className="px-4 py-3">
-                  {isCrypto ? (
-                    <Link href={`/crypto/${h.symbol}`} className="hover:opacity-80">
-                      {nameContent}
-                    </Link>
-                  ) : (
-                    nameContent
-                  )}
+                  <Link href={href} className="hover:opacity-80">
+                    {nameContent}
+                  </Link>
                 </td>
                 <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">
                   {Number(h.quantity).toLocaleString(undefined, { maximumFractionDigits: 8 })}

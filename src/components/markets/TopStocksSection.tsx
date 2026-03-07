@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
+import Link from "next/link";
 import { TopStock } from "@/types/market";
 import { formatPercent } from "@/lib/utils/format";
 import { useUser } from "@/hooks/useUser";
@@ -145,9 +146,10 @@ export function TopStocksSection() {
               {group.map((stock, idx) => {
                 const up = stock.change >= 0;
                 return (
-                  <div
+                  <Link
                     key={stock.symbol}
-                    className={`relative overflow-hidden rounded-xl border bg-gray-900 p-4 transition-all hover:bg-gray-800/80 ${
+                    href={`/stock/${stock.symbol}`}
+                    className={`relative overflow-hidden rounded-xl border bg-gray-900 p-4 transition-all hover:bg-gray-800/80 block ${
                       up ? "border-emerald-500/20" : "border-red-500/20"
                     }`}
                   >
@@ -202,7 +204,7 @@ export function TopStocksSection() {
 
                     {/* 배경 glow */}
                     <div className={`pointer-events-none absolute -right-6 -bottom-6 h-20 w-20 rounded-full blur-2xl ${up ? "bg-emerald-500/5" : "bg-red-500/5"}`} />
-                  </div>
+                  </Link>
                 );
               })}
             </div>

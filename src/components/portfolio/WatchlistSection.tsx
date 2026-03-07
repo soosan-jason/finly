@@ -21,6 +21,7 @@ const ASSET_LABELS: Record<AssetType, string> = {
 
 function itemHref(item: WatchlistItem): string | null {
   if (item.asset_type === "crypto") return `/crypto/${item.symbol}`;
+  if (item.asset_type === "stock" || item.asset_type === "etf") return `/stock/${item.symbol}`;
   return null;
 }
 
