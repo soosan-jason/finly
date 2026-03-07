@@ -2,19 +2,20 @@ import { NextResponse } from "next/server";
 import { BondYield } from "@/types/market";
 
 const BOND_CONFIG: Omit<BondYield, "yield" | "change" | "lastUpdated">[] = [
-  { symbol: "^IRX",       label: "3개월",      maturityMonths: 3,   country: "US" },
-  { symbol: "^FVX",       label: "5년",         maturityMonths: 60,  country: "US" },
-  { symbol: "^TNX",       label: "10년",        maturityMonths: 120, country: "US" },
-  { symbol: "^TYX",       label: "30년",        maturityMonths: 360, country: "US" },
-  { symbol: "KR5YT=RR",   label: "한국 5년",   maturityMonths: 60,  country: "KR" },
-  { symbol: "KR10YT=RR",  label: "한국 10년",  maturityMonths: 120, country: "KR" },
-  { symbol: "JP10YT=RR",  label: "일본 10년",  maturityMonths: 120, country: "JP" },
-  { symbol: "GB10YT=RR",  label: "영국 10년",  maturityMonths: 120, country: "GB" },
-  { symbol: "FR10YT=RR",  label: "프랑스 10년",maturityMonths: 120, country: "FR" },
-  { symbol: "DE10YT=RR",  label: "독일 10년",  maturityMonths: 120, country: "DE" },
+  { symbol: "^IRX",       label: "3개월",       maturityMonths: 3,   country: "US" },
+  { symbol: "^FVX",       label: "5년",          maturityMonths: 60,  country: "US" },
+  { symbol: "^TNX",       label: "10년",         maturityMonths: 120, country: "US" },
+  { symbol: "^TYX",       label: "30년",         maturityMonths: 360, country: "US" },
+  { symbol: "KR5YT=RR",  label: "한국 5년",    maturityMonths: 60,  country: "KR" },
+  { symbol: "KR10YT=RR", label: "한국 10년",   maturityMonths: 120, country: "KR" },
+  { symbol: "JP10YT=RR", label: "일본 10년",   maturityMonths: 120, country: "JP" },
+  { symbol: "GB10YT=RR", label: "영국 10년",   maturityMonths: 120, country: "GB" },
+  { symbol: "FR10YT=RR", label: "프랑스 10년", maturityMonths: 120, country: "FR" },
+  { symbol: "DE10YT=RR", label: "독일 10년",   maturityMonths: 120, country: "DE" },
 ];
 
-async function fetchYahooQuote(symbol: string): Promise<{ price: number; change: number; lastUpdated: string } | null> {
+/** v8 chart API — ^IRX / ^FVX / ^TNX / ^TYX 전용 */
+async function fetchChart(symbol: string): Promise<{ price: number; change: number; lastUpdated: string } | null> {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
     const res = await fetch(url, {
@@ -37,6 +38,38 @@ async function fetchYahooQuote(symbol: string): Promise<{ price: number; change:
   } catch {
     return null;
   }
+}
+
+/** v7 quote API — =RR Reuters 국제 채권 심볼 전용 */
+async function fetchQuote(symbol: string): Promise<{ price: number; change: number; lastUpdated: string } | null> {
+  try {
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}&fields=regularMarketPrice,regularMarketChange,regularMarketPreviousClose,regularMarketTime`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const q = data?.quoteResponse?.result?.[0];
+    if (!q?.regularMarketPrice) return null;
+
+    const price = q.regularMarketPrice as number;
+    const change = (q.regularMarketChange as number) ?? 0;
+    const lastUpdated = q.regularMarketTime
+      ? new Date((q.regularMarketTime as number) * 1000).toISOString()
+      : new Date().toISOString();
+
+    return { price, change, lastUpdated };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchYahooQuote(symbol: string): Promise<{ price: number; change: number; lastUpdated: string } | null> {
+  if (symbol.includes("=RR")) {
+    return fetchQuote(symbol);
+  }
+  return fetchChart(symbol);
 }
 
 export async function GET() {
@@ -73,14 +106,14 @@ export async function GET() {
 }
 
 const FALLBACK_DATA: BondYield[] = [
-  { symbol: "^IRX",       label: "3개월",      maturityMonths: 3,   yield: 4.35, change: 0.01,  country: "US" },
-  { symbol: "^FVX",       label: "5년",         maturityMonths: 60,  yield: 4.25, change: -0.02, country: "US" },
-  { symbol: "^TNX",       label: "10년",        maturityMonths: 120, yield: 4.45, change: -0.01, country: "US" },
-  { symbol: "^TYX",       label: "30년",        maturityMonths: 360, yield: 4.60, change: 0.00,  country: "US" },
-  { symbol: "KR5YT=RR",   label: "한국 5년",   maturityMonths: 60,  yield: 3.15, change: -0.01, country: "KR" },
-  { symbol: "KR10YT=RR",  label: "한국 10년",  maturityMonths: 120, yield: 3.35, change: -0.02, country: "KR" },
-  { symbol: "JP10YT=RR",  label: "일본 10년",  maturityMonths: 120, yield: 1.50, change: 0.02,  country: "JP" },
-  { symbol: "GB10YT=RR",  label: "영국 10년",  maturityMonths: 120, yield: 4.55, change: 0.01,  country: "GB" },
-  { symbol: "FR10YT=RR",  label: "프랑스 10년",maturityMonths: 120, yield: 3.30, change: -0.01, country: "FR" },
-  { symbol: "DE10YT=RR",  label: "독일 10년",  maturityMonths: 120, yield: 2.65, change: 0.00,  country: "DE" },
+  { symbol: "^IRX",       label: "3개월",       maturityMonths: 3,   yield: 4.35, change: 0.01,  country: "US" },
+  { symbol: "^FVX",       label: "5년",          maturityMonths: 60,  yield: 4.25, change: -0.02, country: "US" },
+  { symbol: "^TNX",       label: "10년",         maturityMonths: 120, yield: 4.45, change: -0.01, country: "US" },
+  { symbol: "^TYX",       label: "30년",         maturityMonths: 360, yield: 4.60, change: 0.00,  country: "US" },
+  { symbol: "KR5YT=RR",  label: "한국 5년",    maturityMonths: 60,  yield: 3.15, change: -0.01, country: "KR" },
+  { symbol: "KR10YT=RR", label: "한국 10년",   maturityMonths: 120, yield: 3.35, change: -0.02, country: "KR" },
+  { symbol: "JP10YT=RR", label: "일본 10년",   maturityMonths: 120, yield: 1.50, change: 0.02,  country: "JP" },
+  { symbol: "GB10YT=RR", label: "영국 10년",   maturityMonths: 120, yield: 4.55, change: 0.01,  country: "GB" },
+  { symbol: "FR10YT=RR", label: "프랑스 10년", maturityMonths: 120, yield: 3.30, change: -0.01, country: "FR" },
+  { symbol: "DE10YT=RR", label: "독일 10년",   maturityMonths: 120, yield: 2.65, change: 0.00,  country: "DE" },
 ];
