@@ -92,7 +92,7 @@ export function TopStocksSection() {
               {COUNTRY_LABELS[country]}
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-              {group.map((stock) => {
+              {[...group].sort((a, b) => (b.marketCap ?? -Infinity) - (a.marketCap ?? -Infinity)).map((stock, idx) => {
                 const up = stock.change >= 0;
                 return (
                   <div
@@ -104,11 +104,14 @@ export function TopStocksSection() {
                     {/* 상단 accent bar */}
                     <div className={`absolute inset-x-0 top-0 h-0.5 ${up ? "bg-emerald-500" : "bg-red-500"}`} />
 
-                    {/* 헤더: 심볼(좌) + 시총(우) */}
+                    {/* 헤더: 순위+심볼(좌) + 시총(우) */}
                     <div className="flex items-start justify-between gap-1">
-                      <span className="text-xs text-gray-500 truncate">
-                        {stock.symbol.replace(".KS", "").replace(".T", "")}
-                      </span>
+                      <div className="flex items-center gap-1 min-w-0">
+                        <span className="text-xs font-bold text-gray-600 tabular-nums w-4 shrink-0">{idx + 1}</span>
+                        <span className="text-xs text-gray-500 truncate">
+                          {stock.symbol.replace(".KS", "").replace(".T", "")}
+                        </span>
+                      </div>
                       {stock.marketCap != null && (
                         <span className="shrink-0 text-xs text-gray-500 tabular-nums">
                           {formatMarketCap(stock.marketCap, stock.currency)}
