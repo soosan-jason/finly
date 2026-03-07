@@ -5,6 +5,11 @@ import { CommodityItem } from "@/types/market";
 import { Card } from "@/components/ui/card";
 import { formatPercent } from "@/lib/utils/format";
 
+function fmtTime(iso?: string) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
 export function CommoditiesSection() {
   const [items, setItems] = useState<CommodityItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,6 +78,9 @@ export function CommoditiesSection() {
                       <p className={`mt-0.5 text-xs font-medium ${up ? "text-emerald-400" : "text-red-400"}`}>
                         {formatPercent(item.changePct)}
                       </p>
+                      {fmtTime(item.lastUpdated) && (
+                        <p className="mt-1 text-xs text-gray-600">{fmtTime(item.lastUpdated)}</p>
+                      )}
                     </div>
                   </Card>
                 );

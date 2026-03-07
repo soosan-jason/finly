@@ -19,13 +19,28 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
-const REGION_LABELS: Record<StockIndex["region"], string> = {
+// JP/CN/EU 모두 "기타"로 묶기
+const REGION_GROUP: Record<StockIndex["region"], string> = {
   KR: "한국",
   US: "미국",
-  JP: "일본",
-  CN: "중국",
-  EU: "유럽",
+  JP: "기타",
+  CN: "기타",
+  EU: "기타",
 };
+
+const GROUP_ORDER = ["한국", "미국", "기타"];
+
+const FALLBACK_INDICES: StockIndex[] = [
+  { symbol: "^KS11",     name: "KOSPI",      price: 2523.55,  change: 12.34,   changePercent: 0.49,  currency: "KRW", region: "KR" },
+  { symbol: "^KQ11",     name: "KOSDAQ",     price: 742.18,   change: -3.21,   changePercent: -0.43, currency: "KRW", region: "KR" },
+  { symbol: "^GSPC",     name: "S&P 500",    price: 5304.72,  change: 28.01,   changePercent: 0.53,  currency: "USD", region: "US" },
+  { symbol: "^IXIC",     name: "NASDAQ",     price: 16742.39, change: -42.77,  changePercent: -0.25, currency: "USD", region: "US" },
+  { symbol: "^DJI",      name: "DOW JONES",  price: 39107.54, change: 134.21,  changePercent: 0.34,  currency: "USD", region: "US" },
+  { symbol: "^N225",     name: "NIKKEI 225", price: 38236.07, change: -201.37, changePercent: -0.52, currency: "JPY", region: "JP" },
+  { symbol: "^HSI",      name: "항셍",       price: 23000.00, change: 120.50,  changePercent: 0.53,  currency: "HKD", region: "CN" },
+  { symbol: "000001.SS", name: "상해종합",   price: 3300.00,  change: -8.40,   changePercent: -0.25, currency: "CNY", region: "CN" },
+  { symbol: "399001.SZ", name: "심천성분",   price: 10500.00, change: 45.20,   changePercent: 0.43,  currency: "CNY", region: "CN" },
+];
 
 export function MarketsPageClient() {
   const [tab, setTab] = useState<TabId>("indices");
@@ -48,14 +63,7 @@ export function MarketsPageClient() {
         })
       );
     } catch {
-      setIndices([
-        { symbol: "^KS11", name: "KOSPI",      price: 2523.55, change: 12.34,   changePercent: 0.49,  currency: "KRW", region: "KR" },
-        { symbol: "^KQ11", name: "KOSDAQ",     price: 742.18,  change: -3.21,   changePercent: -0.43, currency: "KRW", region: "KR" },
-        { symbol: "^GSPC", name: "S&P 500",    price: 5304.72, change: 28.01,   changePercent: 0.53,  currency: "USD", region: "US" },
-        { symbol: "^IXIC", name: "NASDAQ",     price: 16742.39,change: -42.77,  changePercent: -0.25, currency: "USD", region: "US" },
-        { symbol: "^DJI",  name: "DOW JONES",  price: 39107.54,change: 134.21,  changePercent: 0.34,  currency: "USD", region: "US" },
-        { symbol: "^N225", name: "NIKKEI 225", price: 38236.07,change: -201.37, changePercent: -0.52, currency: "JPY", region: "JP" },
-      ]);
+      setIndices(FALLBACK_INDICES);
     } finally {
       setLoading(false);
     }
@@ -68,39 +76,44 @@ export function MarketsPageClient() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 그룹화 → 정해진 순서로 정렬
   const grouped = indices.reduce<Record<string, StockIndex[]>>((acc, idx) => {
-    const region = REGION_LABELS[idx.region] ?? idx.region;
-    if (!acc[region]) acc[region] = [];
-    acc[region].push(idx);
+    const group = REGION_GROUP[idx.region] ?? "기타";
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(idx);
     return acc;
   }, {});
 
+  const orderedGroups = GROUP_ORDER.filter((g) => grouped[g]);
+
   return (
-    <div className="space-y-6">
-      {/* 탭 바 */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1 rounded-xl bg-gray-800/60 p-1">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                tab === t.id
-                  ? "bg-gray-700 text-white shadow"
-                  : "text-gray-400 hover:text-gray-200"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+    <div className="space-y-5">
+      {/* 탭 바: 좁은 화면에서 가로 스크롤, 텍스트 줄바꿈 방지 */}
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <div className="flex w-max gap-1 rounded-xl bg-gray-800/60 p-1">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
+                  tab === t.id
+                    ? "bg-gray-700 text-white shadow"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {tab === "indices" && (
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            {lastUpdated && <span>업데이트: {lastUpdated}</span>}
+          <div className="flex shrink-0 items-center gap-1.5 text-xs text-gray-500">
+            {lastUpdated && <span className="hidden sm:inline">{lastUpdated}</span>}
             <button
               onClick={fetchIndices}
-              className="rounded-lg p-1.5 hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
+              className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             </button>
@@ -112,19 +125,19 @@ export function MarketsPageClient() {
       {tab === "indices" && (
         loading && indices.length === 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 9 }).map((_, i) => (
               <div key={i} className="h-28 animate-pulse rounded-xl bg-gray-800" />
             ))}
           </div>
         ) : (
           <div className="space-y-6">
-            {Object.entries(grouped).map(([region, regionIndices]) => (
-              <section key={region}>
+            {orderedGroups.map((group) => (
+              <section key={group}>
                 <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                  {region}
+                  {group}
                 </h2>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                  {regionIndices.map((index) => (
+                  {grouped[group].map((index) => (
                     <IndexCard key={index.symbol} index={index} />
                   ))}
                 </div>

@@ -83,6 +83,11 @@ export function BondsSection() {
   );
 }
 
+function fmtTime(iso?: string) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
 function BondCard({ bond }: { bond: BondYield }) {
   const up = bond.change >= 0;
   return (
@@ -93,6 +98,9 @@ function BondCard({ bond }: { bond: BondYield }) {
         <p className={`mt-0.5 text-xs font-medium ${up ? "text-emerald-400" : "text-red-400"}`}>
           {up ? "+" : ""}{bond.change.toFixed(2)}bp
         </p>
+        {fmtTime(bond.lastUpdated) && (
+          <p className="mt-1 text-xs text-gray-600">{fmtTime(bond.lastUpdated)}</p>
+        )}
       </div>
     </Card>
   );

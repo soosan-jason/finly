@@ -13,6 +13,11 @@ const COUNTRY_LABELS: Record<TopStock["country"], string> = {
 
 const COUNTRY_ORDER: TopStock["country"][] = ["US", "KR", "JP"];
 
+function fmtTime(iso?: string) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
 function formatStockPrice(price: number, currency: string): string {
   if (currency === "KRW") {
     return price.toLocaleString("ko-KR") + "원";
@@ -86,6 +91,9 @@ export function TopStocksSection() {
                       <p className={`mt-0.5 text-xs font-medium ${up ? "text-emerald-400" : "text-red-400"}`}>
                         {formatPercent(stock.changePct)}
                       </p>
+                      {fmtTime(stock.lastUpdated) && (
+                        <p className="mt-1 text-xs text-gray-600">{fmtTime(stock.lastUpdated)}</p>
+                      )}
                     </div>
                   </Card>
                 );

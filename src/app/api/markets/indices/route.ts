@@ -7,12 +7,15 @@ const INDEX_CONFIG: {
   region: StockIndex["region"];
   currency: string;
 }[] = [
-  { symbol: "^KS11",  name: "KOSPI",      region: "KR", currency: "KRW" },
-  { symbol: "^KQ11",  name: "KOSDAQ",     region: "KR", currency: "KRW" },
-  { symbol: "^GSPC",  name: "S&P 500",    region: "US", currency: "USD" },
-  { symbol: "^IXIC",  name: "NASDAQ",     region: "US", currency: "USD" },
-  { symbol: "^DJI",   name: "DOW JONES",  region: "US", currency: "USD" },
-  { symbol: "^N225",  name: "NIKKEI 225", region: "JP", currency: "JPY" },
+  { symbol: "^KS11",     name: "KOSPI",      region: "KR", currency: "KRW" },
+  { symbol: "^KQ11",     name: "KOSDAQ",     region: "KR", currency: "KRW" },
+  { symbol: "^GSPC",     name: "S&P 500",    region: "US", currency: "USD" },
+  { symbol: "^IXIC",     name: "NASDAQ",     region: "US", currency: "USD" },
+  { symbol: "^DJI",      name: "DOW JONES",  region: "US", currency: "USD" },
+  { symbol: "^N225",     name: "NIKKEI 225", region: "JP", currency: "JPY" },
+  { symbol: "^HSI",      name: "항셍",       region: "CN", currency: "HKD" },
+  { symbol: "000001.SS", name: "상해종합",   region: "CN", currency: "CNY" },
+  { symbol: "399001.SZ", name: "심천성분",   region: "CN", currency: "CNY" },
 ];
 
 // Yahoo Finance 비공식 API — ^GSPC, ^KS11 등 ^ 심볼을 그대로 지원
@@ -83,10 +86,13 @@ export async function GET() {
 }
 
 const FALLBACK_DATA: StockIndex[] = [
-  { symbol: "^KS11",  name: "KOSPI",      price: 2523.55,   change: 12.34,   changePercent: 0.49,  currency: "KRW", region: "KR" },
-  { symbol: "^KQ11",  name: "KOSDAQ",     price: 742.18,    change: -3.21,   changePercent: -0.43, currency: "KRW", region: "KR" },
-  { symbol: "^GSPC",  name: "S&P 500",    price: 5304.72,   change: 28.01,   changePercent: 0.53,  currency: "USD", region: "US" },
-  { symbol: "^IXIC",  name: "NASDAQ",     price: 16742.39,  change: -42.77,  changePercent: -0.25, currency: "USD", region: "US" },
-  { symbol: "^DJI",   name: "DOW JONES",  price: 39107.54,  change: 134.21,  changePercent: 0.34,  currency: "USD", region: "US" },
-  { symbol: "^N225",  name: "NIKKEI 225", price: 38236.07,  change: -201.37, changePercent: -0.52, currency: "JPY", region: "JP" },
+  { symbol: "^KS11",     name: "KOSPI",      price: 2523.55,  change: 12.34,   changePercent: 0.49,  currency: "KRW", region: "KR" },
+  { symbol: "^KQ11",     name: "KOSDAQ",     price: 742.18,   change: -3.21,   changePercent: -0.43, currency: "KRW", region: "KR" },
+  { symbol: "^GSPC",     name: "S&P 500",    price: 5304.72,  change: 28.01,   changePercent: 0.53,  currency: "USD", region: "US" },
+  { symbol: "^IXIC",     name: "NASDAQ",     price: 16742.39, change: -42.77,  changePercent: -0.25, currency: "USD", region: "US" },
+  { symbol: "^DJI",      name: "DOW JONES",  price: 39107.54, change: 134.21,  changePercent: 0.34,  currency: "USD", region: "US" },
+  { symbol: "^N225",     name: "NIKKEI 225", price: 38236.07, change: -201.37, changePercent: -0.52, currency: "JPY", region: "JP" },
+  { symbol: "^HSI",      name: "항셍",       price: 23000.00, change: 120.50,  changePercent: 0.53,  currency: "HKD", region: "CN" },
+  { symbol: "000001.SS", name: "상해종합",   price: 3300.00,  change: -8.40,   changePercent: -0.25, currency: "CNY", region: "CN" },
+  { symbol: "399001.SZ", name: "심천성분",   price: 10500.00, change: 45.20,   changePercent: 0.43,  currency: "CNY", region: "CN" },
 ];
