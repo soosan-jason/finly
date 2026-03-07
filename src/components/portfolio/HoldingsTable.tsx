@@ -20,7 +20,7 @@ export function HoldingsTable({ holdings, onDelete }: Props) {
   }
 
   return (
-    <div ref={scrollRef} className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto overscroll-x-contain">
+    <div ref={scrollRef} className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto overscroll-x-contain" style={{ touchAction: "pan-x pan-y" }}>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-800 text-left text-xs text-gray-500">
@@ -85,7 +85,8 @@ export function HoldingsTable({ holdings, onDelete }: Props) {
                 </td>
                 <td className="px-4 py-3 text-right">
                   <button
-                    onClick={() => onDelete(h.id)}
+                    onClick={(e) => { e.stopPropagation(); onDelete(h.id); }}
+                    style={{ touchAction: "manipulation" }}
                     className="rounded-lg p-1.5 text-gray-600 hover:bg-red-500/10 hover:text-red-400 transition-colors"
                   >
                     <Trash2 className="h-3.5 w-3.5" />

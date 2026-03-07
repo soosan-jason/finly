@@ -356,7 +356,7 @@ export function PortfolioPageClient() {
 
       {/* 자산 추이 차트 */}
       {holdings.length > 0 && portfolio && (
-        <div ref={chartScrollRef} className="rounded-2xl border border-gray-800 bg-gray-900 p-4 overflow-x-auto">
+        <div ref={chartScrollRef} className="rounded-2xl border border-gray-800 bg-gray-900 p-4 overflow-x-auto" style={{ touchAction: "pan-x pan-y" }}>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-medium text-gray-400">자산 추이</h2>
             {hasKrw && hasUsd && (
@@ -422,7 +422,11 @@ export function PortfolioPageClient() {
             holdings={holdings}
             onDelete={async (id) => {
               await fetch(`/api/portfolio/holdings?id=${id}`, { method: "DELETE" });
-              if (portfolio) fetchHoldings(portfolio.id);
+              if (portfolio) {
+                snapshotSavedRef.current = null;
+                const enriched = await fetchHoldings(portfolio.id);
+                if (enriched) saveSnapshot(portfolio.id, enriched);
+              }
             }}
           />
         )
@@ -440,7 +444,12 @@ export function PortfolioPageClient() {
         <AddHoldingModal
           portfolioId={portfolio.id}
           onClose={() => setShowAddModal(false)}
-          onAdded={() => { fetchHoldings(portfolio.id); setShowAddModal(false); }}
+          onAdded={async () => {
+            snapshotSavedRef.current = null;
+            const enriched = await fetchHoldings(portfolio.id);
+            if (enriched) saveSnapshot(portfolio.id, enriched);
+            setShowAddModal(false);
+          }}
         />
       )}
 

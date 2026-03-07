@@ -13,7 +13,7 @@ export function CryptoTable({ cryptos }: CryptoTableProps) {
   const scrollRef = usePreventSwipeNav<HTMLDivElement>();
 
   return (
-    <div ref={scrollRef} className="overflow-x-auto">
+    <div ref={scrollRef} className="overflow-x-auto" style={{ touchAction: "pan-x pan-y" }}>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-800 text-left text-xs text-gray-500">
