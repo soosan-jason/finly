@@ -67,7 +67,8 @@ export function PortfolioPageClient() {
     if (typeof window === "undefined") return "KRW";
     return (localStorage.getItem("portfolio_chart_view") as CurrencyView) ?? "KRW";
   });
-  const snapshotSavedRef = useRef<string | null>(null); // 오늘 이미 저장했는지 체크
+  const snapshotSavedRef = useRef<string | null>(null);
+  const [chartRefreshKey, setChartRefreshKey] = useState(0);
 
   async function fetchPortfolio() {
     const res = await fetch("/api/portfolio");
@@ -120,10 +121,12 @@ export function PortfolioPageClient() {
     }
 
     const enriched = data.map((h: Holding) => {
-      const cp =
+      const rawPrice =
         h.asset_type === "crypto"
           ? (cryptoPriceMap[h.symbol] ?? 0)
           : (stockPriceMap[h.symbol] ?? 0);
+      // 가격 API 실패(0) 시 평균매수가로 fallback → 현재가 미반영이지만 자산이 0으로 표시되는 것 방지
+      const cp = rawPrice > 0 ? rawPrice : h.avg_buy_price;
       const cv = cp * h.quantity;
       const cost = h.avg_buy_price * h.quantity;
       return {
@@ -258,6 +261,7 @@ export function PortfolioPageClient() {
         }),
       });
       snapshotSavedRef.current = today;
+      setChartRefreshKey((k) => k + 1);
     } catch { /* ignore — 스냅샷 실패는 조용히 */ }
   }
 
@@ -384,6 +388,7 @@ export function PortfolioPageClient() {
           <PortfolioChart
             portfolioId={portfolio.id}
             view={hasKrw && !hasUsd ? "KRW" : !hasKrw && hasUsd ? "USD" : chartView}
+            refreshKey={chartRefreshKey}
           />
         </div>
       )}

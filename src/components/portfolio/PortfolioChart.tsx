@@ -29,6 +29,7 @@ type DisplayMode = "chart" | "table";
 interface PortfolioChartProps {
   portfolioId: string;
   view: CurrencyView;
+  refreshKey?: number;
   className?: string;
 }
 
@@ -38,7 +39,7 @@ const fmtDate = (iso: string) => iso.slice(5); // "MM-DD"
 const fmtPct  = (cost: number, pl: number) =>
   cost === 0 ? "—" : `${pl >= 0 ? "+" : ""}${((pl / cost) * 100).toFixed(2)}%`;
 
-export function PortfolioChart({ portfolioId, view, className }: PortfolioChartProps) {
+export function PortfolioChart({ portfolioId, view, refreshKey, className }: PortfolioChartProps) {
   const wrapperRef   = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef     = useRef<IChartApi | null>(null);
@@ -132,7 +133,7 @@ export function PortfolioChart({ portfolioId, view, className }: PortfolioChartP
       }
     }
     loadData();
-  }, [portfolioId, days]);
+  }, [portfolioId, days, refreshKey]);
 
   // ── 2. 차트 생성 (chart 모드 + 데이터 있을 때만) ──────────────────────
   useEffect(() => {
