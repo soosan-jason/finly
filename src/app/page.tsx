@@ -2,6 +2,8 @@ import { MarketOverview } from "@/components/markets/MarketOverview";
 import { CryptoSection } from "@/components/markets/CryptoSection";
 import { FxWidget } from "@/components/markets/FxWidget";
 import { PortfolioMiniCard } from "@/components/portfolio/PortfolioMiniCard";
+import { FuturesCommoditiesSummary } from "@/components/markets/FuturesCommoditiesSummary";
+import { StocksTabs } from "@/components/markets/StocksTabs";
 
 export default function HomePage() {
   return (
@@ -23,8 +25,14 @@ export default function HomePage() {
       {/* 환율 */}
       <FxWidget />
 
-      {/* 암호화폐 */}
-      <CryptoSection />
+      {/* 암호화폐 (BTC/ETH) */}
+      <CryptoSection limit={2} />
+
+      {/* 선물 · 원자재 */}
+      <FuturesCommoditiesSummary />
+
+      {/* 주요국 주식 */}
+      <StocksTabs />
     </div>
   );
 }
