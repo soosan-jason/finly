@@ -25,9 +25,7 @@ function formatMarketCap(cap: number, currency: string): string {
     const jo = cap / 1e12;
     return jo >= 1 ? `${jo.toFixed(0)}조` : `${(cap / 1e8).toFixed(0)}억`;
   }
-  if (currency === "JPY") {
-    return `${(cap / 1e12).toFixed(1)}兆`;
-  }
+  if (currency === "JPY") return `${(cap / 1e12).toFixed(1)}兆`;
   if (cap >= 1e12) return `$${(cap / 1e12).toFixed(2)}T`;
   return `$${(cap / 1e9).toFixed(0)}B`;
 }
@@ -83,7 +81,7 @@ export function StocksTabs() {
       {loading ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-800" />
+            <div key={i} className="h-28 animate-pulse rounded-xl bg-gray-800" />
           ))}
         </div>
       ) : (
@@ -92,21 +90,31 @@ export function StocksTabs() {
             const up = stock.changePct >= 0;
             return (
               <Card key={stock.symbol} className="flex flex-col justify-between">
-                <div>
-                  <p className="text-xs text-gray-500">
-                    {stock.symbol.replace(".KS", "").replace(".T", "")}
-                  </p>
-                  <p className="mt-0.5 text-sm font-medium text-gray-200 leading-tight">{stock.name}</p>
+                {/* 상단: 심볼(좌) + 등락률 뱃지(우) */}
+                <div className="flex items-start justify-between gap-1">
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 truncate">
+                      {stock.symbol.replace(".KS", "").replace(".T", "")}
+                    </p>
+                    <p className="mt-0.5 text-sm font-medium text-gray-200 leading-tight truncate">
+                      {stock.name}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
+                      up ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+                    }`}
+                  >
+                    {formatPercent(stock.changePct)}
+                  </span>
                 </div>
+                {/* 하단: 가격 + 시가총액 */}
                 <div className="mt-3">
                   <p className="text-base font-bold text-white tabular-nums">
                     {formatStockPrice(stock.price, stock.currency)}
                   </p>
-                  <p className={`mt-0.5 text-xs font-medium tabular-nums ${up ? "text-emerald-400" : "text-red-400"}`}>
-                    {formatPercent(stock.changePct)}
-                  </p>
                   {stock.marketCap != null && (
-                    <p className="mt-1 text-xs text-gray-500 tabular-nums">
+                    <p className="mt-0.5 text-xs text-gray-500 tabular-nums">
                       {formatMarketCap(stock.marketCap, stock.currency)}
                     </p>
                   )}

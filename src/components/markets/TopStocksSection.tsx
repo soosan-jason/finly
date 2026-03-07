@@ -90,16 +90,28 @@ export function TopStocksSection() {
                 const up = stock.change >= 0;
                 return (
                   <Card key={stock.symbol} className="flex flex-col justify-between">
-                    <div>
-                      <p className="text-xs text-gray-500">{stock.symbol.replace(".KS", "").replace(".T", "")}</p>
-                      <p className="mt-0.5 text-sm font-medium text-gray-200 leading-tight">{stock.name}</p>
-                    </div>
-                    <div className="mt-3">
-                      <p className="text-base font-bold text-white">
-                        {formatStockPrice(stock.price, stock.currency)}
-                      </p>
-                      <p className={`mt-0.5 text-xs font-medium ${up ? "text-emerald-400" : "text-red-400"}`}>
+                    {/* 상단: 심볼(좌) + 등락률 뱃지(우) */}
+                    <div className="flex items-start justify-between gap-1">
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 truncate">
+                          {stock.symbol.replace(".KS", "").replace(".T", "")}
+                        </p>
+                        <p className="mt-0.5 text-sm font-medium text-gray-200 leading-tight truncate">
+                          {stock.name}
+                        </p>
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
+                          up ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+                        }`}
+                      >
                         {formatPercent(stock.changePct)}
+                      </span>
+                    </div>
+                    {/* 하단: 가격 + 시가총액 + 시간 */}
+                    <div className="mt-3">
+                      <p className="text-base font-bold text-white tabular-nums">
+                        {formatStockPrice(stock.price, stock.currency)}
                       </p>
                       {stock.marketCap != null && (
                         <p className="mt-0.5 text-xs text-gray-500 tabular-nums">
