@@ -33,8 +33,8 @@ export function BondsSection() {
     return (
       <div className="space-y-6">
         <div className="h-48 animate-pulse rounded-xl bg-gray-800" />
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-          {Array.from({ length: 7 }).map((_, i) => (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-800" />
           ))}
         </div>
@@ -59,7 +59,7 @@ export function BondsSection() {
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
           미국 국채
         </h2>
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {usBonds.map((bond) => (
             <BondCard key={bond.symbol} bond={bond} />
           ))}
