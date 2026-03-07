@@ -20,6 +20,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.5.0",
+    "yahoo-finance2": "^3.13.2",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
