@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
@@ -13,46 +10,12 @@ interface Props {
 }
 
 export function HoldingsTable({ holdings, onDelete }: Props) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   function fmt(value: number, currency: string) {
     return currency === "KRW" ? formatKRW(value) : formatPrice(value);
   }
 
-  // non-passive touchmove 리스너로 수평 스와이프 시 브라우저 뒤로가기 방지
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    let startX = 0;
-    let startY = 0;
-
-    const onTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      const dx = Math.abs(e.touches[0].clientX - startX);
-      const dy = Math.abs(e.touches[0].clientY - startY);
-      if (dx > dy) {
-        e.preventDefault(); // 수평 스와이프면 브라우저 제스처 차단
-      }
-    };
-
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchmove", onTouchMove, { passive: false });
-    return () => {
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchmove", onTouchMove);
-    };
-  }, []);
-
   return (
-    <div
-      ref={scrollRef}
-      className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto overscroll-x-contain"
-    >
+    <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto overscroll-x-contain">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-800 text-left text-xs text-gray-500">
