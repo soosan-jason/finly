@@ -20,7 +20,7 @@ export function HoldingsTable({ holdings, onDelete }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto" style={{ overscrollBehaviorX: "contain" }}>
+    <div className="scrollbar-holdings rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto" style={{ overscrollBehaviorX: "contain" }}>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-800 text-left text-xs text-gray-500">

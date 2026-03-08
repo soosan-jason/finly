@@ -35,3 +35,25 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #4b5563;
 }
+
+/* 보유종목 테이블 전용 — 수평 스크롤바를 크고 조작하기 쉽게 */
+.scrollbar-holdings::-webkit-scrollbar {
+  height: 12px;
+}
+.scrollbar-holdings::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 6px;
+  margin: 0 4px;
+}
+.scrollbar-holdings::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 6px;
+  border: 2px solid #1f2937;
+}
+.scrollbar-holdings::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+.scrollbar-holdings {
+  scrollbar-width: auto;
+  scrollbar-color: #4b5563 #1f2937;
+}
