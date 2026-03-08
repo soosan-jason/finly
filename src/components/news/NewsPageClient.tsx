@@ -43,7 +43,7 @@ export function NewsPageClient() {
     }
   }
 
-  useEffect(() => { fetchNews(category); }, [category]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchNews(category); }, [category, locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function changeCategory(cat: Category) {
     setCategory(cat);
