@@ -32,7 +32,7 @@ function SummaryHeroCard({ label, totalValue, totalCost, pnl, pnlPositive, pct, 
         <span className={`text-sm font-semibold ${color}`}>{pctLabel}</span>
       </div>
       <div className="mt-1 flex items-baseline justify-between gap-2">
-        <p className="text-xl font-bold tracking-tight text-white">{totalValue}</p>
+        <p className="text-base font-bold tracking-tight text-white">{totalValue}</p>
         <span className={`text-xs font-medium ${color}`}>{pnl}</span>
       </div>
       <div className="mt-2 flex items-center gap-2">
@@ -347,7 +347,7 @@ export function PortfolioPageClient() {
 
       {/* 히어로 요약 카드 — 통화별 */}
       {holdings.length > 0 && (
-        <div className="space-y-3">
+        <div className={hasKrw && hasUsd ? "grid grid-cols-2 gap-2" : "space-y-3"}>
           {hasKrw && (
             <SummaryHeroCard
               label={t("portfolio.krwAssets")}
