@@ -12,10 +12,8 @@ export default function HomePage() {
     <div className="space-y-8">
       {/* Hero */}
       <div>
-        <h1 className="text-2xl font-bold text-white">{t("dashboard.title")}</h1>
-        <p className="mt-1 text-sm text-gray-400">
-          {t("dashboard.description")}
-        </p>
+        <h1 className="text-xl font-bold text-white">{t("dashboard.title")}</h1>
+        <p className="mt-1 text-sm text-gray-400">{t("dashboard.description")}</p>
       </div>
 
       {/* 주요 지수 */}
