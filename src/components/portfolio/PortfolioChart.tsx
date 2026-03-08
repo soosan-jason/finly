@@ -147,6 +147,7 @@ export function PortfolioChart({ portfolioId, view, refreshKey, className }: Por
     const isBoth = view === "BOTH";
 
     const chart = createChart(containerRef.current, {
+      localization: { locale: "en-US" },
       layout: {
         background: { type: ColorType.Solid, color: "#111827" },
         textColor: "#9ca3af",
