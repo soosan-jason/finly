@@ -14,10 +14,16 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-async function translateHeadline(text: string): Promise<string> {
+const LANG_MAP: Record<string, string> = {
+  "ko-KR": "ko",
+  "ja-JP": "ja",
+  "zh-CN": "zh-CN",
+};
+
+async function translateHeadline(text: string, targetLang: string): Promise<string> {
   if (!text) return text;
   try {
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ko`;
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
     const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
     if (!res.ok) return text;
     const data = await res.json();
@@ -44,6 +50,8 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const category = (searchParams.get("category") ?? "general") as "general" | "forex" | "crypto";
   const limit = parseInt(searchParams.get("limit") ?? "20", 10);
+  const locale = searchParams.get("locale") ?? "ko-KR";
+  const targetLang = LANG_MAP[locale]; // undefined for en-US → skip translation
   const apiKey = process.env.FINNHUB_API_KEY;
 
   if (!apiKey || apiKey === "your_finnhub_api_key") {
@@ -69,12 +77,14 @@ export async function GET(req: NextRequest) {
         translated: false,
       }));
 
-    const translatedHeadlines = await Promise.all(articles.map((a) => translateHeadline(a.headline)));
-    articles = articles.map((a, i) => ({
-      ...a,
-      headline: translatedHeadlines[i] ?? a.headline,
-      translated: !!translatedHeadlines[i] && translatedHeadlines[i] !== a.headline,
-    }));
+    if (targetLang) {
+      const translatedHeadlines = await Promise.all(articles.map((a) => translateHeadline(a.headline, targetLang)));
+      articles = articles.map((a, i) => ({
+        ...a,
+        headline: translatedHeadlines[i] ?? a.headline,
+        translated: !!translatedHeadlines[i] && translatedHeadlines[i] !== a.headline,
+      }));
+    }
 
     return NextResponse.json(articles, {
       headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=60" },

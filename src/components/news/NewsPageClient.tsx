@@ -34,7 +34,7 @@ export function NewsPageClient() {
   async function fetchNews(cat = category) {
     setLoading(true);
     try {
-      const res = await fetch(`/api/news?category=${cat}&limit=30`);
+      const res = await fetch(`/api/news?category=${cat}&limit=30&locale=${locale}`);
       const data = await res.json();
       setArticles(Array.isArray(data) ? data : []);
       setLastUpdated(new Date().toLocaleTimeString(locale, { timeZone: timezone }));
