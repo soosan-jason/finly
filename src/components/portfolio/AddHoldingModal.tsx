@@ -253,6 +253,13 @@ function SingleMode({ portfolioId, onAdded }: { portfolioId: string; onAdded: ()
         )}
       </div>
 
+      {/* 심볼 접미사 안내 (주식/ETF 탭에서만 표시) */}
+      {assetTab === "stock" && (
+        <p className="text-xs text-gray-600 leading-relaxed -mt-2">
+          {t("modal.symbolSuffixHint")}
+        </p>
+      )}
+
       {/* 수량 + 가격 나란히 */}
       <div className="grid grid-cols-2 gap-2">
         <div>
@@ -300,7 +307,7 @@ function SingleMode({ portfolioId, onAdded }: { portfolioId: string; onAdded: ()
       {addedCount > 0 && (
         <div className="flex items-center gap-1.5 text-xs text-emerald-400">
           <CheckCircle2 className="h-3.5 w-3.5" />
-          <span>{addedCount}개 {t("modal.addedBadge")}</span>
+          <span>{addedCount} {t("modal.addedBadge")}</span>
         </div>
       )}
 
@@ -457,7 +464,7 @@ function BulkMode({ portfolioId, onAdded }: { portfolioId: string; onAdded: () =
             className="flex-1 rounded-lg bg-gray-700 py-1.5 text-xs font-medium text-white hover:bg-gray-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
           >
             {validating && <Loader2 className="h-3 w-3 animate-spin" />}
-            {validating ? "검증 중..." : t("modal.csvParse")}
+            {validating ? t("modal.csvValidating") : t("modal.csvParse")}
           </button>
           <input ref={fileRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleFile} />
         </div>
@@ -470,11 +477,11 @@ function BulkMode({ portfolioId, onAdded }: { portfolioId: string; onAdded: () =
             <table className="w-full text-xs">
               <thead className="sticky top-0 bg-gray-800 text-gray-400">
                 <tr>
-                  <th className="px-3 py-2 text-left">심볼</th>
-                  <th className="px-2 py-2 text-right">수량</th>
-                  <th className="px-2 py-2 text-right">평균매수가</th>
-                  <th className="px-2 py-2 text-center">통화</th>
-                  <th className="px-2 py-2 text-center">상태</th>
+                  <th className="px-3 py-2 text-left">{t("modal.csvColSymbol")}</th>
+                  <th className="px-2 py-2 text-right">{t("modal.csvColQty")}</th>
+                  <th className="px-2 py-2 text-right">{t("modal.csvColAvgPrice")}</th>
+                  <th className="px-2 py-2 text-center">{t("modal.csvColCurrency")}</th>
+                  <th className="px-2 py-2 text-center">{t("modal.csvColStatus")}</th>
                   <th className="px-2 py-2" />
                 </tr>
               </thead>
@@ -505,7 +512,7 @@ function BulkMode({ portfolioId, onAdded }: { portfolioId: string; onAdded: () =
                           <AlertCircle className="h-3.5 w-3.5" />
                           {row.error === "format" ? t("modal.csvErrFormat")
                            : row.error === "number" ? t("modal.csvErrNumber")
-                           : "미확인"}
+                           : t("modal.csvErrInvalid")}
                         </span>
                       ) : (
                         <CheckCircle2 className="mx-auto h-3.5 w-3.5 text-emerald-500/60" />
@@ -527,14 +534,14 @@ function BulkMode({ portfolioId, onAdded }: { portfolioId: string; onAdded: () =
           </div>
           <div className="flex items-center justify-between border-t border-gray-700 bg-gray-800/50 px-3 py-2">
             <span className="text-xs text-gray-400">
-              유효 <span className="text-white font-medium">{validRows.length}</span>
+              {t("modal.csvValid")} <span className="text-white font-medium">{validRows.length}</span>
               {rows.filter((r) => r.error).length > 0 && (
                 <span className="ml-2 text-red-400">
-                  오류 {rows.filter((r) => r.error).length}
+                  {t("modal.csvErrors")} {rows.filter((r) => r.error).length}
                 </span>
               )}
               {savedCount > 0 && (
-                <span className="ml-2 text-emerald-400">저장됨 {savedCount}</span>
+                <span className="ml-2 text-emerald-400">{t("modal.csvSaved")} {savedCount}</span>
               )}
             </span>
             <button
