@@ -81,7 +81,7 @@ function parseCsv(text: string): CsvRow[] {
       continue;
     }
 
-    let assetType: AssetType =
+    const assetType: AssetType =
       typeHint === "crypto" ? "crypto"
       : typeHint === "stock" || typeHint === "etf" ? (typeHint as AssetType)
       : detectAssetType(symRaw);
