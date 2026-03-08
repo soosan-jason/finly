@@ -87,7 +87,7 @@ export function HoldingsTable({ holdings, onDelete }: Props) {
       <div
         ref={scrollRef}
         className="overflow-x-auto"
-        style={{ overscrollBehaviorX: "contain" }}
+        style={{ overscrollBehaviorX: "contain", touchAction: "pan-x" }}
         onScroll={updateThumb}
       >
         <table className="w-full text-sm">
