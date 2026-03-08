@@ -44,7 +44,7 @@ export function CryptoSection({ limit = 10 }: CryptoSectionProps) {
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">{t("crypto.title")}</h2>
         <Link href="/crypto" className="text-sm text-emerald-400 hover:underline">
-          전체보기 →
+          {t("crypto.viewAll")}
         </Link>
       </div>
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">

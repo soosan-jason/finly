@@ -326,7 +326,7 @@ export function PortfolioPageClient() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900 px-10 py-7 shadow-xl">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-            <p className="text-sm text-gray-400">처리 중...</p>
+            <p className="text-sm text-gray-400">{t("common.processing")}</p>
           </div>
         </div>
       )}
@@ -334,7 +334,7 @@ export function PortfolioPageClient() {
       <div className="flex items-center justify-between">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-bold text-white">{t("portfolio.title")}</h1>
-          {portfolio && <p className="mt-0.5 truncate text-sm text-gray-400">{portfolio.name}</p>}
+          <p className="mt-0.5 truncate text-sm text-gray-400">{t("portfolio.myPortfolio")}</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}

@@ -6,13 +6,15 @@ import { formatPercent, formatTime, formatMonthDay } from "@/lib/utils/format";
 import { useDateFormat } from "@/contexts/DateFormatContext";
 import Link from "next/link";
 import { useSwipeTab } from "@/hooks/useSwipeTab";
+import { useT } from "@/lib/i18n/useT";
+import { type TranslationKey } from "@/lib/i18n";
 
 type Country = TopStock["country"];
 
-const TABS: { key: Country; label: string; flag: string }[] = [
-  { key: "US", label: "미국", flag: "🇺🇸" },
-  { key: "KR", label: "한국", flag: "🇰🇷" },
-  { key: "JP", label: "일본", flag: "🇯🇵" },
+const TABS: { key: Country; labelKey: TranslationKey; flag: string }[] = [
+  { key: "US", labelKey: "region.US", flag: "🇺🇸" },
+  { key: "KR", labelKey: "region.KR", flag: "🇰🇷" },
+  { key: "JP", labelKey: "region.JP", flag: "🇯🇵" },
 ];
 
 function formatStockPrice(price: number, currency: string): string {
@@ -42,6 +44,7 @@ function formatMarketCap(cap: number, currency: string): string {
 const STORAGE_KEY = "stocks-tab";
 
 export function StocksTabs() {
+  const t = useT();
   const { showDate, locale, timezone } = useDateFormat();
   const [stocks, setStocks] = useState<TopStock[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,9 +85,9 @@ export function StocksTabs() {
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">주요국 주식</h2>
+        <h2 className="text-lg font-semibold text-white">{t("dashboard.majorStocks")}</h2>
         <Link href="/markets?tab=stocks" className="text-sm text-emerald-400 hover:underline">
-          전체보기 →
+          {t("crypto.viewAll")}
         </Link>
       </div>
 
@@ -100,7 +103,7 @@ export function StocksTabs() {
                 : "text-gray-400 hover:text-gray-200"
             }`}
           >
-            {tab.flag} {tab.label}
+            {tab.flag} {t(tab.labelKey)}
           </button>
         ))}
       </div>

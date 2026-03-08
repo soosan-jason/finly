@@ -11,12 +11,14 @@ import { cn } from "@/lib/utils/cn";
 import { formatMonthDay } from "@/lib/utils/format";
 import { PortfolioSnapshot } from "@/types/portfolio";
 import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
+import { useT } from "@/lib/i18n/useT";
+import { type TranslationKey } from "@/lib/i18n";
 
-const PERIODS = [
-  { label: "7일",  days: 7 },
-  { label: "30일", days: 30 },
-  { label: "90일", days: 90 },
-  { label: "전체", days: 0 },
+const PERIODS: { labelKey: TranslationKey; days: number }[] = [
+  { labelKey: "chart.period.7d",  days: 7 },
+  { labelKey: "chart.period.30d", days: 30 },
+  { labelKey: "chart.period.90d", days: 90 },
+  { labelKey: "chart.period.all", days: 0 },
 ];
 
 const MIN_HEIGHT = 140;
@@ -41,6 +43,7 @@ const fmtPct  = (cost: number, pl: number) =>
   cost === 0 ? "—" : `${pl >= 0 ? "+" : ""}${((pl / cost) * 100).toFixed(2)}%`;
 
 export function PortfolioChart({ portfolioId, view, refreshKey, className }: PortfolioChartProps) {
+  const t = useT();
   const wrapperRef   = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef     = useRef<IChartApi | null>(null);
@@ -228,7 +231,7 @@ export function PortfolioChart({ portfolioId, view, refreshKey, className }: Por
                 days === p.days ? "bg-emerald-500 text-white" : "bg-gray-800 text-gray-400 hover:text-white"
               )}
             >
-              {p.label}
+              {t(p.labelKey)}
             </button>
           ))}
         </div>
@@ -270,10 +273,10 @@ export function PortfolioChart({ portfolioId, view, refreshKey, className }: Por
       {view === "BOTH" && displayMode === "chart" && (
         <div className="flex gap-3 text-xs">
           <span className="flex items-center gap-1.5 text-gray-400">
-            <span className="inline-block h-2 w-4 rounded-full bg-emerald-400" /> KRW (우측)
+            <span className="inline-block h-2 w-4 rounded-full bg-emerald-400" /> {t("chart.krwRight")}
           </span>
           <span className="flex items-center gap-1.5 text-gray-400">
-            <span className="inline-block h-2 w-4 rounded-full bg-blue-400" /> USD (좌측)
+            <span className="inline-block h-2 w-4 rounded-full bg-blue-400" /> {t("chart.usdLeft")}
           </span>
         </div>
       )}
@@ -292,7 +295,7 @@ export function PortfolioChart({ portfolioId, view, refreshKey, className }: Por
           )}
           {empty && !loading && (
             <div className="flex h-full items-center justify-center rounded-xl border border-gray-800 bg-gray-900">
-              <p className="text-sm text-gray-500">데이터가 쌓이는 중입니다 — 매일 방문하면 추이가 기록됩니다.</p>
+              <p className="text-sm text-gray-500">{t("chart.accumulating")}</p>
             </div>
           )}
           <div ref={containerRef} className={cn("rounded-xl overflow-hidden h-full", empty && "hidden")} />
@@ -326,7 +329,7 @@ export function PortfolioChart({ portfolioId, view, refreshKey, className }: Por
           )}
           {empty && !loading && (
             <div className="flex h-full items-center justify-center">
-              <p className="text-sm text-gray-500">데이터가 쌓이는 중입니다 — 매일 방문하면 추이가 기록됩니다.</p>
+              <p className="text-sm text-gray-500">{t("chart.accumulating")}</p>
             </div>
           )}
 
@@ -335,20 +338,20 @@ export function PortfolioChart({ portfolioId, view, refreshKey, className }: Por
               <table className="w-full text-xs [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
                 <thead className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur-sm">
                   <tr className="border-b border-gray-800 text-gray-500">
-                    <th className="px-3 py-2 text-left font-medium">날짜</th>
+                    <th className="px-3 py-2 text-left font-medium">{t("chart.col.date")}</th>
                     {(view === "KRW" || view === "BOTH") && (
                       <>
-                        <th className="px-3 py-2 text-right font-medium">평가(₩)</th>
-                        <th className="px-3 py-2 text-right font-medium">손익(₩)</th>
+                        <th className="px-3 py-2 text-right font-medium">{t("chart.col.krwVal")}</th>
+                        <th className="px-3 py-2 text-right font-medium">{t("chart.col.krwPnl")}</th>
                       </>
                     )}
                     {(view === "USD" || view === "BOTH") && (
                       <>
-                        <th className="px-3 py-2 text-right font-medium">평가($)</th>
-                        <th className="px-3 py-2 text-right font-medium">손익($)</th>
+                        <th className="px-3 py-2 text-right font-medium">{t("chart.col.usdVal")}</th>
+                        <th className="px-3 py-2 text-right font-medium">{t("chart.col.usdPnl")}</th>
                       </>
                     )}
-                    <th className="px-3 py-2 text-right font-medium">수익률</th>
+                    <th className="px-3 py-2 text-right font-medium">{t("chart.col.return")}</th>
                   </tr>
                 </thead>
                 <tbody>
