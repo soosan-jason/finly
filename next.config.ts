@@ -11,8 +11,8 @@ const csp = [
   "default-src 'self'",
   `script-src ${scriptSrc}`,
   "style-src 'self' 'unsafe-inline'",
-  // 코인 이미지 CDN + OAuth 프로바이더 아바타
-  "img-src 'self' data: blob: https://assets.coingecko.com https://coin-images.coingecko.com https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://avatars.googleusercontent.com",
+  // 코인 이미지 CDN + OAuth 프로바이더 아바타 + 뉴스 이미지 (외부 CDN)
+  "img-src 'self' data: blob: https: https://assets.coingecko.com https://coin-images.coingecko.com https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://avatars.googleusercontent.com",
   "font-src 'self'",
   // Supabase REST/Realtime
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
