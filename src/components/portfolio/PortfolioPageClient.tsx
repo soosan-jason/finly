@@ -90,7 +90,7 @@ export function PortfolioPageClient() {
   }
 
   async function fetchHoldings(portfolioId: string) {
-    const res = await fetch(`/api/portfolio/holdings?portfolio_id=${portfolioId}`);
+    const res = await fetch(`/api/portfolio/holdings?portfolio_id=${portfolioId}`, { cache: "no-store" });
     const data = await res.json();
     if (!Array.isArray(data)) return;
 
@@ -157,7 +157,7 @@ export function PortfolioPageClient() {
   }
 
   async function fetchWatchlist() {
-    const res = await fetch("/api/portfolio/watchlist");
+    const res = await fetch("/api/portfolio/watchlist", { cache: "no-store" });
     const data = await res.json();
     if (!Array.isArray(data)) return;
 
@@ -448,6 +448,7 @@ export function PortfolioPageClient() {
           <HoldingsTable
             holdings={holdings}
             onDelete={async (id) => {
+              setHoldings((prev) => prev.filter((h) => h.id !== id));
               setDeleting(true);
               try {
                 await fetch(`/api/portfolio/holdings?id=${id}`, { method: "DELETE" });
@@ -466,6 +467,7 @@ export function PortfolioPageClient() {
         <WatchlistSection
           items={watchlist}
           onRemove={async (symbol) => {
+            setWatchlist((prev) => prev.filter((item) => item.symbol !== symbol));
             setDeleting(true);
             try {
               await fetch(`/api/portfolio/watchlist?symbol=${symbol}`, { method: "DELETE" });

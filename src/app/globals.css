@@ -7,14 +7,12 @@
 
 html {
   overscroll-behavior-x: none;
-  touch-action: pan-y;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   overscroll-behavior-x: none;
-  touch-action: pan-y;
 }
 
 * {
