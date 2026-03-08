@@ -5,8 +5,10 @@ import { BondYield } from "@/types/market";
 import { Card } from "@/components/ui/card";
 import { formatTime, formatMonthDay } from "@/lib/utils/format";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 
 export function BondsSection() {
+  const t = useT();
   const { showDate, locale, timezone } = useDateFormat();
   const [bonds, setBonds] = useState<BondYield[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,7 +53,7 @@ export function BondsSection() {
       {usBonds.length >= 2 && (
         <Card>
           <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
-            미국 국채 수익률 곡선
+            {t("bonds.usYieldCurve")}
           </p>
           <YieldCurveChart bonds={usBonds} />
         </Card>
@@ -60,7 +62,7 @@ export function BondsSection() {
       {/* US 국채 */}
       <section>
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-          미국 국채
+          {t("bonds.usTreasury")}
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {usBonds.map((bond) => (
@@ -74,11 +76,11 @@ export function BondsSection() {
         <section>
           <div className="mb-3 flex items-baseline gap-2">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-              기타
+              {t("region.other")}
             </h2>
             {otherBonds.some((b) => b.lastUpdated) && (
               <span className="text-xs text-gray-500">
-                연동{" "}
+                {t("bonds.syncedAt")}{" "}
                 {(() => {
                   const iso = otherBonds
                     .filter((b) => b.lastUpdated)
@@ -156,7 +158,7 @@ function YieldCurveChart({ bonds }: { bonds: BondYield[] }) {
       viewBox={`0 0 ${W} ${H}`}
       className="w-full"
       style={{ height: 140 }}
-      aria-label="미국 국채 수익률 곡선"
+      aria-label="US Treasury Yield Curve"
     >
       {/* Grid lines */}
       {Array.from({ length: yTicks + 1 }).map((_, i) => {

@@ -81,11 +81,18 @@ export function formatDateTime(iso: string, locale = "ko-KR", timeZone?: string)
   });
 }
 
-/** Unix 초 → "n초/분/시간/일 전" */
-export function formatTimeAgo(unixTs: number): string {
+/** Unix 초 → 로케일에 맞는 상대 시간 문자열 */
+export function formatTimeAgo(unixTs: number, locale = "ko-KR"): string {
   const diff = Math.floor(Date.now() / 1000) - unixTs;
-  if (diff < 60) return `${diff}초 전`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
-  return `${Math.floor(diff / 86400)}일 전`;
+  const suffixes: Record<string, [string, string, string, string]> = {
+    "ko-KR": ["초 전",   "분 전",    "시간 전",  "일 전"],
+    "en-US": ["s ago",  "m ago",   "h ago",   "d ago"],
+    "ja-JP": ["秒前",    "分前",     "時間前",   "日前"],
+    "zh-CN": ["秒前",    "分钟前",   "小时前",   "天前"],
+  };
+  const [s, m, h, d] = suffixes[locale] ?? suffixes["ko-KR"];
+  if (diff < 60)    return `${diff}${s}`;
+  if (diff < 3600)  return `${Math.floor(diff / 60)}${m}`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}${h}`;
+  return `${Math.floor(diff / 86400)}${d}`;
 }

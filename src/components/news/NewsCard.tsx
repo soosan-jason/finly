@@ -1,21 +1,26 @@
+"use client";
+
 import { NewsArticle } from "@/app/api/news/route";
 import { ExternalLink, Clock } from "lucide-react";
 import { formatTimeAgo } from "@/lib/utils/format";
+import { useT } from "@/lib/i18n/useT";
+import { useDateFormat } from "@/contexts/DateFormatContext";
 
 interface Props {
   article: NewsArticle;
 }
 
-
-const CATEGORY_LABELS: Record<string, string> = {
-  general: "시장",
-  crypto: "암호화폐",
-  forex: "외환",
-  merger: "M&A",
-};
-
 export function NewsCard({ article }: Props) {
+  const t = useT();
+  const { locale } = useDateFormat();
   const isExternal = article.url !== "#";
+
+  const CATEGORY_KEYS: Record<string, Parameters<typeof t>[0]> = {
+    general: "news.cat.general",
+    crypto:  "news.cat.crypto",
+    forex:   "news.cat.forex",
+    merger:  "news.cat.merger",
+  };
 
   return (
     <a
@@ -40,7 +45,7 @@ export function NewsCard({ article }: Props) {
       {/* Category badge */}
       <div className="mb-2 flex items-center gap-2">
         <span className="rounded-md bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
-          {CATEGORY_LABELS[article.category] ?? article.category}
+          {CATEGORY_KEYS[article.category] ? t(CATEGORY_KEYS[article.category]) : article.category}
         </span>
         {article.related && (
           <span className="text-xs text-gray-600">{article.related}</span>
@@ -63,7 +68,7 @@ export function NewsCard({ article }: Props) {
       <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
         <div className="flex items-center gap-1">
           <Clock className="h-3 w-3" />
-          <span>{formatTimeAgo(article.datetime)}</span>
+          <span>{formatTimeAgo(article.datetime, locale)}</span>
         </div>
         <div className="flex items-center gap-1">
           <span>{article.source}</span>

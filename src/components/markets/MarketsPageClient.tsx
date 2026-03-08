@@ -82,7 +82,7 @@ export function MarketsPageClient() {
 
   // 그룹화 → 정해진 순서로 정렬
   const grouped = indices.reduce<Record<string, StockIndex[]>>((acc, idx) => {
-    const group = REGION_GROUP[idx.region] ?? "기타";
+    const group = REGION_GROUP[idx.region] ?? t("region.other");
     if (!acc[group]) acc[group] = [];
     acc[group].push(idx);
     return acc;

@@ -6,13 +6,14 @@ import Link from "next/link";
 import { TopStock } from "@/types/market";
 import { formatPercent, formatTime, formatMonthDay } from "@/lib/utils/format";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 
-const COUNTRY_LABELS: Record<TopStock["country"], string> = {
-  US: "미국",
-  KR: "한국",
-  JP: "일본",
+const COUNTRY_KEY_MAP: Record<TopStock["country"], "region.US" | "region.KR" | "region.JP"> = {
+  US: "region.US",
+  KR: "region.KR",
+  JP: "region.JP",
 };
 
 const COUNTRY_ORDER: TopStock["country"][] = ["US", "KR", "JP"];
@@ -46,6 +47,7 @@ function formatMarketCap(cap: number, currency: string): string {
 }
 
 function StarButton({ symbol, name }: { symbol: string; name: string }) {
+  const t = useT();
   const { user } = useUser();
   const router = useRouter();
   const [watched, setWatched] = useState(false);
@@ -82,7 +84,7 @@ function StarButton({ symbol, name }: { symbol: string; name: string }) {
     <button
       onClick={toggle}
       disabled={loading}
-      title={watched ? "관심 목록에서 제거" : "관심 목록에 추가"}
+      title={watched ? t("star.remove") : t("star.add")}
       className={`absolute top-2 right-2 rounded-md p-1 transition-colors disabled:opacity-50 ${
         watched ? "text-yellow-400" : "text-gray-600 hover:text-yellow-400"
       }`}
@@ -93,6 +95,7 @@ function StarButton({ symbol, name }: { symbol: string; name: string }) {
 }
 
 export function TopStocksSection() {
+  const t = useT();
   const { showDate, locale, timezone } = useDateFormat();
   const [stocks, setStocks] = useState<TopStock[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,7 +141,7 @@ export function TopStocksSection() {
         return (
           <section key={country}>
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-              {COUNTRY_LABELS[country]}
+              {t(COUNTRY_KEY_MAP[country])}
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {group.map((stock, idx) => {

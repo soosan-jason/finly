@@ -8,8 +8,10 @@ import { CryptoAsset } from "@/types/market";
 import { formatPrice, formatMarketCap, formatPercent } from "@/lib/utils/format";
 import { Badge } from "@/components/ui/badge";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 
 export function CryptoPageClient() {
+  const t = useT();
   const { locale, timezone } = useDateFormat();
   const [cryptos, setCryptos] = useState<CryptoAsset[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export function CryptoPageClient() {
       {/* Toolbar */}
       <div className="flex items-center justify-between border-b border-gray-800 px-4 py-2">
         <span className="text-xs text-gray-500">
-          {cryptos.length}개 코인
+          {cryptos.length} {t("crypto.coinLabel")}
         </span>
         <div className="flex items-center gap-2">
           {lastUpdated && <span className="hidden sm:inline text-xs text-gray-600">{lastUpdated}</span>}
@@ -62,12 +64,12 @@ export function CryptoPageClient() {
           <thead>
             <tr className="border-b border-gray-800 text-left text-xs text-gray-500">
               <th className="px-3 py-2">#</th>
-              <th className="px-3 py-2">이름</th>
-              <th className="px-3 py-2 text-right">가격</th>
-              <th className="px-3 py-2 text-right">24h %</th>
+              <th className="px-3 py-2">{t("crypto.name")}</th>
+              <th className="px-3 py-2 text-right">{t("crypto.price")}</th>
+              <th className="px-3 py-2 text-right">{t("crypto.change24")}</th>
               <th className="px-3 py-2 text-right hidden sm:table-cell">7d %</th>
-              <th className="px-3 py-2 text-right hidden md:table-cell">시가총액</th>
-              <th className="px-3 py-2 text-right hidden lg:table-cell">거래량 (24h)</th>
+              <th className="px-3 py-2 text-right hidden md:table-cell">{t("crypto.mcap")}</th>
+              <th className="px-3 py-2 text-right hidden lg:table-cell">{t("crypto.volume")}</th>
             </tr>
           </thead>
           <tbody>
@@ -129,7 +131,7 @@ export function CryptoPageClient() {
             onClick={() => setPage((p) => p + 1)}
             className="rounded-lg bg-gray-800 px-6 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
           >
-            더 보기
+            {t("common.loadMore")}
           </button>
         </div>
       )}

@@ -6,11 +6,18 @@ import { FuturesItem } from "@/types/market";
 import { Card } from "@/components/ui/card";
 import { formatPercent, formatTime, formatMonthDay } from "@/lib/utils/format";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 
+const FUTURES_NAME_KEYS: Record<string, string> = {
+  "ES=F": "instrument.sp500futures", "NQ=F": "instrument.nasdaqfutures",
+  "YM=F": "instrument.dowfutures",   "^VIX": "instrument.vix",
+};
+
 
 function StarButton({ symbol, name }: { symbol: string; name: string }) {
+  const t = useT();
   const { user } = useUser();
   const router = useRouter();
   const [watched, setWatched] = useState(false);
@@ -47,7 +54,7 @@ function StarButton({ symbol, name }: { symbol: string; name: string }) {
     <button
       onClick={toggle}
       disabled={loading}
-      title={watched ? "관심 목록에서 제거" : "관심 목록에 추가"}
+      title={watched ? t("star.remove") : t("star.add")}
       className={`absolute top-2 right-2 rounded-md p-1 transition-colors disabled:opacity-50 ${
         watched ? "text-yellow-400" : "text-gray-500 hover:text-yellow-400"
       }`}
@@ -58,6 +65,7 @@ function StarButton({ symbol, name }: { symbol: string; name: string }) {
 }
 
 export function FuturesSection() {
+  const t = useT();
   const { showDate, locale, timezone } = useDateFormat();
   const [items, setItems] = useState<FuturesItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,7 +109,9 @@ export function FuturesSection() {
             <StarButton symbol={item.symbol} name={item.name} />
             <div>
               <p className="text-xs text-gray-500">{item.symbol}</p>
-              <p className="mt-0.5 text-sm font-medium text-gray-200 leading-tight">{item.name}</p>
+              <p className="mt-0.5 text-sm font-medium text-gray-200 leading-tight">
+                {FUTURES_NAME_KEYS[item.symbol] ? t(FUTURES_NAME_KEYS[item.symbol] as Parameters<typeof t>[0]) : item.name}
+              </p>
             </div>
             <div className="mt-3">
               <p className="text-xl font-bold text-white">

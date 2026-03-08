@@ -6,11 +6,24 @@ import { CommodityItem } from "@/types/market";
 import { Card } from "@/components/ui/card";
 import { formatPercent, formatTime, formatMonthDay } from "@/lib/utils/format";
 import { useDateFormat } from "@/contexts/DateFormatContext";
+import { useT } from "@/lib/i18n/useT";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 
+const COMMODITY_NAME_KEYS: Record<string, string> = {
+  "GC=F": "commodity.gold",     "SI=F": "commodity.silver",
+  "HG=F": "commodity.copper",   "PL=F": "commodity.platinum",
+  "CL=F": "commodity.wticrude", "BZ=F": "commodity.brentcrude",
+  "NG=F": "commodity.natgas",   "HO=F": "commodity.heatingoil",
+};
+const CATEGORY_NAME_KEYS: Record<string, string> = {
+  "귀금속": "commodity.cat.precious",
+  "에너지":  "commodity.cat.energy",
+};
+
 
 function StarButton({ symbol, name }: { symbol: string; name: string }) {
+  const t = useT();
   const { user } = useUser();
   const router = useRouter();
   const [watched, setWatched] = useState(false);
@@ -47,7 +60,7 @@ function StarButton({ symbol, name }: { symbol: string; name: string }) {
     <button
       onClick={toggle}
       disabled={loading}
-      title={watched ? "관심 목록에서 제거" : "관심 목록에 추가"}
+      title={watched ? t("star.remove") : t("star.add")}
       className={`absolute top-2 right-2 rounded-md p-1 transition-colors disabled:opacity-50 ${
         watched ? "text-yellow-400" : "text-gray-500 hover:text-yellow-400"
       }`}
@@ -58,6 +71,7 @@ function StarButton({ symbol, name }: { symbol: string; name: string }) {
 }
 
 export function CommoditiesSection() {
+  const t = useT();
   const { showDate, locale, timezone } = useDateFormat();
   const [items, setItems] = useState<CommodityItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +92,7 @@ export function CommoditiesSection() {
     return () => clearInterval(id);
   }, []);
 
-  const categories = ["귀금속", "에너지"] as const;
+  const categories = ["귀금속", "에너지"] as const; // API 필터용 (변경 금지)
 
   if (loading) {
     return (
@@ -105,7 +119,7 @@ export function CommoditiesSection() {
         return (
           <section key={cat}>
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-              {cat}
+              {CATEGORY_NAME_KEYS[cat] ? t(CATEGORY_NAME_KEYS[cat] as Parameters<typeof t>[0]) : cat}
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {group.map((item) => {
@@ -115,7 +129,9 @@ export function CommoditiesSection() {
                     <StarButton symbol={item.symbol} name={item.name} />
                     <div>
                       <p className="text-xs text-gray-500">{item.unit}</p>
-                      <p className="mt-0.5 text-sm font-medium text-gray-200">{item.name}</p>
+                      <p className="mt-0.5 text-sm font-medium text-gray-200">
+                        {COMMODITY_NAME_KEYS[item.symbol] ? t(COMMODITY_NAME_KEYS[item.symbol] as Parameters<typeof t>[0]) : item.name}
+                      </p>
                     </div>
                     <div className="mt-3">
                       <p className="text-xl font-bold text-white">
