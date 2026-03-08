@@ -5,14 +5,23 @@ import { FuturesItem, CommodityItem } from "@/types/market";
 import { formatPercent } from "@/lib/utils/format";
 import Link from "next/link";
 
-type Row = { key: string; name: string; price: number; changePct: number; unit: string };
+type Row = { key: string; name: string; price: number; changePct: number; unit: string; lastUpdated?: string };
 
 function toRow(item: FuturesItem): Row {
-  return { key: item.symbol, name: item.name, price: item.price, changePct: item.changePct, unit: "" };
+  return { key: item.symbol, name: item.name, price: item.price, changePct: item.changePct, unit: "", lastUpdated: item.lastUpdated };
 }
 
 function toRowC(item: CommodityItem): Row {
-  return { key: item.symbol, name: item.name, price: item.price, changePct: item.changePct, unit: item.unit };
+  return { key: item.symbol, name: item.name, price: item.price, changePct: item.changePct, unit: item.unit, lastUpdated: item.lastUpdated };
+}
+
+function latestUpdated(rows: Row[]): string | null {
+  const dates = rows.map((r) => r.lastUpdated).filter(Boolean) as string[];
+  if (!dates.length) return null;
+  const d = new Date(dates.sort().at(-1)!);
+  if (isNaN(d.getTime())) return null;
+  const M = d.getMonth() + 1, D = d.getDate(), h = d.getHours(), m = String(d.getMinutes()).padStart(2, "0");
+  return `${M}/${D} ${h}:${m}`;
 }
 
 function fmtPrice(price: number) {
@@ -76,7 +85,12 @@ export function FuturesCommoditiesSummary() {
           {groups.map(({ label, rows }) =>
             rows.length === 0 ? null : (
               <div key={label}>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
+                  {latestUpdated(rows) && (
+                    <p className="text-xs text-gray-600">{latestUpdated(rows)} 기준</p>
+                  )}
+                </div>
                 <div className="rounded-xl border border-gray-800 bg-gray-900 divide-y divide-gray-800">
                   {rows.map((row) => {
                     const up = row.changePct >= 0;

@@ -24,29 +24,22 @@ interface HeroCardProps {
 function SummaryHeroCard({ label, totalValue, totalCost, pnl, pnlPositive, pct, pctLabel }: HeroCardProps) {
   const t = useT();
   const barWidth = Math.min(Math.abs(pct), 100);
+  const color = pnlPositive ? "text-emerald-400" : "text-red-400";
   return (
-    <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
-      <p className="mb-2 text-xs font-medium text-gray-500">{label}</p>
-      <p className="text-3xl font-bold tracking-tight text-white">{totalValue}</p>
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        <span className="text-gray-500">{t("portfolio.investment")} {totalCost}</span>
-        <span className={pnlPositive ? "font-medium text-emerald-400" : "font-medium text-red-400"}>
-          {pnl}
-        </span>
+    <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-500">{label}</p>
+        <span className={`text-sm font-semibold ${color}`}>{pctLabel}</span>
       </div>
-      <div className="mt-3 space-y-1.5">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-500">{t("portfolio.returnRate")}</span>
-          <span className={`font-semibold ${pnlPositive ? "text-emerald-400" : "text-red-400"}`}>
-            {pctLabel}
-          </span>
+      <div className="mt-1 flex items-baseline justify-between gap-2">
+        <p className="text-xl font-bold tracking-tight text-white">{totalValue}</p>
+        <span className={`text-xs font-medium ${color}`}>{pnl}</span>
+      </div>
+      <div className="mt-2 flex items-center gap-2">
+        <div className="h-1 flex-1 overflow-hidden rounded-full bg-gray-800">
+          <div className={`h-full rounded-full ${pnlPositive ? "bg-emerald-400" : "bg-red-400"}`} style={{ width: `${barWidth}%` }} />
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${pnlPositive ? "bg-emerald-400" : "bg-red-400"}`}
-            style={{ width: `${barWidth}%` }}
-          />
-        </div>
+        <span className="shrink-0 text-xs text-gray-600">{t("portfolio.investment")} {totalCost}</span>
       </div>
     </div>
   );
