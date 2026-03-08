@@ -22,6 +22,8 @@ body {
 * {
   box-sizing: border-box;
   overscroll-behavior-x: none;
+  transition: none !important;
+  animation: none !important;
 }
 
 /* Scrollbar styling */
