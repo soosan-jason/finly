@@ -38,7 +38,7 @@ body {
 
 /* 보유종목 테이블 전용 — 수평 스크롤바를 크고 조작하기 쉽게 */
 .scrollbar-holdings::-webkit-scrollbar {
-  height: 12px;
+  height: 32px;
 }
 .scrollbar-holdings::-webkit-scrollbar-track {
   background: #1f2937;
