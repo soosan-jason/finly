@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { Holding } from "@/types/portfolio";
 import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
-import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
 import { useT } from "@/lib/i18n/useT";
 
 interface Props {
@@ -15,14 +14,13 @@ interface Props {
 
 export function HoldingsTable({ holdings, onDelete }: Props) {
   const t = useT();
-  const scrollRef = usePreventSwipeNav<HTMLDivElement>();
 
   function fmt(value: number, currency: string) {
     return currency === "KRW" ? formatKRW(value) : formatPrice(value);
   }
 
   return (
-    <div ref={scrollRef} className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto overscroll-x-contain" style={{ touchAction: "pan-x pan-y", overscrollBehaviorX: "none" }}>
+    <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-x-auto" style={{ overscrollBehaviorX: "contain" }}>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-800 text-left text-xs text-gray-500">

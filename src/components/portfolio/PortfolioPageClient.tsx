@@ -10,7 +10,6 @@ import { PortfolioChart, type CurrencyView } from "./PortfolioChart";
 import { formatPrice, formatKRW, formatPercent } from "@/lib/utils/format";
 import { Plus, Briefcase } from "lucide-react";
 import { useT } from "@/lib/i18n/useT";
-import { usePreventSwipeNav } from "@/hooks/usePreventSwipeNav";
 
 interface HeroCardProps {
   label: string;
@@ -72,6 +71,7 @@ export function PortfolioPageClient() {
   });
   const snapshotSavedRef = useRef<string | null>(null);
   const [chartRefreshKey, setChartRefreshKey] = useState(0);
+  const [deleting, setDeleting] = useState(false);
 
   async function fetchPortfolio() {
     const res = await fetch("/api/portfolio");
@@ -298,8 +298,6 @@ export function PortfolioPageClient() {
     else if (!authLoading) setLoading(false);
   }, [user, authLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const chartScrollRef = usePreventSwipeNav<HTMLDivElement>();
-
   if (authLoading || loading) {
     return (
       <div className="space-y-4">
@@ -330,6 +328,15 @@ export function PortfolioPageClient() {
 
   return (
     <div className="space-y-6">
+      {/* 삭제 처리 중 로딩 오버레이 */}
+      {deleting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900 px-10 py-7 shadow-xl">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+            <p className="text-sm text-gray-400">처리 중...</p>
+          </div>
+        </div>
+      )}
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between">
         <div className="min-w-0">
@@ -375,7 +382,7 @@ export function PortfolioPageClient() {
 
       {/* 자산 추이 차트 */}
       {holdings.length > 0 && portfolio && (
-        <div ref={chartScrollRef} className="rounded-2xl border border-gray-800 bg-gray-900 p-4 overflow-x-auto" style={{ touchAction: "pan-x pan-y", overscrollBehaviorX: "none" }}>
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 overflow-x-auto" style={{ overscrollBehaviorX: "contain" }}>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-medium text-gray-400">{t("portfolio.assetTrend")}</h2>
             {hasKrw && hasUsd && (
@@ -441,11 +448,16 @@ export function PortfolioPageClient() {
           <HoldingsTable
             holdings={holdings}
             onDelete={async (id) => {
-              await fetch(`/api/portfolio/holdings?id=${id}`, { method: "DELETE" });
-              if (portfolio) {
-                snapshotSavedRef.current = null;
-                const enriched = await fetchHoldings(portfolio.id);
-                if (enriched) saveSnapshot(portfolio.id, enriched);
+              setDeleting(true);
+              try {
+                await fetch(`/api/portfolio/holdings?id=${id}`, { method: "DELETE" });
+                if (portfolio) {
+                  snapshotSavedRef.current = null;
+                  const enriched = await fetchHoldings(portfolio.id);
+                  if (enriched) saveSnapshot(portfolio.id, enriched);
+                }
+              } finally {
+                setDeleting(false);
               }
             }}
           />
@@ -454,8 +466,13 @@ export function PortfolioPageClient() {
         <WatchlistSection
           items={watchlist}
           onRemove={async (symbol) => {
-            await fetch(`/api/portfolio/watchlist?symbol=${symbol}`, { method: "DELETE" });
-            fetchWatchlist();
+            setDeleting(true);
+            try {
+              await fetch(`/api/portfolio/watchlist?symbol=${symbol}`, { method: "DELETE" });
+              await fetchWatchlist();
+            } finally {
+              setDeleting(false);
+            }
           }}
         />
       )}
